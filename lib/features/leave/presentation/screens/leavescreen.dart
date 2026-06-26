@@ -30,18 +30,18 @@ class _LeaveRequestView extends StatelessWidget {
     final provider = context.watch<LeaveRequestProvider>();
 
     return Scaffold(
-      floatingActionButton: Padding(
-  padding: const EdgeInsets.only(bottom: 100.0), // Adjust as needed
-        child: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const LeaveTypeScreen()),
-        ),
-        backgroundColor: AppStyle.accentCyan,
-        child: const Icon(Icons.playlist_add_rounded, color: Colors.white),
-            ),
-      ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat, // Add this line
+  //     floatingActionButton: Padding(
+  // padding: const EdgeInsets.only(bottom: 100.0), // Adjust as needed
+  //       child: FloatingActionButton(
+  //       onPressed: () => Navigator.push(
+  //         context,
+  //         MaterialPageRoute(builder: (_) => const LeaveTypeScreen()),
+  //       ),
+  //       backgroundColor: AppStyle.accentCyan,
+  //       child: const Icon(Icons.playlist_add_rounded, color: Colors.white),
+  //           ),
+  //     ),
+  //   floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat, // Add this line
     backgroundColor: AppStyle.backgroundColor,
       body: SafeArea(
         child: Column(

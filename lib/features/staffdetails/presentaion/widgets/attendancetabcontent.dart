@@ -8,7 +8,17 @@ import 'package:offixoadmin/features/staffdetails/presentaion/widgets/monthlyatt
 class AttendanceTabContent extends StatelessWidget {
   final AttendanceSummary? summary;
   final MonthlyAttendance? monthly;
-  const AttendanceTabContent({this.summary, this.monthly});
+  final int selectedMonth;
+  final int selectedYear;
+  final Function(int month, int year)? onMonthChanged;
+
+  const AttendanceTabContent({
+    this.summary,
+    this.monthly,
+    required this.selectedMonth,
+    required this.selectedYear,
+    this.onMonthChanged,
+  });
  
   @override
   Widget build(BuildContext context) {
@@ -104,7 +114,12 @@ class AttendanceTabContent extends StatelessWidget {
           ],
  
           const SizedBox(height: 20),
-          MonthlyAttendanceSection(monthly: monthly),
+          MonthlyAttendanceSection(
+            monthly: monthly,
+            selectedMonth: selectedMonth,
+            selectedYear: selectedYear,
+            onMonthChanged: onMonthChanged,
+          ),
         ],
       ),
     );

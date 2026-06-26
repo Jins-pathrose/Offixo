@@ -34,7 +34,7 @@ class TabContent extends StatelessWidget {
             department: provider.department,
             designation: provider.designation,
             salaryType: provider.memberType,
-            salaryAmount: double.tryParse(provider.currentPayroll?.baseSalary ?? '0'),
+            salaryAmount: provider.salaryAmount,
             workingShift: provider.shift,
           ),
         ),
@@ -62,6 +62,11 @@ class TabContent extends StatelessWidget {
             monthLabel: provider.monthLabel,
             dayStatus: provider.monthlyDayStatus,
           ),
+          selectedMonth: provider.selectedAttendanceMonth ?? DateTime.now().month,
+          selectedYear: provider.selectedAttendanceYear ?? DateTime.now().year,
+          onMonthChanged: (month, year) {
+            provider.changeAttendanceMonth(month, year);
+          },
         ),
       StaffMainTab.leave => LeaveTab(
           leave: LeaveDetails(
@@ -74,26 +79,15 @@ class TabContent extends StatelessWidget {
           ),
         ),
       StaffMainTab.salary => SalaryTab(
-          salary: SalaryDetails(
-            monthLabel: provider.currentPayroll?.monthLabel ?? '--',
-            payableDays: 30, // You can calculate this
-            overtimeWork: '0 hrs', // You can calculate this
-            monthlySalary: double.tryParse(provider.currentPayroll?.baseSalary ?? '0') ?? 0,
-            earnedSalary: double.tryParse(provider.currentPayroll?.netSalary ?? '0') ?? 0,
-          ),
-          payslipId: provider.currentPayslip?.id,
-          onDownload: () {
-            if (provider.currentPayslip != null) {
-              provider.downloadPayslip(provider.currentPayslip!.id);
-            }
-          },
-          onGenerate: () {
-            final now = DateTime.now();
-            provider.generatePayslip(
-              provider.staffDetails?.id ?? 0,
-              now.month,
-              now.year,
-            );
+          payslip: provider.displayPayslip,
+          selectedMonth: provider.selectedPayslipMonth ?? DateTime.now().month,
+          selectedYear: provider.selectedPayslipYear ?? DateTime.now().year,
+          staffName: provider.memberName,
+          empNo: provider.empNo,
+          department: provider.department,
+          designation: provider.designation,
+          onMonthChanged: (month, year) {
+            provider.changePayslipMonth(month, year);
           },
         ),
     };

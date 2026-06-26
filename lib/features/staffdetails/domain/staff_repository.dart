@@ -238,13 +238,44 @@ class Staffrepository {
     }
   }
 
+  Future<Payslip?> getPayslipPreview(
+    int memberId,
+    int month,
+    int year,
+  ) async {
+    final apiName = 'getPayslipPreview';
+    final url = '$baseUrl/api/salary/payslips/preview/?month=$month&year=$year&member_id=$memberId';
+    print('🌐 [$apiName] GET: $url');
+    
+    final headers = await _getHeaders();
+    
+    final response = await http.get(
+      Uri.parse(url),
+      headers: headers,
+    );
+    
+    print('📡 [$apiName] Status: ${response.statusCode}');
+    
+    if (response.statusCode == 200) {
+      final jsonResp = json.decode(response.body);
+      if (jsonResp['success'] == true && jsonResp['data'] != null) {
+        return Payslip.fromJson(jsonResp['data']);
+      }
+      return null;
+    } else {
+      print('⚠️ [$apiName] Unexpected status: ${response.statusCode}');
+      print('⚠️ [$apiName] Response: ${response.body}');
+      return null; // Don't throw to avoid breaking the UI flow
+    }
+  }
+
   Future<void> generatePayslip(
     int memberId,
     int month,
     int year,
   ) async {
     final apiName = 'generatePayslip';
-    final url = '$baseUrl/api/salary/payroll/generate/$memberId/';
+    final url = '$baseUrl/api/salary/payslips/generate/';
     print('🌐 [$apiName] POST: $url');
     
     final headers = await _getHeaders();
@@ -255,6 +286,7 @@ class Staffrepository {
       body: json.encode({
         'month': month,
         'year': year,
+        'member_id': memberId,
       }),
     );
     

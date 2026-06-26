@@ -24,11 +24,10 @@ class StaffDetailsProvider extends ChangeNotifier {
 
   // State
   StaffDetailsResponse? _staffDetails;
-  PayslipResponse? _payslipResponse;
-  PayrollListResponse? _payrollList;
   MonthlyAttendanceResponse? _monthlyAttendance;
   LeaveAnalyticsResponse? _leaveAnalytics;
   LeaveBalanceResponse? _leaveBalance;
+  Payslip? _payslipPreview;
 
   bool _isLoading = false;
   String? _error;
@@ -36,10 +35,14 @@ class StaffDetailsProvider extends ChangeNotifier {
   StaffDetailsTab _activeTab = StaffDetailsTab.main;
   StaffMainTab _activeMainTab = StaffMainTab.attendance;
 
+  int? selectedPayslipMonth;
+  int? selectedPayslipYear;
+
+  int? selectedAttendanceMonth;
+  int? selectedAttendanceYear;
+
   // Getters
   StaffDetailsResponse? get staffDetails => _staffDetails;
-  PayslipResponse? get payslipResponse => _payslipResponse;
-  PayrollListResponse? get payrollList => _payrollList;
   MonthlyAttendanceResponse? get monthlyAttendance => _monthlyAttendance;
   LeaveAnalyticsResponse? get leaveAnalytics => _leaveAnalytics;
   LeaveBalanceResponse? get leaveBalance => _leaveBalance;
@@ -69,13 +72,8 @@ class StaffDetailsProvider extends ChangeNotifier {
   String get memberType => _staffDetails?.memberType ?? '--';
 
   double? get salaryAmount {
-    if (_payrollList != null && _payrollList!.records.isNotEmpty) {
-      final record = _payrollList!.records.first;
-      return double.tryParse(record.baseSalary);
-    }
-    if (_payslipResponse != null && _payslipResponse!.payslips.isNotEmpty) {
-      final payslip = _payslipResponse!.payslips.first;
-      return double.tryParse(payslip.baseSalary);
+    if (_payslipPreview != null) {
+      return double.tryParse(_payslipPreview!.baseSalary);
     }
     return null;
   }
@@ -152,16 +150,7 @@ class StaffDetailsProvider extends ChangeNotifier {
     return sl?.remainingDays.toInt() ?? 0;
   }
 
-  // Salary
-  PayrollRecord? get currentPayroll {
-    if (_payrollList == null || _payrollList!.records.isEmpty) return null;
-    return _payrollList!.records.first;
-  }
-
-  Payslip? get currentPayslip {
-    if (_payslipResponse == null || _payslipResponse!.payslips.isEmpty) return null;
-    return _payslipResponse!.payslips.first;
-  }
+  Payslip? get displayPayslip => _payslipPreview;
 
   // Methods
   void setTab(StaffDetailsTab tab) {
@@ -197,19 +186,28 @@ Future<void> loadAllData() async {
   notifyListeners();
   
   final now = DateTime.now();
-  final month = now.month;
-  final year = now.year;
+  final month = selectedPayslipMonth ?? now.month;
+  final year = selectedPayslipYear ?? now.year;
+
+  // For attendance, leave analytics we might still want to use current year/month
+  // but let's keep them using the payslip month so everything is synced, 
+  // or use `now` for others. Let's use `now` for others and `month/year` for payslip.
+  final currentMonth = now.month;
+  final currentYear = now.year;
+
+  final attendanceMonth = selectedAttendanceMonth ?? currentMonth;
+  final attendanceYear = selectedAttendanceYear ?? currentYear;
 
   try {
     // Load each API separately to handle failures gracefully
     await _loadStaffDetails();
-    await _loadLeaveAnalytics(year, month);
-    await _loadLeaveBalance(year);
-    await _loadPayrollList();
-    await _loadPayslip(month, year);
+    await _loadLeaveAnalytics(currentYear, currentMonth);
+    await _loadLeaveBalance(currentYear);
+    
+    await _loadPayslipPreview(month, year);
     
     // Load monthly attendance separately with special handling
-    await _loadMonthlyAttendanceWithFallback(month, year);
+    await _loadMonthlyAttendanceWithFallback(attendanceMonth, attendanceYear);
     
     if (!_isDisposed) {
       _isDataLoaded = true;
@@ -321,37 +319,57 @@ Future<void> _loadMonthlyAttendanceWithFallback(int month, int year) async {
     }
   }
 
-  Future<void> _loadPayrollList() async {
+
+
+Future<void> _loadPayslipPreview(int month, int year) async {
   try {
-    final data = await _repository.getPayrollList(staffId);
+    final data = await _repository.getPayslipPreview(staffId, month, year);
     if (!_isDisposed) {
-      _payrollList = data;
-      _error = null;
+      _payslipPreview = data;
     }
   } catch (e) {
-    // Don't rethrow - just log and continue
-    print('⚠️ Payroll list error (might not exist): $e');
+    print('⚠️ Payslip preview error: $e');
     if (!_isDisposed) {
-      _payrollList = null; // Set to null, don't fail the whole load
+      _payslipPreview = null;
     }
   }
 }
 
-Future<void> _loadPayslip(int month, int year) async {
-  try {
-    final data = await _repository.getPayslip(staffId, month, year);
-    if (!_isDisposed) {
-      _payslipResponse = data;
-      _error = null;
-    }
-  } catch (e) {
-    // Don't rethrow - just log and continue
-    print('⚠️ Payslip error (might not exist): $e');
-    if (!_isDisposed) {
-      _payslipResponse = null; // Set to null, don't fail the whole load
+  Future<void> changeAttendanceMonth(int month, int year) async {
+    if (_isDisposed) return;
+    selectedAttendanceMonth = month;
+    selectedAttendanceYear = year;
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      await _loadMonthlyAttendanceWithFallback(month, year);
+    } finally {
+      if (!_isDisposed) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
-}
+
+  Future<void> changePayslipMonth(int month, int year) async {
+    if (_isDisposed) return;
+    selectedPayslipMonth = month;
+    selectedPayslipYear = year;
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      await _loadPayslipPreview(month, year);
+    } finally {
+      if (!_isDisposed) {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
+  }
 
   // Public method to force refresh
   Future<void> refreshData() async {

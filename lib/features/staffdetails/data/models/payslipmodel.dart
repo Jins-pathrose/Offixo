@@ -24,6 +24,7 @@ class Payslip {
   final String baseSalary;
   final String travelAllowance;
   final String medicalAllowance;
+  final String otherAllowance;
   final String otAmount;
   final String grossSalary;
   final String? actualWorkedHours;
@@ -49,6 +50,7 @@ class Payslip {
         baseSalary = json['base_salary']?.toString() ?? '0',
         travelAllowance = json['travel_allowance']?.toString() ?? '0',
         medicalAllowance = json['medical_allowance']?.toString() ?? '0',
+        otherAllowance = json['other_allowance']?.toString() ?? '0',
         otAmount = json['ot_amount']?.toString() ?? '0',
         grossSalary = json['gross_salary']?.toString() ?? '0',
         actualWorkedHours = json['actual_worked_hours']?.toString(),

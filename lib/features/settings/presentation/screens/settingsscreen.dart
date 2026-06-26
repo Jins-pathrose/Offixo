@@ -3,6 +3,7 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/branch/presentation/screens/branchscreen.dart';
 import 'package:offixoadmin/features/department/presentation/screens/departmentscreen.dart';
 import 'package:offixoadmin/features/designation/presentation/screens/designationscreen.dart';
+import 'package:offixoadmin/features/leavetype/presentation/screens/leavetypescreen.dart';
 import 'package:offixoadmin/features/login/presentation/screen/loginscreen.dart';
 import 'package:offixoadmin/features/settings/data/authservice.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/cliniccard.dart';
@@ -121,8 +122,13 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   MenuItem(
                     icon: Icons.work_outline_rounded,
-                    label: 'Salary Creations',
-                    onTap: () => _showComingSoon(context),
+                    label: 'Leave Types',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LeaveTypeScreen(),
+                      ),
+                    ),
                   ),
                   MenuItem(
                     icon: Icons.access_time_outlined,
