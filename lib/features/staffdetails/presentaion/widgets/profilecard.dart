@@ -12,13 +12,9 @@ class ProfileCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00BCD4), Color(0xFF26C6DA)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
+  gradient: AppStyle.primaryGradient,
+  borderRadius: BorderRadius.circular(16),
+),
       child: Row(
         children: [
           // Avatar

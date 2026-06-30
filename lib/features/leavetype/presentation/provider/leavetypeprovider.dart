@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,8 +8,7 @@ import 'package:offixoadmin/features/leavetype/data/model/leavetypemodel.dart';
 enum LeaveTypeLoadState { idle, loading, loaded, error }
 
 class LeaveTypeProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/leave/type/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/leave/type/';
 
   final StorageService _storage = StorageService();
 
@@ -36,9 +36,15 @@ class LeaveTypeProvider extends ChangeNotifier {
         },
       );
       if (res.statusCode == 200) {
-        final list = jsonDecode(res.body) as List;
+        final Map<String, dynamic> data = jsonDecode(res.body);
+
+        final List<dynamic> list = data['results'];
+
         leaveTypes =
-            list.map((e) => LeaveTypeModel.fromJson(e)).toList();
+            list
+                .map((e) => LeaveTypeModel.fromJson(e as Map<String, dynamic>))
+                .toList();
+
         state = LeaveTypeLoadState.loaded;
       } else {
         error = 'Failed to load leave types';
@@ -121,8 +127,7 @@ class LeaveTypeProvider extends ChangeNotifier {
       };
 
       final res = await http.put(
-        Uri.parse(
-            'https://offixo.archanastones.in/api/leave/type/update/$id/'),
+        Uri.parse('${dotenv.env['BASE_URL']}/api/leave/type/update/$id/'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -151,15 +156,11 @@ class LeaveTypeProvider extends ChangeNotifier {
   }
 
   // ── Delete ──
-  Future<bool> delete({
-    required int id,
-    required BuildContext context,
-  }) async {
+  Future<bool> delete({required int id, required BuildContext context}) async {
     try {
       final token = await _storage.getAccessToken();
       final res = await http.delete(
-        Uri.parse(
-            'https://offixo.archanastones.in/api/leave/type/delete/$id/'),
+        Uri.parse('${dotenv.env['BASE_URL']}/api/leave/type/delete/$id/'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -199,14 +200,15 @@ class LeaveTypeProvider extends ChangeNotifier {
   }
 
   void _snack(BuildContext context, String msg, {required bool isError}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor:
-          isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
-      behavior: SnackBarBehavior.floating,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      margin: const EdgeInsets.all(16),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor:
+            isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -78,10 +79,10 @@ class LiveStatusMember {
 enum HomeLoadState { idle, loading, loaded, error }
 
 class HomeProvider extends ChangeNotifier {
-  static const String _liveStatusUrl =
-      'https://offixo.archanastones.in/api/maintainer/live-status/';
-  static const String _profileUrl =
-      'https://offixo.archanastones.in/api/accounts/maintainer/profile/';
+  static String _liveStatusUrl =
+      '${dotenv.env['BASE_URL']}/api/maintainer/live-status/';
+  static String _profileUrl =
+      '${dotenv.env['BASE_URL']}/api/accounts/maintainer/profile/';
 
   final StorageService _storageService = StorageService();
 
@@ -119,10 +120,7 @@ class HomeProvider extends ChangeNotifier {
     final token = await _storageService.getAccessToken();
     final res = await http.get(
       Uri.parse(_profileUrl),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
     if (res.statusCode == 200) {
       final json = jsonDecode(res.body) as Map<String, dynamic>;
@@ -133,37 +131,35 @@ class HomeProvider extends ChangeNotifier {
   }
 
   // ── Fetch live check-in status ──
- Future<void> _fetchLiveStatus() async {
-  final token = await _storageService.getAccessToken();
-  final res = await http.get(
-    Uri.parse(_liveStatusUrl),
-    headers: {
-      'Authorization': 'Bearer $token',
-      'Accept': 'application/json',
-    },
-  );
-  if (res.statusCode == 200) {
-    final json = jsonDecode(res.body) as Map<String, dynamic>;
-    final branches = (json['branches'] as Map<String, dynamic>? ?? {});
+  Future<void> _fetchLiveStatus() async {
+    final token = await _storageService.getAccessToken();
+    final res = await http.get(
+      Uri.parse(_liveStatusUrl),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (res.statusCode == 200) {
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      final branches = (json['branches'] as Map<String, dynamic>? ?? {});
 
-    final List<LiveStatusMember> allMembers = [];
-    branches.forEach((branchName, members) {
-      final list = (members as List? ?? []);
-      for (final m in list) {
-        final map = Map<String, dynamic>.from(m as Map);
-        map['branch_name'] = branchName; // inject branch name since it's not in each member object
-        allMembers.add(LiveStatusMember.fromJson(map));
-      }
-    });
+      final List<LiveStatusMember> allMembers = [];
+      branches.forEach((branchName, members) {
+        final list = (members as List? ?? []);
+        for (final m in list) {
+          final map = Map<String, dynamic>.from(m as Map);
+          map['branch_name'] =
+              branchName; // inject branch name since it's not in each member object
+          allMembers.add(LiveStatusMember.fromJson(map));
+        }
+      });
 
-    liveStatus = allMembers;
-    totalMembers = json['total_members_counted'] ?? liveStatus.length;
-    totalCheckedIn =
-        liveStatus.where((m) => m.liveStatus == 'CHECKED_IN').length;
-    totalCheckedOut =
-        liveStatus.where((m) => m.liveStatus == 'CHECKED_OUT').length;
-  } else {
-    throw Exception('Live status failed: ${res.statusCode}');
+      liveStatus = allMembers;
+      totalMembers = json['total_members_counted'] ?? liveStatus.length;
+      totalCheckedIn =
+          liveStatus.where((m) => m.liveStatus == 'CHECKED_IN').length;
+      totalCheckedOut =
+          liveStatus.where((m) => m.liveStatus == 'CHECKED_OUT').length;
+    } else {
+      throw Exception('Live status failed: ${res.statusCode}');
+    }
   }
-}
 }

@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -5,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
 
 class AuthService {
-  static const String _baseUrl = 'https://offixo.archanastones.in/api/accounts';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/accounts';
   final StorageService _storageService = StorageService();
 
   /// Clears local session immediately, fires the logout API in the background.

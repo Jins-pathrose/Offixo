@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
@@ -9,7 +10,7 @@ import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart'
 import 'package:offixoadmin/features/staffdetails/data/models/staffdetailsresponse.dart';
 
 class Staffrepository {
-  final String baseUrl = 'https://offixo.archanastones.in';
+  String get baseUrl => dotenv.env['BASE_URL'] ?? '';
   
   // FIX: Make token retrieval async and cache it
   String? _cachedToken;
@@ -342,6 +343,50 @@ class Staffrepository {
       throw Exception('Failed to download payslip: ${response.statusCode}\n${response.body}');
     }
   }
+
+  Future<void> updateStaffDetails(int memberId, Map<String, dynamic> data) async {
+    final apiName = 'updateStaffDetails';
+    final url = '$baseUrl/api/member/update/$memberId/';
+    print('🌐 [$apiName] PATCH: $url');
+    
+    final headers = await _getHeaders();
+    
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: headers,
+      body: json.encode(data),
+    );
+    
+    print('📡 [$apiName] Status: ${response.statusCode}');
+    
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      print('⚠️ [$apiName] Unexpected status: ${response.statusCode}');
+      print('⚠️ [$apiName] Response: ${response.body}');
+      throw Exception('Failed to update staff details: ${response.statusCode}\n${response.body}');
+    }
+  }
+
+  Future<void> deleteStaffMember(int memberId) async {
+    final apiName = 'deleteStaffMember';
+    final url = '$baseUrl/api/member/update/$memberId/';
+    print('🌐 [$apiName] DELETE: $url');
+    
+    final headers = await _getHeaders();
+    
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: headers,
+    );
+    
+    print('📡 [$apiName] Status: ${response.statusCode}');
+    
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      print('⚠️ [$apiName] Unexpected status: ${response.statusCode}');
+      print('⚠️ [$apiName] Response: ${response.body}');
+      throw Exception('Failed to delete staff member: ${response.statusCode}\n${response.body}');
+    }
+  }
+  
   
   // FIX: Add a method to clear cached token (for logout)
   void clearTokenCache() {

@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,8 +8,8 @@ import 'package:offixoadmin/features/designation/data/model/designationmodel.dar
 enum DeptLoadState { idle, loading, loaded, error }
 
 class DesignationProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/maintainer/designations/';
+  static String get _baseUrl =>
+      '${dotenv.env['BASE_URL']}/api/maintainer/designations/';
 
   final StorageService _storage = StorageService();
 
@@ -35,10 +36,19 @@ class DesignationProvider extends ChangeNotifier {
           'Accept': 'application/json',
         },
       );
+      print('designation provider response ${res.body}');
       if (res.statusCode == 200) {
-        final list = jsonDecode(res.body) as List;
+        final Map<String, dynamic> data = jsonDecode(res.body);
+
+        final List<dynamic> list = data['results'];
+
         designations =
-            list.map((e) => DesignationModel.fromJson(e)).toList();
+            list
+                .map(
+                  (e) => DesignationModel.fromJson(e as Map<String, dynamic>),
+                )
+                .toList();
+
         state = DeptLoadState.loaded;
       } else {
         error = 'Failed to load designations';
@@ -123,10 +133,7 @@ class DesignationProvider extends ChangeNotifier {
   }
 
   // ── Delete ──
-  Future<bool> delete({
-    required int id,
-    required BuildContext context,
-  }) async {
+  Future<bool> delete({required int id, required BuildContext context}) async {
     try {
       final token = await _storage.getAccessToken();
       final res = await http.delete(
@@ -166,14 +173,15 @@ class DesignationProvider extends ChangeNotifier {
   }
 
   void _snack(BuildContext context, String msg, {required bool isError}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor:
-          isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10)),
-      margin: const EdgeInsets.all(16),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor:
+            isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 }

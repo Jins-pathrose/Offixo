@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/screens/addnewstaffscreen.dart';
@@ -261,7 +262,7 @@ class _LiveStatusCard extends StatelessWidget {
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.network(
-                      'https://offixo.archanastones.in${member.profileImage}',
+                      '${dotenv.env['BASE_URL']}${member.profileImage}',
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => const Icon(
                           Icons.person,

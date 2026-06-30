@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,8 +8,7 @@ import 'package:offixoadmin/features/settings/data/models/organizationmodel.dart
 import 'package:offixoadmin/features/settings/domain/enumprofile.dart';
 
 class MaintainerProfileProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/accounts/maintainer/profile/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/accounts/maintainer/profile/';
  
   final StorageService _storageService = StorageService();
  

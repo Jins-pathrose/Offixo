@@ -1,4 +1,5 @@
 // lib/features/login/presentation/providers/login_provider.dart
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -34,7 +35,7 @@ class LoginProvider extends ChangeNotifier {
     
     try {
       final response = await http.post(
-        Uri.parse('https://offixo.archanastones.in/api/accounts/maintainer/login/'),
+        Uri.parse('${dotenv.env['BASE_URL']}/api/accounts/maintainer/login/'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': emailController.text.trim(),

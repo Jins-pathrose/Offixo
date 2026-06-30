@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,8 +8,7 @@ import 'package:offixoadmin/features/leavebalance/data/models/leavebalancemodel.
 enum BalanceLoadState { idle, loading, loaded, error }
 
 class LeaveBalanceProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/leave/maintainer/balances/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/leave/maintainer/balances/';
 
   BalanceLoadState _state = BalanceLoadState.idle;
   List<EmployeeLeaveBalance> _all = [];

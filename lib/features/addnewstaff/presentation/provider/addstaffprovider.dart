@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -12,16 +13,16 @@ import 'package:offixoadmin/features/addnewstaff/presentation/screens/addsalarys
 // ENUM
 // ─────────────────────────────────────────────
 enum FaceImageSlot { front, right, left }
+
 enum DropdownLoadState { idle, loading, loaded, error }
 
 // ─────────────────────────────────────────────
 // ADD STAFF PROVIDER
 // ─────────────────────────────────────────────
 class AddStaffProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/member/create/';
-  static const String _dropdownUrl =
-      'https://offixo.archanastones.in/api/member/dropdown-choices/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/member/create/';
+  static String _dropdownUrl =
+      '${dotenv.env['BASE_URL']}/api/member/dropdown-choices/';
 
   // ── Basic Details ──
   String firstName = '';
@@ -35,10 +36,10 @@ class AddStaffProvider extends ChangeNotifier {
 
   // ── Work Details ──
   DateTime? dateOfJoining;
-  String branch = '';        // stores branch ID
-  String department = '';    // stores department ID
-  String designation = '';   // stores designation ID
-  String memberType = '';    // stores member_type code (FULL_TIME, etc.)
+  String branch = ''; // stores branch ID
+  String department = ''; // stores department ID
+  String designation = ''; // stores designation ID
+  String memberType = ''; // stores member_type code (FULL_TIME, etc.)
   String workingShift = '';
 
   // ── Face Images ──
@@ -171,10 +172,7 @@ class AddStaffProvider extends ChangeNotifier {
     if (source == null) return;
 
     final picker = ImagePicker();
-    final picked = await picker.pickImage(
-      source: source,
-      imageQuality: 80,
-    );
+    final picked = await picker.pickImage(source: source, imageQuality: 80);
 
     if (picked == null) return;
 
@@ -201,52 +199,54 @@ class AddStaffProvider extends ChangeNotifier {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
+      builder:
+          (ctx) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const Text(
+                    'Select Image Source',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 16),
+                  ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFE0F7FA),
+                      child: Icon(
+                        Icons.camera_alt_outlined,
+                        color: Color(0xFF00ACC1),
+                      ),
+                    ),
+                    title: const Text('Camera'),
+                    onTap: () => Navigator.pop(ctx, ImageSource.camera),
+                  ),
+                  ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFE8F5E9),
+                      child: Icon(
+                        Icons.photo_library_outlined,
+                        color: Color(0xFF43A047),
+                      ),
+                    ),
+                    title: const Text('Gallery'),
+                    onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ),
-              const Text(
-                'Select Image Source',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0xFFE0F7FA),
-                  child: Icon(Icons.camera_alt_outlined,
-                      color: Color(0xFF00ACC1)),
-                ),
-                title: const Text('Camera'),
-                onTap: () => Navigator.pop(ctx, ImageSource.camera),
-              ),
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0xFFE8F5E9),
-                  child: Icon(Icons.photo_library_outlined,
-                      color: Color(0xFF43A047)),
-                ),
-                title: const Text('Gallery'),
-                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-              ),
-              const SizedBox(height: 8),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -331,16 +331,19 @@ class AddStaffProvider extends ChangeNotifier {
       });
 
       if (frontImage != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-            'face_image_1', frontImage!.path));
+        request.files.add(
+          await http.MultipartFile.fromPath('face_image_1', frontImage!.path),
+        );
       }
       if (rightImage != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-            'face_image_2', rightImage!.path));
+        request.files.add(
+          await http.MultipartFile.fromPath('face_image_2', rightImage!.path),
+        );
       }
       if (leftImage != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-            'face_image_3', leftImage!.path));
+        request.files.add(
+          await http.MultipartFile.fromPath('face_image_3', leftImage!.path),
+        );
       }
 
       debugPrint('Authorization: Bearer $accessToken');
@@ -367,8 +370,11 @@ class AddStaffProvider extends ChangeNotifier {
         final member = lastResponse?.member;
 
         if (member == null) {
-          _showSnack(context, 'Staff created but member id missing',
-              isError: true);
+          _showSnack(
+            context,
+            'Staff created but member id missing',
+            isError: true,
+          );
           return;
         }
 
@@ -376,9 +382,7 @@ class AddStaffProvider extends ChangeNotifier {
           // Navigate to salary creation screen — do not pop yet.
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => AddSalaryScreen(member: member),
-            ),
+            MaterialPageRoute(builder: (_) => AddSalaryScreen(member: member)),
           );
         }
       } else {
@@ -460,8 +464,11 @@ class AddStaffProvider extends ChangeNotifier {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  void _showSnack(BuildContext context, String message,
-      {required bool isError}) {
+  void _showSnack(
+    BuildContext context,
+    String message, {
+    required bool isError,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

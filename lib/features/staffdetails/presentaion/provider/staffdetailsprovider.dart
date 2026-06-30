@@ -418,6 +418,48 @@ Future<void> _loadPayslipPreview(int month, int year) async {
     }
   }
 
+  Future<void> updateStaff(Map<String, dynamic> data) async {
+    if (_isDisposed) return;
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      await _repository.updateStaffDetails(staffId, data);
+      if (!_isDisposed) {
+        _isDataLoaded = false;
+        await loadAllData();
+      }
+    } catch (e) {
+      if (!_isDisposed) {
+        _error = e.toString();
+        _isLoading = false;
+        notifyListeners();
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> deleteStaff() async {
+    if (_isDisposed) return;
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      await _repository.deleteStaffMember(staffId);
+      if (!_isDisposed) {
+        _isLoading = false;
+        notifyListeners();
+      }
+    } catch (e) {
+      if (!_isDisposed) {
+        _error = e.toString();
+        _isLoading = false;
+        notifyListeners();
+      }
+      rethrow;
+    }
+  }
+
   @override
   void dispose() {
     _isDisposed = true;

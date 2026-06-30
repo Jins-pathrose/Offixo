@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -5,13 +6,13 @@ import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/leave/data/model/leaverequestmodel.dart';
 
 enum LeaveLoadState { idle, loading, loaded, error }
+
 enum LeaveFilter { pending, approved, rejected }
 
 class LeaveRequestProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/leave/member/request/';
-  static const String _reviewBaseUrl =
-      'https://offixo.archanastones.in/api/leave/request/';
+  static String get _baseUrl =>
+      '${dotenv.env['BASE_URL']}/api/leave/member/request/';
+  static String _reviewBaseUrl = '${dotenv.env['BASE_URL']}/api/leave/request/';
 
   final StorageService _storageService = StorageService();
 
@@ -126,36 +127,41 @@ class LeaveRequestProvider extends ChangeNotifier {
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         // Update local list optimistically
-        _all = _all.map((l) {
-          if (l.id == requestId) {
-            return LeaveRequestModel.fromJson({
-              ...jsonDecode(jsonEncode({
-                'id': l.id,
-                'member': l.member,
-                'member_name': l.memberName,
-                'member_emp_no': l.memberEmpNo,
-                'leave_type': l.leaveType,
-                'leave_type_name': l.leaveTypeName,
-                'from_date': l.fromDate,
-                'to_date': l.toDate,
-                'session': l.session,
-                'number_of_days': l.numberOfDays,
-                'reason': l.reason,
-                'status': status,
-                'applied_at': l.appliedAt,
-                'reviewed_by_name': null,
-                'rejection_reason': rejectionReason,
-              })),
-            });
-          }
-          return l;
-        }).toList();
+        _all =
+            _all.map((l) {
+              if (l.id == requestId) {
+                return LeaveRequestModel.fromJson({
+                  ...jsonDecode(
+                    jsonEncode({
+                      'id': l.id,
+                      'member': l.member,
+                      'member_name': l.memberName,
+                      'member_emp_no': l.memberEmpNo,
+                      'leave_type': l.leaveType,
+                      'leave_type_name': l.leaveTypeName,
+                      'from_date': l.fromDate,
+                      'to_date': l.toDate,
+                      'session': l.session,
+                      'number_of_days': l.numberOfDays,
+                      'reason': l.reason,
+                      'status': status,
+                      'applied_at': l.appliedAt,
+                      'reviewed_by_name': null,
+                      'rejection_reason': rejectionReason,
+                    }),
+                  ),
+                });
+              }
+              return l;
+            }).toList();
         notifyListeners();
         return true;
       } else {
-        _showSnack(context,
-            'Failed: ${jsonDecode(res.body)['detail'] ?? res.statusCode}',
-            isError: true);
+        _showSnack(
+          context,
+          'Failed: ${jsonDecode(res.body)['detail'] ?? res.statusCode}',
+          isError: true,
+        );
         return false;
       }
     } catch (e) {
@@ -165,13 +171,15 @@ class LeaveRequestProvider extends ChangeNotifier {
   }
 
   void _showSnack(BuildContext context, String msg, {required bool isError}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor:
-          isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      margin: const EdgeInsets.all(16),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor:
+            isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 }

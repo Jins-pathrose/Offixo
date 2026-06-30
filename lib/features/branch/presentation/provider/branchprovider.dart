@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,8 +8,7 @@ import 'package:offixoadmin/features/branch/data/model/branchmodel.dart';
 enum BranchLoadState { idle, loading, loaded, error }
 
 class BranchProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/maintainer/branches/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/maintainer/branches/';
 
   final StorageService _storageService = StorageService();
 
@@ -30,10 +30,20 @@ class BranchProvider extends ChangeNotifier {
           'Accept': 'application/json',
         },
       );
+      print(res.statusCode);
+      print(res.body);
       if (res.statusCode == 200) {
-        final list = jsonDecode(res.body) as List;
-        _all = list.map((e) => BranchModel.fromJson(e)).toList();
+        final Map<String, dynamic> data = jsonDecode(res.body);
+
+        final List<dynamic> list = data['results'];
+
+        _all =
+            list
+                .map((e) => BranchModel.fromJson(e as Map<String, dynamic>))
+                .toList();
+
         branches = List.from(_all);
+
         state = BranchLoadState.loaded;
       } else {
         error = 'Failed to load branches';
@@ -48,14 +58,17 @@ class BranchProvider extends ChangeNotifier {
 
   void search(String query) {
     final q = query.toLowerCase().trim();
-    branches = q.isEmpty
-        ? List.from(_all)
-        : _all
-            .where((b) =>
-                b.name.toLowerCase().contains(q) ||
-                b.address.toLowerCase().contains(q) ||
-                b.branchCode.toLowerCase().contains(q))
-            .toList();
+    branches =
+        q.isEmpty
+            ? List.from(_all)
+            : _all
+                .where(
+                  (b) =>
+                      b.name.toLowerCase().contains(q) ||
+                      b.address.toLowerCase().contains(q) ||
+                      b.branchCode.toLowerCase().contains(q),
+                )
+                .toList();
     notifyListeners();
   }
 }

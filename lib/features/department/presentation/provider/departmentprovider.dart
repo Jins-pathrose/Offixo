@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,8 +8,7 @@ import 'package:offixoadmin/features/department/data/model/departmentmodel.dart'
 enum DeptLoadState { idle, loading, loaded, error }
 
 class DepartmentProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/maintainer/departments/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/maintainer/departments/';
 
   final StorageService _storage = StorageService();
 
@@ -38,13 +38,19 @@ class DepartmentProvider extends ChangeNotifier {
       print(res.statusCode);
       print(res.body);
       if (res.statusCode == 200) {
-        final list = jsonDecode(res.body) as List;
-        departments = list.map((e) => DepartmentModel.fromJson(e)).toList();
-        state = DeptLoadState.loaded;
-      } else {
-        error = 'Failed to load departments';
-        state = DeptLoadState.error;
-      }
+  final Map<String, dynamic> data = jsonDecode(res.body);
+
+  final List<dynamic> list = data['results'];
+
+  departments = list
+      .map((e) => DepartmentModel.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+  state = DeptLoadState.loaded;
+} else {
+  error = 'Failed to load departments';
+  state = DeptLoadState.error;
+}
     } catch (e) {
       error = 'Network error: $e';
       state = DeptLoadState.error;

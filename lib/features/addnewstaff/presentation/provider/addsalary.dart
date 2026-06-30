@@ -1,11 +1,11 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
 
 class AddSalaryProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/salary/employee-salaries/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/salary/employee-salaries/';
 
   final StorageService _storageService = StorageService();
 

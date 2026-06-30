@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 class OrganizationModel {
   final int id;
   final String name;
@@ -37,7 +38,7 @@ class MaintainerProfile {
  
   String get imageUrl =>
       image != null && image!.isNotEmpty
-          ? 'https://offixo.archanastones.in$image'
+          ? '${dotenv.env['BASE_URL']}$image'
           : '';
  
   const MaintainerProfile({

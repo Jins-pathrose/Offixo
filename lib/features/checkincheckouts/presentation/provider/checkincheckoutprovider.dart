@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -44,7 +45,7 @@ class AttendanceProvider extends ChangeNotifier {
 
       final response = await http.get(
         Uri.parse(
-            'https://offixo.archanastones.in/api/maintainer/branches/'),
+            '${dotenv.env['BASE_URL']}/api/maintainer/branches/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -95,7 +96,7 @@ class AttendanceProvider extends ChangeNotifier {
       };
 
       final uri = Uri.parse(
-              'https://offixo.archanastones.in/api/maintainer/date-wise-attendance/')
+              '${dotenv.env['BASE_URL']}/api/maintainer/date-wise-attendance/')
           .replace(queryParameters: queryParams);
 
       final response = await http.get(

@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -82,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       final res = await http.get(
         Uri.parse(
-            'https://offixo.archanastones.in/api/accounts/maintainer/profile/'),
+            '${dotenv.env['BASE_URL']}/api/accounts/maintainer/profile/'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -104,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen>
 
       final res = await http.post(
         Uri.parse(
-            'https://offixo.archanastones.in/api/accounts/maintainer/refresh/'),
+            '${dotenv.env['BASE_URL']}/api/accounts/maintainer/refresh/'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

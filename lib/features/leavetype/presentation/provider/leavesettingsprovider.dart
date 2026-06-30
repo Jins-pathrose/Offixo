@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -46,7 +47,7 @@ class LeaveSettingsProvider extends ChangeNotifier {
 
       final response = await http.get(
         Uri.parse(
-            'https://offixo.archanastones.in/api/member/dropdown-choices/'),
+            '${dotenv.env['BASE_URL']}/api/member/dropdown-choices/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -87,7 +88,7 @@ class LeaveSettingsProvider extends ChangeNotifier {
       final accessToken = await storageService.getAccessToken();
 
       final response = await http.post(
-        Uri.parse('https://offixo.archanastones.in/api/leave/reset/'),
+        Uri.parse('${dotenv.env['BASE_URL']}/api/leave/reset/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -133,7 +134,7 @@ class LeaveSettingsProvider extends ChangeNotifier {
 
       final response = await http.post(
         Uri.parse(
-            'https://offixo.archanastones.in/api/office-calendar/saturday-config/'),
+            '${dotenv.env['BASE_URL']}/api/office-calendar/saturday-config/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',

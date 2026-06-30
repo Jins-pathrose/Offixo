@@ -130,20 +130,7 @@ class ProfileInfoTab extends StatelessWidget {
         const SizedBox(height: 16),
  
         // ── Edit Button ──
-        GestureDetector(
-          onTap: () {},
-          child: Container(
-            height: 52,
-            decoration: BoxDecoration(
-              gradient: AppStyle.primaryGradient,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            alignment: Alignment.center,
-            child: Text('Edit',
-                style: AppStyle.text(
-                    size: 16, color: Colors.white, weight: FontWeight.w600)),
-          ),
-        ),
+       
       ],
     );
   }

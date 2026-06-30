@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -24,8 +25,7 @@ class SelectedLocation {
 // ─────────────────────────────────────────────
 
 class CreateBranchProvider extends ChangeNotifier {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/maintainer/branches/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/maintainer/branches/';
 
   final StorageService _storageService = StorageService();
 

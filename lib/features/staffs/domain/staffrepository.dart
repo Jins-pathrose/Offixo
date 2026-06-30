@@ -1,13 +1,13 @@
 // lib/features/staffs/data/repositories/staff_repository.dart
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/staffs/data/staffmodel.dart';
 
 class StaffRepository {
-  static const String _baseUrl =
-      'https://offixo.archanastones.in/api/member/create/';
+  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/member/create/';
 
   Future<List<StaffModel>> fetchStaffs() async {
     final token = await StorageService().getAccessToken(); // ← add await

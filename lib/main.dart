@@ -17,8 +17,11 @@ import 'package:offixoadmin/features/staffs/presentation/controller/staffprovide
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await SharedPreferences.getInstance();
   runApp(
     MultiProvider(
