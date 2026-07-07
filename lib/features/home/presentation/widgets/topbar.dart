@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/home/presentation/widgets/notificationbell.dart';
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 
 class TopBar extends StatelessWidget {
   final String clinicName;
@@ -42,13 +43,16 @@ class TopBar extends StatelessWidget {
                   color: Color(0xFF232323),
                 ),
               ),
-              Text(
-                clinicName,
-                style: AppStyle.text(
-                  size: 18,
-                  weight: FontWeight.w700,
+              if (clinicName.isEmpty || clinicName == 'Loading...')
+                const ShimmerContainer(width: 120, height: 20, borderRadius: 4)
+              else
+                Text(
+                  clinicName,
+                  style: AppStyle.text(
+                    size: 18,
+                    weight: FontWeight.w700,
+                  ),
                 ),
-              ),
             ],
           ),
         ),

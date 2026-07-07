@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/provider/staffdetailsprovider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class EditTab extends StatefulWidget {
   final StaffDetailsProvider provider;
 
@@ -177,7 +177,14 @@ class _EditTabState extends State<EditTab> {
                   elevation: 0,
                 ),
                 child: widget.provider.isLoading
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
                     : Text('Update Details', style: AppStyle.text(size: 14, weight: FontWeight.w600, color: Colors.white)),
               ),
             ),

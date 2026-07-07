@@ -3,7 +3,8 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/shift/data/model/shiftmodel.dart';
 import 'package:offixoadmin/features/shift/presentation/provider/shiftprovider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class ShiftScreen extends StatelessWidget {
   const ShiftScreen({super.key});
 
@@ -102,8 +103,7 @@ class _ShiftView extends StatelessWidget {
     switch (provider.state) {
       case ShiftLoadState.idle:
       case ShiftLoadState.loading:
-        return const Center(
-            child: CircularProgressIndicator(color: AppStyle.accentCyan));
+        return const ShimmerList();
 
       case ShiftLoadState.error:
         return Center(
@@ -729,10 +729,12 @@ class _ShiftFormSheetState extends State<_ShiftFormSheet> {
                       alignment: Alignment.center,
                       child: provider.isSubmitting
                           ? const SizedBox(
-                              width: 22,
-                              height: 22,
+                              width: 20,
+                              height: 20,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2.5),
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
                             )
                           : Text(
                               _isEdit ? 'Save Changes' : 'Create',

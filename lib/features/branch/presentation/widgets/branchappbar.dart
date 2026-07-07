@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 
 class BranchAppBar extends StatelessWidget {
-  const BranchAppBar();
+  final bool isEdit;
+  const BranchAppBar({this.isEdit = false});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +11,7 @@ class BranchAppBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Create New Branch',
+          isEdit ? 'Edit Branch' : 'Create New Branch',
           style: AppStyle.text(size: 20, weight: FontWeight.w700),
         ),
         GestureDetector(

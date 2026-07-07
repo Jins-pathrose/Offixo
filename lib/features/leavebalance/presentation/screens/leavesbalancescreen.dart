@@ -3,7 +3,7 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/leavebalance/data/models/leavebalancemodel.dart';
 import 'package:offixoadmin/features/leavebalance/presentation/provider/leavebalanceprovider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
 class LeaveBalanceScreen extends StatelessWidget {
   const LeaveBalanceScreen({super.key});
 
@@ -101,8 +101,7 @@ class _LeaveBalanceView extends StatelessWidget {
     switch (provider.state) {
       case BalanceLoadState.idle:
       case BalanceLoadState.loading:
-        return const Center(
-            child: CircularProgressIndicator(color: AppStyle.accentCyan));
+        return const ShimmerList();
 
       case BalanceLoadState.error:
         return Center(

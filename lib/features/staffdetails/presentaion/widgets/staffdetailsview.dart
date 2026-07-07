@@ -8,7 +8,7 @@ import 'package:offixoadmin/features/staffdetails/presentaion/widgets/profilecar
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/quickactions.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/tabcontent.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_profile.dart';
 
 class StaffDetailsView extends StatefulWidget {
   const StaffDetailsView({super.key});
@@ -43,9 +43,7 @@ class _StaffDetailsViewState extends State<StaffDetailsView> {
             _StaffAppBar(),
             Expanded(
               child: provider.isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                          color: AppStyle.accentCyan))
+                  ? const ShimmerProfile()
                   : SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(

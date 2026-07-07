@@ -38,8 +38,7 @@ class EmployeeAttendanceCard extends StatelessWidget {
                   children: [
                     Text(
                       record.employeeName,
-                      style:
-                          AppStyle.text(size: 14, weight: FontWeight.w600),
+                      style: AppStyle.text(size: 14, weight: FontWeight.w600),
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 3),
@@ -48,7 +47,9 @@ class EmployeeAttendanceCard extends StatelessWidget {
                         Text(
                           record.empNo,
                           style: AppStyle.text(
-                              size: 12, color: AppStyle.hintColor),
+                            size: 12,
+                            color: AppStyle.hintColor,
+                          ),
                         ),
                         const SizedBox(width: 6),
                         Container(
@@ -63,7 +64,9 @@ class EmployeeAttendanceCard extends StatelessWidget {
                         Text(
                           record.branchName,
                           style: AppStyle.text(
-                              size: 12, color: AppStyle.hintColor),
+                            size: 12,
+                            color: AppStyle.hintColor,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -74,8 +77,10 @@ class EmployeeAttendanceCard extends StatelessWidget {
               const SizedBox(width: 8),
               // Status chip
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(20),
@@ -83,9 +88,10 @@ class EmployeeAttendanceCard extends StatelessWidget {
                 child: Text(
                   record.status,
                   style: AppStyle.text(
-                      size: 11,
-                      color: statusColor,
-                      weight: FontWeight.w700),
+                    size: 11,
+                    color: statusColor,
+                    weight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -125,29 +131,34 @@ class EmployeeAttendanceCard extends StatelessWidget {
           if (record.totalBreaksTaken > 0) ...[
             const SizedBox(height: 12),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: const Color(0xFFF59E0B).withOpacity(0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.coffee_rounded,
-                      size: 14, color: Color(0xFFF59E0B)),
+                  const Icon(
+                    Icons.coffee_rounded,
+                    size: 14,
+                    color: Color(0xFFF59E0B),
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     '${record.totalBreaksTaken} break${record.totalBreaksTaken > 1 ? 's' : ''}',
                     style: AppStyle.text(
-                        size: 12,
-                        color: const Color(0xFFF59E0B),
-                        weight: FontWeight.w600),
+                      size: 12,
+                      color: const Color(0xFFF59E0B),
+                      weight: FontWeight.w600,
+                    ),
                   ),
                   const Spacer(),
                   Text(
                     'Total: ${record.totalBreakDuration}',
                     style: AppStyle.text(
-                        size: 12, color: const Color(0xFFF59E0B)),
+                      size: 12,
+                      color: const Color(0xFFF59E0B),
+                    ),
                   ),
                 ],
               ),
@@ -159,11 +170,11 @@ class EmployeeAttendanceCard extends StatelessWidget {
   }
 
   Widget _verticalDivider() => Container(
-        width: 1,
-        height: 36,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        color: AppStyle.borderColor,
-      );
+    width: 1,
+    height: 36,
+    margin: const EdgeInsets.symmetric(horizontal: 8),
+    color: AppStyle.borderColor,
+  );
 
   Color _statusColor(String status) {
     switch (status.toUpperCase()) {
@@ -204,7 +215,10 @@ class _Avatar extends StatelessWidget {
       child: Text(
         _initials,
         style: AppStyle.text(
-            size: 15, color: Colors.white, weight: FontWeight.w700),
+          size: 15,
+          color: Colors.white,
+          weight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -233,16 +247,20 @@ class _TimeCell extends StatelessWidget {
             children: [
               Icon(icon, size: 13, color: color),
               const SizedBox(width: 4),
-              Text(label,
-                  style:
-                      AppStyle.text(size: 11, color: AppStyle.hintColor)),
+              Text(
+                label,
+                style: AppStyle.text(size: 11, color: AppStyle.hintColor),
+              ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             time,
             style: AppStyle.text(
-                size: 13, weight: FontWeight.w700, color: color),
+              size: 13,
+              weight: FontWeight.w700,
+              color: color,
+            ),
           ),
         ],
       ),

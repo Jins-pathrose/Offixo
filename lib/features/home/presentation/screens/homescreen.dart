@@ -4,6 +4,11 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/screens/addnewstaffscreen.dart';
 import 'package:offixoadmin/features/checkincheckouts/presentation/screens/checkincheckoutscreen.dart';
 import 'package:offixoadmin/features/home/data/quickactionmodel.dart';
+import 'package:flutter/material.dart';
+import 'package:offixoadmin/core/appstyle/appstyle.dart';
+import 'package:offixoadmin/features/addnewstaff/presentation/screens/addnewstaffscreen.dart';
+import 'package:offixoadmin/features/checkincheckouts/presentation/screens/checkincheckoutscreen.dart';
+import 'package:offixoadmin/features/home/data/quickactionmodel.dart';
 import 'package:offixoadmin/features/home/data/statcardmodel.dart';
 import 'package:offixoadmin/features/home/presentation/provider/homeprovider.dart';
 import 'package:offixoadmin/features/home/presentation/widgets/quickactiongrid.dart';
@@ -11,6 +16,7 @@ import 'package:offixoadmin/features/home/presentation/widgets/sectionheader.dar
 import 'package:offixoadmin/features/home/presentation/widgets/statcard.dart';
 import 'package:offixoadmin/features/home/presentation/widgets/topbar.dart';
 import 'package:offixoadmin/features/leave/presentation/screens/leavescreen.dart';
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -104,9 +110,7 @@ class _HomeView extends StatelessWidget {
 
                 // ── Top Bar — org name from API ──
                 TopBar(
-                  clinicName: provider.organizationName.isNotEmpty
-                      ? provider.organizationName
-                      : 'Loading...',
+                  clinicName: provider.organizationName,
                 ),
 
                 const SizedBox(height: 20),
@@ -367,12 +371,10 @@ class _StatsShimmer extends StatelessWidget {
         (i) => Expanded(
           child: Padding(
             padding: EdgeInsets.only(right: i < 2 ? 10 : 0),
-            child: Container(
+            child: const ShimmerContainer(
               height: 90,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(16),
-              ),
+              width: double.infinity,
+              borderRadius: 16,
             ),
           ),
         ),
@@ -386,12 +388,10 @@ class _CardShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return const ShimmerContainer(
       height: 70,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(14),
-      ),
+      width: double.infinity,
+      borderRadius: 14,
     );
   }
 }

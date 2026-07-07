@@ -6,14 +6,14 @@ import 'package:offixoadmin/features/branch/presentation/screens/createbranchscr
 import 'package:offixoadmin/features/branch/presentation/widgets/branchdetailssheet.dart';
 import 'package:offixoadmin/features/branch/presentation/widgets/createbranchbutton.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
 class BranchesScreen extends StatelessWidget {
   const BranchesScreen({super.key});
  
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => BranchProvider()..loadBranches(),
+      create: (_) => BranchProvider()..fetchBranches(),
       child: const _BranchesView(),
     );
   }
@@ -85,7 +85,7 @@ class _BranchesView extends StatelessWidget {
                   );
                   // Refresh list after creation
                   if (context.mounted) {
-                    context.read<BranchProvider>().loadBranches();
+                    context.read<BranchProvider>().refreshBranches();
                   }
                 },
               ),
@@ -101,8 +101,7 @@ class _BranchesView extends StatelessWidget {
     switch (provider.state) {
       case BranchLoadState.idle:
       case BranchLoadState.loading:
-        return const Center(
-            child: CircularProgressIndicator(color: AppStyle.accentCyan));
+        return const ShimmerList();
  
       case BranchLoadState.error:
         return Center(
@@ -116,7 +115,7 @@ class _BranchesView extends StatelessWidget {
                   style: AppStyle.text(color: Colors.grey)),
               const SizedBox(height: 12),
               GestureDetector(
-                onTap: provider.loadBranches,
+                onTap: provider.fetchBranches,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 10),
@@ -153,20 +152,62 @@ class _BranchesView extends StatelessWidget {
             const SizedBox(height: 12),
  
             Expanded(
-              child: RefreshIndicator(
-                onRefresh: provider.loadBranches,
-                color: AppStyle.accentCyan,
-                child: ListView.separated(
-                  itemCount: provider.branches.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final branch = provider.branches[index];
-                    return _BranchCard(
-                      branch: branch,
-                      onTap: () => _showBranchDetails(context, branch),
-                      onMenuTap: () => _showBranchDetails(context, branch),
-                    );
-                  },
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification scrollInfo) {
+                  if (!provider.isLoadingMore &&
+                      provider.hasMore &&
+                      scrollInfo.metrics.pixels >=
+                          scrollInfo.metrics.maxScrollExtent * 0.8) {
+                    provider.loadMoreBranches();
+                  }
+                  return false;
+                },
+                child: RefreshIndicator(
+                  onRefresh: provider.refreshBranches,
+                  color: AppStyle.accentCyan,
+                  child: ListView.separated(
+                    itemCount: provider.branches.length + 1,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      if (index == provider.branches.length) {
+                        if (provider.isLoadingMore) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: ShimmerList(itemCount: 1, padding: EdgeInsets.zero),
+                          );
+                        }
+                        if (!provider.hasMore && provider.branches.isNotEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: Text('No more branches',
+                                  style: AppStyle.text(
+                                      color: AppStyle.hintColor, size: 13)),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }
+
+                      final branch = provider.branches[index];
+                      return _BranchCard(
+                        branch: branch,
+                        onTap: () => _showBranchDetails(context, branch),
+                        onEdit: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CreateBranchScreen(existing: branch),
+                            ),
+                          );
+                          if (context.mounted) {
+                            context.read<BranchProvider>().refreshBranches();
+                          }
+                        },
+                        onDelete: () => _confirmDelete(context, provider, branch),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -183,6 +224,50 @@ class _BranchesView extends StatelessWidget {
       builder: (_) => BranchDetailsSheet(branch: branch),
     );
   }
+
+  void _confirmDelete(BuildContext context, BranchProvider provider,
+      BranchModel branch) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
+        title: Text('Delete Branch',
+            style: AppStyle.text(size: 16, weight: FontWeight.w700)),
+        content: Text(
+          'Delete "${branch.name}"? This cannot be undone.',
+          style: AppStyle.text(size: 13, color: AppStyle.hintColor),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel',
+                style: AppStyle.text(color: AppStyle.hintColor)),
+          ),
+          GestureDetector(
+            onTap: () async {
+              Navigator.pop(ctx);
+              await provider.deleteBranch(
+                  id: branch.id, context: context);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE53935),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text('Delete',
+                  style: AppStyle.text(
+                      color: Colors.white,
+                      weight: FontWeight.w600)),
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
+    );
+  }
 }
  
 // ─────────────────────────────────────────────
@@ -191,12 +276,14 @@ class _BranchesView extends StatelessWidget {
 class _BranchCard extends StatelessWidget {
   final BranchModel branch;
   final VoidCallback onTap;
-  final VoidCallback onMenuTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
  
   const _BranchCard({
     required this.branch,
     required this.onTap,
-    required this.onMenuTap,
+    required this.onEdit,
+    required this.onDelete,
   });
  
   @override
@@ -247,7 +334,7 @@ class _BranchCard extends StatelessWidget {
  
             // Menu
             GestureDetector(
-              onTap: onMenuTap,
+              onTap: () => _showMenu(context),
               behavior: HitTestBehavior.opaque,
               child: const Padding(
                 padding: EdgeInsets.all(4),
@@ -256,6 +343,88 @@ class _BranchCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(branch.name,
+                      style: AppStyle.text(
+                          size: 15, weight: FontWeight.w700)),
+                ),
+              ),
+              const Divider(height: 20),
+              ListTile(
+                leading: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0F7FA),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.edit_outlined,
+                      size: 18, color: AppStyle.accentCyan),
+                ),
+                title: Text('Edit',
+                    style: AppStyle.text(
+                        size: 14, weight: FontWeight.w500)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onEdit();
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFEBEE),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.delete_outline_rounded,
+                      size: 18, color: Color(0xFFE53935)),
+                ),
+                title: Text('Delete',
+                    style: AppStyle.text(
+                        size: 14,
+                        color: const Color(0xFFE53935),
+                        weight: FontWeight.w500)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onDelete();
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );

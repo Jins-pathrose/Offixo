@@ -17,10 +17,30 @@ class BranchProvider extends ChangeNotifier {
   BranchLoadState state = BranchLoadState.idle;
   String? error;
 
-  Future<void> loadBranches() async {
-    state = BranchLoadState.loading;
+  bool isLoading = false;
+  bool isLoadingMore = false;
+  bool hasMore = true;
+  String? nextPageUrl;
+  int totalCount = 0;
+
+  Future<void> fetchBranches({bool refresh = false}) async {
+    if (refresh) {
+      _all.clear();
+      branches.clear();
+      nextPageUrl = null;
+      hasMore = true;
+      totalCount = 0;
+      isLoadingMore = false;
+    }
+    
+    if (branches.isEmpty) {
+      state = BranchLoadState.loading;
+      notifyListeners();
+    }
+    
+    isLoading = true;
     error = null;
-    notifyListeners();
+
     try {
       final token = await _storageService.getAccessToken();
       final res = await http.get(
@@ -30,20 +50,16 @@ class BranchProvider extends ChangeNotifier {
           'Accept': 'application/json',
         },
       );
-      print(res.statusCode);
-      print(res.body);
+      
       if (res.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(res.body);
-
-        final List<dynamic> list = data['results'];
-
-        _all =
-            list
-                .map((e) => BranchModel.fromJson(e as Map<String, dynamic>))
-                .toList();
-
+        totalCount = data['count'] ?? 0;
+        nextPageUrl = data['next'];
+        hasMore = nextPageUrl != null;
+        
+        final List<dynamic> list = data['results'] ?? [];
+        _all = list.map((e) => BranchModel.fromJson(e as Map<String, dynamic>)).toList();
         branches = List.from(_all);
-
         state = BranchLoadState.loaded;
       } else {
         error = 'Failed to load branches';
@@ -52,8 +68,50 @@ class BranchProvider extends ChangeNotifier {
     } catch (e) {
       error = 'Network error: $e';
       state = BranchLoadState.error;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
+  }
+
+  Future<void> loadMoreBranches() async {
+    if (isLoadingMore || !hasMore || nextPageUrl == null) return;
+
+    isLoadingMore = true;
     notifyListeners();
+
+    try {
+      final token = await _storageService.getAccessToken();
+      final res = await http.get(
+        Uri.parse(nextPageUrl!),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (res.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(res.body);
+        totalCount = data['count'] ?? 0;
+        nextPageUrl = data['next'];
+        hasMore = nextPageUrl != null;
+
+        final List<dynamic> list = data['results'] ?? [];
+        final newBranches = list.map((e) => BranchModel.fromJson(e as Map<String, dynamic>)).toList();
+        
+        _all.addAll(newBranches);
+        branches.addAll(newBranches);
+      }
+    } catch (e) {
+      debugPrint('Load more error: $e');
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshBranches() async {
+    await fetchBranches(refresh: true);
   }
 
   void search(String query) {
@@ -70,5 +128,47 @@ class BranchProvider extends ChangeNotifier {
                 )
                 .toList();
     notifyListeners();
+  }
+
+  Future<bool> deleteBranch({required int id, required BuildContext context}) async {
+    try {
+      final token = await _storageService.getAccessToken();
+      final res = await http.delete(
+        Uri.parse('$_baseUrl$id/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+      if (res.statusCode == 200 ||
+          res.statusCode == 204 ||
+          res.statusCode == 202) {
+        branches.removeWhere((d) => d.id == id);
+        _all.removeWhere((d) => d.id == id);
+        notifyListeners();
+        _snack(context, 'Branch deleted', isError: false);
+        return true;
+      } else {
+        _snack(context, 'Failed to delete', isError: true);
+        return false;
+      }
+    } catch (_) {
+      _snack(context, 'Please try again later', isError: true);
+      return false;
+    }
+  }
+
+  void _snack(BuildContext context, String msg, {required bool isError}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError
+            ? const Color(0xFFE53935)
+            : const Color(0xFF22C55E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 }

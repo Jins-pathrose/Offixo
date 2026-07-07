@@ -3,7 +3,8 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/designation/data/model/designationmodel.dart';
 import 'package:offixoadmin/features/designation/presentation/provider/designationprovider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class DesignationsScreen extends StatelessWidget {
   const DesignationsScreen({super.key});
 
@@ -103,8 +104,7 @@ class _DesignationsView extends StatelessWidget {
     switch (provider.state) {
       case DeptLoadState.idle:
       case DeptLoadState.loading:
-        return const Center(
-            child: CircularProgressIndicator(color: AppStyle.accentCyan));
+        return const ShimmerList();
 
       case DeptLoadState.error:
         return Center(
@@ -596,11 +596,12 @@ class _DeptFormSheetState extends State<_DeptFormSheet> {
                     alignment: Alignment.center,
                     child: provider.isSubmitting
                         ? const SizedBox(
-                            width: 22,
-                            height: 22,
+                            width: 20,
+                            height: 20,
                             child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5),
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
                           )
                         : Text(
                             _isEdit ? 'Save Changes' : 'Create',

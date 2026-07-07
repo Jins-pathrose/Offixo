@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class CreateButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onTap;
 
-  const CreateButton({this.isLoading = false, this.onTap});
+  final bool isEdit;
+
+  const CreateButton({this.isLoading = false, this.onTap, this.isEdit = false});
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +23,14 @@ class CreateButton extends StatelessWidget {
         alignment: Alignment.center,
         child: isLoading
             ? const SizedBox(
-                width: 22,
-                height: 22,
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2.5),
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
               )
-            : Text('Create Branch',
+            : Text(isEdit ? 'Save Changes' : 'Create Branch',
                 style: AppStyle.text(
                     size: 16,
                     color: Colors.white,

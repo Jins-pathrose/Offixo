@@ -5,7 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/branch/presentation/provider/createbranchprovider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class OfficeLocationScreen extends StatefulWidget {
   const OfficeLocationScreen({super.key});
 
@@ -221,9 +221,14 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
                             child: _isLoadingLocation
                                 ? const Padding(
                                     padding: EdgeInsets.all(10),
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppStyle.accentCyan),
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: AppStyle.accentCyan,
+                                      ),
+                                    ),
                                   )
                                 : const Icon(Icons.navigation_rounded,
                                     color: AppStyle.accentCyan, size: 20),
@@ -391,13 +396,7 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
                             size: 12, color: AppStyle.accentCyan)),
                     const SizedBox(height: 2),
                     _isLoadingAddress
-                        ? const SizedBox(
-                            height: 14,
-                            width: 14,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppStyle.accentCyan),
-                          )
+                        ? const ShimmerContainer(width: 100, height: 14, borderRadius: 4)
                         : Text(
                             _currentAddress.isNotEmpty
                                 ? _currentAddress

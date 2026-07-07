@@ -6,7 +6,7 @@ import 'package:offixoadmin/features/addnewstaff/presentation/widgets/appdropdow
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/formfiled.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/sectiontitle.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 const List<Map<String, String>> _salaryTypeChoices = [
   {'id': 'MONTHLY', 'name': 'Monthly'},
   {'id': 'HOURLY', 'name': 'Hourly'},
@@ -87,10 +87,12 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
             alignment: Alignment.center,
             child: provider.isLoading
                 ? const SizedBox(
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2.5),
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
                   )
                 : Text('Save Salary',
                     style: AppStyle.text(

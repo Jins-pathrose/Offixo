@@ -9,8 +9,34 @@ import 'package:offixoadmin/features/branch/presentation/widgets/fieldlabel.dart
 import 'package:offixoadmin/features/branch/presentation/widgets/locationfield.dart';
 import 'package:provider/provider.dart';
 
-class CreateBranchView extends StatelessWidget {
-  const CreateBranchView();
+class CreateBranchView extends StatefulWidget {
+  const CreateBranchView({super.key});
+
+  @override
+  State<CreateBranchView> createState() => _CreateBranchViewState();
+}
+
+class _CreateBranchViewState extends State<CreateBranchView> {
+  late TextEditingController _nameCtrl;
+  late TextEditingController _phoneCtrl;
+  late TextEditingController _radiusCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    final provider = context.read<CreateBranchProvider>();
+    _nameCtrl = TextEditingController(text: provider.branchName);
+    _phoneCtrl = TextEditingController(text: provider.phone);
+    _radiusCtrl = TextEditingController(text: provider.punchInRadius);
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _radiusCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +44,6 @@ class CreateBranchView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppStyle.backgroundColor,
-      // No bottomNavigationBar — button placed inline below the form
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -28,7 +53,7 @@ class CreateBranchView extends StatelessWidget {
               const SizedBox(height: 16),
 
               // ── App Bar ──
-              const BranchAppBar(),
+              BranchAppBar(isEdit: provider.isEdit),
               const SizedBox(height: 24),
 
               // ── Section Title ──
@@ -43,18 +68,30 @@ class CreateBranchView extends StatelessWidget {
               const SizedBox(height: 16),
 
               // ── Branch Name ──
-              FieldLabel(label: 'Branch Name', isRequired: true),
+              const FieldLabel(label: 'Branch Name', isRequired: true),
               const SizedBox(height: 6),
               AppTextField(
+                controller: _nameCtrl,
                 hint: 'Enter Branch name',
-                onChanged: (v) =>
-                    context.read<CreateBranchProvider>().branchName = v,
+                onChanged: (v) => provider.branchName = v,
                 errorText: provider.errors['branchName'],
               ),
               const SizedBox(height: 14),
 
+              // ── Phone Number ──
+              const FieldLabel(label: 'Phone Number', isRequired: true),
+              const SizedBox(height: 6),
+              AppTextField(
+                controller: _phoneCtrl,
+                hint: 'Enter Phone number',
+                keyboardType: TextInputType.phone,
+                onChanged: (v) => provider.phone = v,
+                errorText: provider.errors['phone'],
+              ),
+              const SizedBox(height: 14),
+
               // ── Branch Location ──
-              FieldLabel(label: 'Branch Location', isRequired: true),
+              const FieldLabel(label: 'Branch Location', isRequired: true),
               const SizedBox(height: 6),
               LocationField(
                 selectedLocation: provider.selectedLocation,
@@ -74,24 +111,24 @@ class CreateBranchView extends StatelessWidget {
               const SizedBox(height: 14),
 
               // ── Punch-in Radius ──
-              FieldLabel(
+              const FieldLabel(
                   label: 'Punch-in Radius (Meters)', isRequired: true),
               const SizedBox(height: 6),
               AppTextField(
+                controller: _radiusCtrl,
                 hint: 'Choose Punch-in Radius',
                 keyboardType: TextInputType.number,
-                onChanged: (v) =>
-                    context.read<CreateBranchProvider>().punchInRadius = v,
+                onChanged: (v) => provider.punchInRadius = v,
                 errorText: provider.errors['punchInRadius'],
               ),
 
               const SizedBox(height: 24),
 
-              // ── Create Branch Button — inline, right after the form ──
+              // ── Create Branch Button ──
               CreateButton(
+                isEdit: provider.isEdit,
                 isLoading: provider.isLoading,
-                onTap: () =>
-                    context.read<CreateBranchProvider>().submit(context),
+                onTap: () => provider.submit(context),
               ),
 
               const SizedBox(height: 24),

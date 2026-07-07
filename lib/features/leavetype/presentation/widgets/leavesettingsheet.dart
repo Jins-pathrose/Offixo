@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:provider/provider.dart';
 import 'package:offixoadmin/features/leavetype/presentation/provider/leavesettingsprovider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 // ─────────────────────────────────────────────
 // ENTRY POINT — call this from the settings icon
 // ─────────────────────────────────────────────
@@ -321,10 +321,12 @@ class _AnnualResetSheetState extends State<_AnnualResetSheet> {
               alignment: Alignment.center,
               child: provider.isSubmitting
                   ? const SizedBox(
-                      width: 22,
-                      height: 22,
+                      width: 20,
+                      height: 20,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2.5),
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
                     )
                   : Text('Reset for $_selectedYear',
                       style: AppStyle.text(
@@ -451,13 +453,7 @@ class _SaturdayConfigSheetState extends State<_SaturdayConfigSheet> {
           if (provider.isLoadingBranches)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 14),
-              child: Center(
-                  child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: AppStyle.accentCyan),
-              )),
+              child: const ShimmerContainer(width: double.infinity, height: 48, borderRadius: 10),
             )
           else
             Container(
@@ -534,10 +530,12 @@ class _SaturdayConfigSheetState extends State<_SaturdayConfigSheet> {
               alignment: Alignment.center,
               child: provider.isSubmitting
                   ? const SizedBox(
-                      width: 22,
-                      height: 22,
+                      width: 20,
+                      height: 20,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2.5),
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
                     )
                   : Text('Save Configuration',
                       style: AppStyle.text(

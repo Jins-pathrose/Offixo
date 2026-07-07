@@ -3,7 +3,7 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/checkincheckouts/presentation/provider/checkincheckoutprovider.dart';
 import 'package:offixoadmin/features/checkincheckouts/presentation/widgets/employeeattendancecard.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
 
 class AttendanceScreen extends StatelessWidget {
   const AttendanceScreen({super.key});
@@ -124,8 +124,7 @@ class _AttendanceView extends StatelessWidget {
     switch (provider.state) {
       case AttendanceLoadState.idle:
       case AttendanceLoadState.loading:
-        return const Center(
-            child: CircularProgressIndicator(color: AppStyle.accentCyan));
+        return const ShimmerList();
 
       case AttendanceLoadState.error:
         return Center(

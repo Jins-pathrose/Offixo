@@ -9,22 +9,25 @@ import 'package:offixoadmin/features/staffs/data/staffmodel.dart';
 class StaffRepository {
   static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/member/create/';
 
-  Future<List<StaffModel>> fetchStaffs() async {
+  Future<StaffResponseModel> fetchStaffs({String? url}) async {
     final token = await StorageService().getAccessToken(); // ← add await
-  
-  if (token == null || token.isEmpty) {
-    print('No auth token found. Please login again.');
-  }
+
+    if (token == null || token.isEmpty) {
+      print('No auth token found. Please login again.');
+    }
+    
+    final targetUrl = url ?? _baseUrl;
+    
     final response = await http.get(
-      Uri.parse(_baseUrl),
+      Uri.parse(targetUrl),
       headers: {'Authorization': 'Bearer $token'},
     );
     print(response.statusCode);
     print(response.body);
+    print("ankara messssiiiii");
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final List results = data['results'];
-      return results.map((e) => StaffModel.fromJson(e)).toList();
+      return StaffResponseModel.fromJson(data);
     } else {
       throw Exception('Failed to load staff list');
     }

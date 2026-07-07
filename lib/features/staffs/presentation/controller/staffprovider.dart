@@ -16,22 +16,87 @@ class StaffProvider extends ChangeNotifier {
   String errorMessage = '';
   String _searchQuery = '';
 
+  int totalCount = 0;
+  String? nextUrl;
+  String? previousUrl;
+  int currentPage = 1;
+
+  bool isNextLoading = false;
+  bool isPreviousLoading = false;
+
   List<StaffModel> get staffs => _filteredStaffs;
 
-  Future<void> loadStaffs() async {
-    state = StaffLoadState.loading;
-    notifyListeners();
+  Future<void> loadStaffs({String? url, bool isRefresh = false}) async {
+    if (url == null && !isRefresh) {
+      state = StaffLoadState.loading;
+      notifyListeners();
+    }
 
     try {
-      _allStaffs = await _repository.fetchStaffs();
+      final response = await _repository.fetchStaffs(url: url);
+      _allStaffs = response.results;
+      totalCount = response.count;
+      nextUrl = response.next;
+      previousUrl = response.previous;
+
+      if (url == null) {
+        currentPage = 1; // reset if it's initial load or refresh without url
+      }
+
       _applyFilter();
       state = StaffLoadState.loaded;
     } catch (e) {
-      errorMessage = e.toString();
-      state = StaffLoadState.error;
+      if (url == null) {
+        errorMessage = e.toString();
+        state = StaffLoadState.error;
+      } else {
+        rethrow;
+      }
+    } finally {
+      notifyListeners();
     }
+  }
 
+  Future<void> fetchNextPage(BuildContext context) async {
+    if (nextUrl == null || isNextLoading) return;
+
+    isNextLoading = true;
     notifyListeners();
+
+    try {
+      await loadStaffs(url: nextUrl);
+      currentPage++;
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load next page')),
+        );
+      }
+    } finally {
+      isNextLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchPreviousPage(BuildContext context) async {
+    if (previousUrl == null || isPreviousLoading) return;
+
+    isPreviousLoading = true;
+    notifyListeners();
+
+    try {
+      await loadStaffs(url: previousUrl);
+      currentPage--;
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load previous page')),
+        );
+      }
+    } finally {
+      isPreviousLoading = false;
+      notifyListeners();
+    }
   }
 
   void search(String query) {

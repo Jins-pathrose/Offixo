@@ -4,7 +4,7 @@ import 'package:offixoadmin/features/login/presentation/provider/logincontroller
 import 'package:provider/provider.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/bottomnavigation/presentaion/screens/bottomnavigation.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class ContinueButton extends StatelessWidget {
   const ContinueButton();
 
@@ -35,7 +35,14 @@ class ContinueButton extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: loginProvider.isLoading
-            ? const CircularProgressIndicator(color: Colors.white)
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
+              )
             : Text(
                 'Continue',
                 style: AppStyle.text(

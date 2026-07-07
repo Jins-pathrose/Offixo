@@ -107,14 +107,32 @@ class AttendanceProvider extends ChangeNotifier {
         },
       );
 
+      print(response.body);
+      print(response.statusCode);
+      print("suiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body) as Map<String, dynamic>;
         if (decoded['success'] == true) {
           final data = decoded['data'] as List<dynamic>? ?? [];
-          _records = data
+          final allRecords = data
               .map((e) =>
                   AttendanceRecord.fromJson(e as Map<String, dynamic>))
               .toList();
+
+          final Map<int, AttendanceRecord> uniqueRecords = {};
+          for (var record in allRecords) {
+            if (!uniqueRecords.containsKey(record.memberId)) {
+              uniqueRecords[record.memberId] = record;
+            } else {
+              if (record.attendanceId >
+                  uniqueRecords[record.memberId]!.attendanceId) {
+                uniqueRecords[record.memberId] = record;
+              }
+            }
+          }
+          
+          _records = uniqueRecords.values.toList();
         } else {
           _records = [];
         }

@@ -39,3 +39,29 @@ class StaffModel {
     );
   }
 }
+
+class StaffResponseModel {
+  final int count;
+  final String? next;
+  final String? previous;
+  final List<StaffModel> results;
+
+  StaffResponseModel({
+    required this.count,
+    this.next,
+    this.previous,
+    required this.results,
+  });
+
+  factory StaffResponseModel.fromJson(Map<String, dynamic> json) {
+    return StaffResponseModel(
+      count: json['count'] ?? 0,
+      next: json['next'],
+      previous: json['previous'],
+      results: (json['results'] as List?)
+              ?.map((e) => StaffModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}

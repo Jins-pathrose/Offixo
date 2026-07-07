@@ -9,7 +9,7 @@ import 'package:offixoadmin/features/leave/presentation/widgets/leavesummaryrow.
 import 'package:offixoadmin/features/leavebalance/presentation/screens/leavesbalancescreen.dart';
 import 'package:offixoadmin/features/leavetype/presentation/screens/leavetypescreen.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
 class LeaveRequestScreen extends StatelessWidget {
   const LeaveRequestScreen({super.key});
 
@@ -120,8 +120,7 @@ class _LeaveRequestView extends StatelessWidget {
     switch (provider.state) {
       case LeaveLoadState.idle:
       case LeaveLoadState.loading:
-        return const Center(
-            child: CircularProgressIndicator(color: AppStyle.accentCyan));
+        return const ShimmerList();
 
       case LeaveLoadState.error:
         return Center(

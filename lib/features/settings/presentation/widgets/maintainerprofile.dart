@@ -3,7 +3,7 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/settings/domain/enumprofile.dart';
 import 'package:offixoadmin/features/settings/presentation/provider/maintainerprofileprovider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_profile.dart';
 class MaintainerProfileSheet extends StatelessWidget {
   const MaintainerProfileSheet({super.key});
 
@@ -63,11 +63,7 @@ class _ProfileSheetView extends StatelessWidget {
     switch (provider.state) {
       case ProfileLoadState.idle:
       case ProfileLoadState.loading:
-        return const SizedBox(
-          height: 200,
-          child: Center(
-              child: CircularProgressIndicator(color: AppStyle.accentCyan)),
-        );
+        return const ShimmerProfile();
 
       case ProfileLoadState.error:
         return SizedBox(

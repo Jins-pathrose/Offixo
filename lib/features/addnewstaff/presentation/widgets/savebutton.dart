@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class SaveButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onTap;
@@ -28,10 +28,12 @@ class SaveButton extends StatelessWidget {
           alignment: Alignment.center,
           child: isLoading
               ? const SizedBox(
-                  width: 22,
-                  height: 22,
+                  width: 20,
+                  height: 20,
                   child: CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2.5),
+                    strokeWidth: 2.5,
+                    color: Colors.white,
+                  ),
                 )
               : Text(
                   label,

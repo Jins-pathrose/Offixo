@@ -5,7 +5,8 @@ import 'package:offixoadmin/features/leavetype/presentation/provider/leavetypepr
 import 'package:offixoadmin/features/leavetype/presentation/widgets/leavesettingsheet.dart';
 
 import 'package:provider/provider.dart';
-
+import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
+import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class LeaveTypeScreen extends StatelessWidget {
   const LeaveTypeScreen({super.key});
 
@@ -92,8 +93,7 @@ class _LeaveTypeView extends StatelessWidget {
     switch (provider.state) {
       case LeaveTypeLoadState.idle:
       case LeaveTypeLoadState.loading:
-        return const Center(
-            child: CircularProgressIndicator(color: AppStyle.accentCyan));
+        return const ShimmerList();
 
       case LeaveTypeLoadState.error:
         return Center(
@@ -550,10 +550,12 @@ class _LeaveTypeFormSheetState extends State<_LeaveTypeFormSheet> {
               alignment: Alignment.center,
               child: provider.isSubmitting
                   ? const SizedBox(
-                      width: 22,
-                      height: 22,
+                      width: 20,
+                      height: 20,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2.5),
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
                     )
                   : Text(
                       _isEdit ? 'Save Changes' : 'Create Leave Type',
