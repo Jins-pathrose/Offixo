@@ -7,7 +7,7 @@ class LeaveCountBadge extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final Color borderColor;
- 
+
   const LeaveCountBadge({
     required this.count,
     required this.label,
@@ -15,7 +15,7 @@ class LeaveCountBadge extends StatelessWidget {
     required this.iconColor,
     required this.borderColor,
   });
- 
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -32,11 +32,14 @@ class LeaveCountBadge extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$count',
-                    style:
-                        AppStyle.text(size: 16, weight: FontWeight.w700)),
-                Text(label,
-                    style: AppStyle.text(size: 11, color: AppStyle.hintColor)),
+                Text(
+                  '$count',
+                  style: AppStyle.text(size: 16, weight: FontWeight.w700),
+                ),
+                Text(
+                  label,
+                  style: AppStyle.text(size: 11, color: AppStyle.hintColor),
+                ),
               ],
             ),
           ],

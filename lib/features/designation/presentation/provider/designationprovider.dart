@@ -1,64 +1,96 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/designation/data/model/designationmodel.dart';
+import 'package:offixoadmin/features/designation/data/repository/designation_repository.dart';
 
 enum DeptLoadState { idle, loading, loaded, error }
 
 class DesignationProvider extends ChangeNotifier {
-  static String get _baseUrl =>
-      '${dotenv.env['BASE_URL']}/api/maintainer/designations/';
-
-  final StorageService _storage = StorageService();
+  final DesignationRepository _repository = DesignationRepository();
 
   DeptLoadState state = DeptLoadState.idle;
   List<DesignationModel> designations = [];
   String? error;
   bool isSubmitting = false;
 
+  bool isLoading = false;
+  bool isLoadingMore = false;
+
+  String? nextPageUrl;
+  String? previousPageUrl;
+  int totalCount = 0;
+  int currentPage = 1;
+
   DesignationProvider() {
     fetchDesignations();
   }
 
   // ── Fetch ──
-  Future<void> fetchDesignations() async {
-    state = DeptLoadState.loading;
+  Future<void> fetchDesignations({
+    bool refresh = false,
+    String? url,
+    bool isNext = false,
+    bool isPrev = false,
+  }) async {
+    if (refresh) {
+      designations.clear();
+      nextPageUrl = null;
+      previousPageUrl = null;
+      totalCount = 0;
+      currentPage = 1;
+      url = null;
+    }
+
+    if (designations.isEmpty && url == null) {
+      state = DeptLoadState.loading;
+      notifyListeners();
+    } else if (url != null) {
+      isLoadingMore = true;
+      notifyListeners();
+    }
+
+    if (url == null) {
+      isLoading = true;
+    }
+
     error = null;
-    notifyListeners();
+
     try {
-      final token = await _storage.getAccessToken();
-      final res = await http.get(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-      print('designation provider response ${res.body}');
-      if (res.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(res.body);
+      final data = await _repository.fetchDesignations(url);
 
-        final List<dynamic> list = data['results'];
+      totalCount = data['count'] ?? 0;
+      nextPageUrl = data['next'];
+      previousPageUrl = data['previous'];
 
-        designations =
-            list
-                .map(
-                  (e) => DesignationModel.fromJson(e as Map<String, dynamic>),
-                )
-                .toList();
+      final List<dynamic> list = data['results'] ?? [];
+      designations = list
+          .map((e) => DesignationModel.fromJson(e as Map<String, dynamic>))
+          .toList();
 
-        state = DeptLoadState.loaded;
-      } else {
-        error = 'Failed to load designations';
-        state = DeptLoadState.error;
-      }
+      state = DeptLoadState.loaded;
+
+      if (isNext) currentPage++;
+      if (isPrev && currentPage > 1) currentPage--;
+
     } catch (e) {
       error = 'Network error: $e';
       state = DeptLoadState.error;
+    } finally {
+      isLoading = false;
+      isLoadingMore = false;
+      notifyListeners();
     }
-    notifyListeners();
+  }
+
+  Future<void> loadNextPage() async {
+    if (nextPageUrl != null && !isLoadingMore) {
+      await fetchDesignations(url: nextPageUrl, isNext: true);
+    }
+  }
+
+  Future<void> loadPreviousPage() async {
+    if (previousPageUrl != null && !isLoadingMore) {
+      await fetchDesignations(url: previousPageUrl, isPrev: true);
+    }
   }
 
   // ── Create ──
@@ -69,22 +101,13 @@ class DesignationProvider extends ChangeNotifier {
     isSubmitting = true;
     notifyListeners();
     try {
-      final token = await _storage.getAccessToken();
-      final res = await http.post(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'name': name.trim()}),
-      );
-      if (res.statusCode == 200 || res.statusCode == 201) {
-        await fetchDesignations();
+      final success = await _repository.createDesignation(name);
+      if (success) {
+        await fetchDesignations(refresh: true);
         _snack(context, 'Designation created', isError: false);
         return true;
       } else {
-        _snack(context, _extractError(res.body), isError: true);
+        _snack(context, 'Failed to create', isError: true);
         return false;
       }
     } catch (_) {
@@ -105,22 +128,13 @@ class DesignationProvider extends ChangeNotifier {
     isSubmitting = true;
     notifyListeners();
     try {
-      final token = await _storage.getAccessToken();
-      final res = await http.patch(
-        Uri.parse('$_baseUrl$id/'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'name': name.trim()}),
-      );
-      if (res.statusCode == 200 || res.statusCode == 201) {
-        await fetchDesignations();
+      final success = await _repository.updateDesignation(id, name);
+      if (success) {
+        await fetchDesignations(refresh: true);
         _snack(context, 'Designation updated', isError: false);
         return true;
       } else {
-        _snack(context, _extractError(res.body), isError: true);
+        _snack(context, 'Failed to update', isError: true);
         return false;
       }
     } catch (_) {
@@ -135,17 +149,8 @@ class DesignationProvider extends ChangeNotifier {
   // ── Delete ──
   Future<bool> delete({required int id, required BuildContext context}) async {
     try {
-      final token = await _storage.getAccessToken();
-      final res = await http.delete(
-        Uri.parse('$_baseUrl$id/'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-      if (res.statusCode == 200 ||
-          res.statusCode == 204 ||
-          res.statusCode == 202) {
+      final success = await _repository.deleteDesignation(id);
+      if (success) {
         designations.removeWhere((d) => d.id == id);
         notifyListeners();
         _snack(context, 'Designation deleted', isError: false);
@@ -158,18 +163,6 @@ class DesignationProvider extends ChangeNotifier {
       _snack(context, 'Please try again later', isError: true);
       return false;
     }
-  }
-
-  String _extractError(String body) {
-    try {
-      final json = jsonDecode(body);
-      if (json is Map) {
-        final first = json.values.first;
-        if (first is List && first.isNotEmpty) return first.first.toString();
-        return first.toString();
-      }
-    } catch (_) {}
-    return 'Please try again later';
   }
 
   void _snack(BuildContext context, String msg, {required bool isError}) {

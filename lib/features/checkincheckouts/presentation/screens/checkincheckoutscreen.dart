@@ -32,8 +32,7 @@ class _AttendanceView extends StatelessWidget {
           children: [
             // ── App Bar ──
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
                   GestureDetector(
@@ -52,22 +51,28 @@ class _AttendanceView extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded,
-                          size: 16, color: AppStyle.fontColor),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 16,
+                        color: AppStyle.fontColor,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Attendance',
-                        style: AppStyle.text(
-                            size: 20, weight: FontWeight.w700)),
+                    child: Text(
+                      'Attendance',
+                      style: AppStyle.text(size: 20, weight: FontWeight.w700),
+                    ),
                   ),
                   // Date picker button
                   GestureDetector(
                     onTap: () => _pickDate(context, provider),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
@@ -76,15 +81,19 @@ class _AttendanceView extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.calendar_today_rounded,
-                              size: 14, color: AppStyle.accentCyan),
+                          const Icon(
+                            Icons.calendar_today_rounded,
+                            size: 14,
+                            color: AppStyle.accentCyan,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             _formatDate(provider.selectedDate),
                             style: AppStyle.text(
-                                size: 12,
-                                weight: FontWeight.w600,
-                                color: AppStyle.accentCyan),
+                              size: 12,
+                              weight: FontWeight.w600,
+                              color: AppStyle.accentCyan,
+                            ),
                           ),
                         ],
                       ),
@@ -131,19 +140,18 @@ class _AttendanceView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.wifi_off_rounded,
-                  size: 48, color: Colors.grey),
+              const Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey),
               const SizedBox(height: 12),
-              Text('Failed to load',
-                  style: AppStyle.text(color: Colors.grey)),
+              Text('Failed to load', style: AppStyle.text(color: Colors.grey)),
               if (provider.errorMessage != null) ...[
                 const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Text(provider.errorMessage!,
-                      style: AppStyle.text(
-                          size: 12, color: AppStyle.hintColor),
-                      textAlign: TextAlign.center),
+                  child: Text(
+                    provider.errorMessage!,
+                    style: AppStyle.text(size: 12, color: AppStyle.hintColor),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
               const SizedBox(height: 16),
@@ -151,15 +159,20 @@ class _AttendanceView extends StatelessWidget {
                 onTap: provider.loadAttendance,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 10),
+                    horizontal: 24,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     gradient: AppStyle.primaryGradient,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text('Retry',
-                      style: AppStyle.text(
-                          color: Colors.white,
-                          weight: FontWeight.w600)),
+                  child: Text(
+                    'Retry',
+                    style: AppStyle.text(
+                      color: Colors.white,
+                      weight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -172,17 +185,21 @@ class _AttendanceView extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.event_busy_rounded,
-                    size: 52,
-                    color: AppStyle.hintColor.withOpacity(0.4)),
+                Icon(
+                  Icons.event_busy_rounded,
+                  size: 52,
+                  color: AppStyle.hintColor.withOpacity(0.4),
+                ),
                 const SizedBox(height: 12),
-                Text('No attendance records',
-                    style: AppStyle.text(
-                        size: 15, color: AppStyle.hintColor)),
+                Text(
+                  'No attendance records',
+                  style: AppStyle.text(size: 15, color: AppStyle.hintColor),
+                ),
                 const SizedBox(height: 4),
-                Text('for ${_formatDate(provider.selectedDate)}',
-                    style: AppStyle.text(
-                        size: 13, color: AppStyle.hintColor)),
+                Text(
+                  'for ${_formatDate(provider.selectedDate)}',
+                  style: AppStyle.text(size: 13, color: AppStyle.hintColor),
+                ),
               ],
             ),
           );
@@ -195,38 +212,52 @@ class _AttendanceView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: provider.records.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (context, index) =>
-                EmployeeAttendanceCard(record: provider.records[index]),
+            itemBuilder:
+                (context, index) =>
+                    EmployeeAttendanceCard(record: provider.records[index]),
           ),
         );
     }
   }
 
   Future<void> _pickDate(
-      BuildContext context, AttendanceProvider provider) async {
+    BuildContext context,
+    AttendanceProvider provider,
+  ) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: provider.selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      builder: (context, child) => Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: AppStyle.accentCyan,
-            onPrimary: Colors.white,
-            surface: Colors.white,
+      builder:
+          (context, child) => Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: AppStyle.accentCyan,
+                onPrimary: Colors.white,
+                surface: Colors.white,
+              ),
+            ),
+            child: child!,
           ),
-        ),
-        child: child!,
-      ),
     );
     if (picked != null) provider.setDate(picked);
   }
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
@@ -252,14 +283,16 @@ class _BranchFilter extends StatelessWidget {
             onTap: () => provider.selectBranch(null),
           ),
           const SizedBox(width: 8),
-          ...provider.branches.map((branch) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _BranchChip(
-                  label: branch.name,
-                  selected: provider.selectedBranch?.id == branch.id,
-                  onTap: () => provider.selectBranch(branch),
-                ),
-              )),
+          ...provider.branches.map(
+            (branch) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _BranchChip(
+                label: branch.name,
+                selected: provider.selectedBranch?.id == branch.id,
+                onTap: () => provider.selectBranch(branch),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -283,25 +316,24 @@ class _BranchChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           gradient: selected ? AppStyle.primaryGradient : null,
           color: selected ? null : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color:
-                selected ? Colors.transparent : AppStyle.borderColor,
+            color: selected ? Colors.transparent : AppStyle.borderColor,
           ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppStyle.accentCyan.withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  )
-                ]
-              : [],
+          boxShadow:
+              selected
+                  ? [
+                    BoxShadow(
+                      color: AppStyle.accentCyan.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                  : [],
         ),
         child: Text(
           label,
@@ -356,43 +388,49 @@ class _SummaryStrip extends StatelessWidget {
             count: provider.absentCount,
             color: const Color(0xFFEF4444),
           ),
-          _divider(),
-          _SummaryChip(
-            label: 'Late',
-            count: provider.lateCount,
-            color: const Color(0xFFF59E0B),
-          ),
+          // _divider(),
+          // _SummaryChip(
+          //   label: 'Late',
+          //   count: provider.lateCount,
+          //   color: const Color(0xFFF59E0B),
+          // ),
         ],
       ),
     );
   }
 
-  Widget _divider() => Container(
-        width: 1,
-        height: 28,
-        color: AppStyle.borderColor,
-      );
+  Widget _divider() =>
+      Container(width: 1, height: 28, color: AppStyle.borderColor);
 }
 
 class _SummaryChip extends StatelessWidget {
   final String label;
   final int count;
   final Color color;
-  const _SummaryChip(
-      {required this.label, required this.count, required this.color});
+  const _SummaryChip({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Column(
         children: [
-          Text('$count',
-              style: AppStyle.text(
-                  size: 18, weight: FontWeight.w700, color: color)),
+          Text(
+            '$count',
+            style: AppStyle.text(
+              size: 18,
+              weight: FontWeight.w700,
+              color: color,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(label,
-              style: AppStyle.text(
-                  size: 11, color: AppStyle.hintColor)),
+          Text(
+            label,
+            style: AppStyle.text(size: 11, color: AppStyle.hintColor),
+          ),
         ],
       ),
     );

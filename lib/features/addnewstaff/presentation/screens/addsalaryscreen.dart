@@ -7,6 +7,7 @@ import 'package:offixoadmin/features/addnewstaff/presentation/widgets/formfiled.
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/sectiontitle.dart';
 import 'package:provider/provider.dart';
 import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
+
 const List<Map<String, String>> _salaryTypeChoices = [
   {'id': 'MONTHLY', 'name': 'Monthly'},
   {'id': 'HOURLY', 'name': 'Hourly'},
@@ -85,20 +86,24 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
               borderRadius: BorderRadius.circular(30),
             ),
             alignment: Alignment.center,
-            child: provider.isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text('Save Salary',
-                    style: AppStyle.text(
+            child:
+                provider.isLoading
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                    : Text(
+                      'Save Salary',
+                      style: AppStyle.text(
                         size: 15,
                         color: Colors.white,
-                        weight: FontWeight.w600)),
+                        weight: FontWeight.w600,
+                      ),
+                    ),
           ),
         ),
       ),
@@ -113,31 +118,35 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
               // ── App Bar ──
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.maybePop(context),
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded,
-                          size: 16, color: AppStyle.fontColor),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
+                  // GestureDetector(
+                  //   onTap: () => Navigator.maybePop(context),
+                  //   child: Container(
+                  //     width: 38,
+                  //     height: 38,
+                  //     decoration: BoxDecoration(
+                  //       color: Colors.white,
+                  //       borderRadius: BorderRadius.circular(10),
+                  //       boxShadow: [
+                  //         BoxShadow(
+                  //           color: Colors.black.withOpacity(0.06),
+                  //           blurRadius: 6,
+                  //           offset: const Offset(0, 2),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //     child: const Icon(
+                  //       Icons.arrow_back_ios_new_rounded,
+                  //       size: 16,
+                  //       color: AppStyle.fontColor,
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Salary Details',
-                        style: AppStyle.text(
-                            size: 20, weight: FontWeight.w700)),
+                    child: Text(
+                      'Salary Details',
+                      style: AppStyle.text(size: 20, weight: FontWeight.w700),
+                    ),
                   ),
                 ],
               ),
@@ -163,9 +172,10 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                       child: Text(
                         _initials(widget.member.fullName),
                         style: AppStyle.text(
-                            size: 14,
-                            color: Colors.white,
-                            weight: FontWeight.w700),
+                          size: 14,
+                          color: Colors.white,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -173,13 +183,21 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(widget.member.fullName,
-                              style: AppStyle.text(
-                                  size: 14, weight: FontWeight.w600)),
+                          Text(
+                            widget.member.fullName,
+                            style: AppStyle.text(
+                              size: 14,
+                              weight: FontWeight.w600,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text(widget.member.empNo,
-                              style: AppStyle.text(
-                                  size: 12, color: AppStyle.hintColor)),
+                          Text(
+                            widget.member.empNo,
+                            style: AppStyle.text(
+                              size: 12,
+                              color: AppStyle.hintColor,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -203,7 +221,7 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                   value: _salaryType,
                   items: _salaryTypeChoices.map((e) => e['id']!).toList(),
                   itemLabels: {
-                    for (final e in _salaryTypeChoices) e['id']!: e['name']!
+                    for (final e in _salaryTypeChoices) e['id']!: e['name']!,
                   },
                   onChanged: (v) => setState(() => _salaryType = v),
                   errorText: provider.errors['salaryType'],
@@ -219,8 +237,9 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                   controller: _totalSalaryCtrl,
                   keyboardType: TextInputType.number,
                   style: AppStyle.text(size: 13),
-                  decoration: _inputDec('Eg: 50000')
-                      .copyWith(errorText: provider.errors['totalSalary']),
+                  decoration: _inputDec(
+                    'Eg: 50000',
+                  ).copyWith(errorText: provider.errors['totalSalary']),
                 ),
               ),
               const SizedBox(height: 14),
@@ -232,8 +251,9 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                   controller: _pfCtrl,
                   keyboardType: TextInputType.number,
                   style: AppStyle.text(size: 13),
-                  decoration: _inputDec('Eg: 2000')
-                      .copyWith(errorText: provider.errors['pfAmount']),
+                  decoration: _inputDec(
+                    'Eg: 2000',
+                  ).copyWith(errorText: provider.errors['pfAmount']),
                 ),
               ),
               const SizedBox(height: 14),
@@ -245,8 +265,9 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                   controller: _insuranceCtrl,
                   keyboardType: TextInputType.number,
                   style: AppStyle.text(size: 13),
-                  decoration: _inputDec('Eg: 1000').copyWith(
-                      errorText: provider.errors['insuranceAmount']),
+                  decoration: _inputDec(
+                    'Eg: 1000',
+                  ).copyWith(errorText: provider.errors['insuranceAmount']),
                 ),
               ),
               const SizedBox(height: 14),
@@ -258,8 +279,9 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                   controller: _otherDeductionCtrl,
                   keyboardType: TextInputType.number,
                   style: AppStyle.text(size: 13),
-                  decoration: _inputDec('Eg: 500').copyWith(
-                      errorText: provider.errors['otherDeduction']),
+                  decoration: _inputDec(
+                    'Eg: 500',
+                  ).copyWith(errorText: provider.errors['otherDeduction']),
                 ),
               ),
 
@@ -278,21 +300,20 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
   }
 
   InputDecoration _inputDec(String hint) => InputDecoration(
-        hintText: hint,
-        hintStyle: AppStyle.text(size: 13, color: AppStyle.hintColor),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: AppStyle.borderColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: AppStyle.borderColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppStyle.accentCyan),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      );
+    hintText: hint,
+    hintStyle: AppStyle.text(size: 13, color: AppStyle.hintColor),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: AppStyle.borderColor),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: AppStyle.borderColor),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppStyle.accentCyan),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+  );
 }

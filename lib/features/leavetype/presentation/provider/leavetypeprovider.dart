@@ -65,6 +65,15 @@ class LeaveTypeProvider extends ChangeNotifier {
     required bool isRestricted,
     required BuildContext context,
   }) async {
+    if (leaveTypes.any((e) => e.name.toLowerCase() == name.trim().toLowerCase())) {
+      _snack(context, 'Leave type with this name already exists.', isError: true);
+      return false;
+    }
+    if (leaveTypes.any((e) => e.code.toLowerCase() == code.trim().toLowerCase())) {
+      _snack(context, 'Leave type with this code already exists.', isError: true);
+      return false;
+    }
+
     isSubmitting = true;
     notifyListeners();
     try {
@@ -115,6 +124,15 @@ class LeaveTypeProvider extends ChangeNotifier {
     required bool isRestricted,
     required BuildContext context,
   }) async {
+    if (leaveTypes.any((e) => e.id != id && e.name.toLowerCase() == name.trim().toLowerCase())) {
+      _snack(context, 'Leave type with this name already exists.', isError: true);
+      return false;
+    }
+    if (leaveTypes.any((e) => e.id != id && e.code.toLowerCase() == code.trim().toLowerCase())) {
+      _snack(context, 'Leave type with this code already exists.', isError: true);
+      return false;
+    }
+
     isSubmitting = true;
     notifyListeners();
     try {

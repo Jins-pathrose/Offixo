@@ -14,6 +14,9 @@ import 'package:offixoadmin/features/settings/presentation/provider/maintainerpr
 import 'package:offixoadmin/features/shift/presentation/provider/shiftprovider.dart';
 import 'package:offixoadmin/features/splashscreen/presentation/screens/splashscreen.dart';
 import 'package:offixoadmin/features/staffs/presentation/controller/staffprovider.dart';
+import 'package:offixoadmin/core/providers/update_provider.dart';
+import 'package:offixoadmin/core/widgets/update_dialog.dart';
+import 'package:offixoadmin/core/services/update_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,6 +30,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LoginProvider()),
+        ChangeNotifierProvider(create: (_) => UpdateProvider()),
         ChangeNotifierProvider(create: (_) => AddStaffProvider()),
         ChangeNotifierProvider(create: (_) => StaffProvider()),
         ChangeNotifierProvider(create: (_) => AddStaffProvider()),
@@ -48,11 +52,75 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Initial check for updates after the frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UpdateProvider>().checkForUpdate();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Check for updates or resume immediate update when returning to foreground
+      context.read<UpdateProvider>().checkForUpdate();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: SplashScreen());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false, 
+      home: const SplashScreen(),
+      builder: (context, child) {
+        return Scaffold(
+          body: Stack(
+            children: [
+              if (child != null) child,
+              const Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: FlexibleUpdateRestartPrompt(),
+              ),
+              Consumer<UpdateProvider>(
+                builder: (context, updateProvider, _) {
+                  if (updateProvider.state == UpdateState.available) {
+                    return Positioned.fill(
+                      child: Container(
+                        color: Colors.black54,
+                        child: Center(
+                          child: UpdateDialog(
+                            isImmediate: UpdateService.defaultStrategy == UpdateStrategy.immediate,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

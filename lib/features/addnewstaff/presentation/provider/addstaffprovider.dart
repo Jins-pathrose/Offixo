@@ -273,7 +273,17 @@ class AddStaffProvider extends ChangeNotifier {
 
     if (bloodGroup.trim().isEmpty) errors['bloodGroup'] = 'Required';
     if (gender.trim().isEmpty) errors['gender'] = 'Required';
-    if (dateOfBirth == null) errors['dateOfBirth'] = 'Required';
+    
+    if (dateOfBirth == null) {
+      errors['dateOfBirth'] = 'Required';
+    } else {
+      final now = DateTime.now();
+      final age = now.year - dateOfBirth!.year - ((now.month > dateOfBirth!.month || (now.month == dateOfBirth!.month && now.day >= dateOfBirth!.day)) ? 0 : 1);
+      if (age < 18) {
+        errors['dateOfBirth'] = 'Must be at least 18 years old';
+      }
+    }
+
     if (presentAddress.trim().isEmpty) errors['presentAddress'] = 'Required';
     if (dateOfJoining == null) errors['dateOfJoining'] = 'Required';
     if (branch.trim().isEmpty) errors['branch'] = 'Required';
@@ -293,7 +303,14 @@ class AddStaffProvider extends ChangeNotifier {
   // Submit Staff (Step 1) — Continue → Salary Screen
   // ─────────────────────────────────────────
   Future<void> submit(BuildContext context) async {
-    if (!_validate()) return;
+    if (!_validate()) {
+      if (errors.containsKey('frontImage') || 
+          errors.containsKey('rightImage') || 
+          errors.containsKey('leftImage')) {
+        _showSnack(context, 'Please upload all 3 face images', isError: true);
+      }
+      return;
+    }
 
     isLoading = true;
     notifyListeners();

@@ -152,70 +152,76 @@ class _BranchesView extends StatelessWidget {
             const SizedBox(height: 12),
  
             Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification scrollInfo) {
-                  if (!provider.isLoadingMore &&
-                      provider.hasMore &&
-                      scrollInfo.metrics.pixels >=
-                          scrollInfo.metrics.maxScrollExtent * 0.8) {
-                    provider.loadMoreBranches();
-                  }
-                  return false;
-                },
-                child: RefreshIndicator(
-                  onRefresh: provider.refreshBranches,
-                  color: AppStyle.accentCyan,
-                  child: ListView.separated(
-                    itemCount: provider.branches.length + 1,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, index) {
-                      if (index == provider.branches.length) {
-                        if (provider.isLoadingMore) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: ShimmerList(itemCount: 1, padding: EdgeInsets.zero),
+              child: provider.isLoadingMore
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppStyle.accentCyan,
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: provider.refreshBranches,
+                      color: AppStyle.accentCyan,
+                      child: ListView.separated(
+                        itemCount: provider.branches.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final branch = provider.branches[index];
+                          return _BranchCard(
+                            branch: branch,
+                            onTap: () => _showBranchDetails(context, branch),
+                            onEdit: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CreateBranchScreen(existing: branch),
+                                ),
+                              );
+                              if (context.mounted) {
+                                context.read<BranchProvider>().refreshBranches();
+                              }
+                            },
+                            onDelete: () => _confirmDelete(context, provider, branch),
                           );
-                        }
-                        if (!provider.hasMore && provider.branches.isNotEmpty) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: Text('No more branches',
-                                  style: AppStyle.text(
-                                      color: AppStyle.hintColor, size: 13)),
-                            ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      }
-
-                      final branch = provider.branches[index];
-                      return _BranchCard(
-                        branch: branch,
-                        onTap: () => _showBranchDetails(context, branch),
-                        onEdit: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CreateBranchScreen(existing: branch),
-                            ),
-                          );
-                          if (context.mounted) {
-                            context.read<BranchProvider>().refreshBranches();
-                          }
                         },
-                        onDelete: () => _confirmDelete(context, provider, branch),
-                      );
-                    },
-                  ),
-                ),
-              ),
+                      ),
+                    ),
             ),
+            if (!provider.isLoadingMore && (provider.previousPageUrl != null || provider.nextPageUrl != null))
+              _buildPaginationFooter(context, provider),
           ],
         );
     }
   }
- 
+
+  Widget _buildPaginationFooter(BuildContext context, BranchProvider provider) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _PaginationButton(
+            label: 'Previous',
+            icon: Icons.chevron_left_rounded,
+            isNext: false,
+            isEnabled: provider.previousPageUrl != null,
+            onTap: () => provider.loadPreviousPage(),
+          ),
+          Text(
+            'Page ${provider.currentPage}',
+            style: AppStyle.text(size: 14, weight: FontWeight.w600),
+          ),
+          _PaginationButton(
+            label: 'Next',
+            icon: Icons.chevron_right_rounded,
+            isNext: true,
+            isEnabled: provider.nextPageUrl != null,
+            onTap: () => provider.loadNextPage(),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showBranchDetails(BuildContext context, BranchModel branch) {
     showModalBottomSheet(
       context: context,
@@ -269,6 +275,59 @@ class _BranchesView extends StatelessWidget {
     );
   }
 }
+
+// ─────────────────────────────────────────────
+// PAGINATION BUTTON
+// ─────────────────────────────────────────────
+class _PaginationButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isNext;
+  final bool isEnabled;
+  final VoidCallback onTap;
+
+  const _PaginationButton({
+    required this.label,
+    required this.icon,
+    required this.isNext,
+    required this.isEnabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: isEnabled ? onTap : null,
+      behavior: HitTestBehavior.opaque,
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.4,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: isNext
+                ? [
+                    Text(label, style: AppStyle.text(size: 13, weight: FontWeight.w500)),
+                    const SizedBox(width: 4),
+                    Icon(icon, size: 16),
+                  ]
+                : [
+                    Icon(icon, size: 16),
+                    const SizedBox(width: 4),
+                    Text(label, style: AppStyle.text(size: 13, weight: FontWeight.w500)),
+                  ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
  
 // ─────────────────────────────────────────────
 // BRANCH CARD

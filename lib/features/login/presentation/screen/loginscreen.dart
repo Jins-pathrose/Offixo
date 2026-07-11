@@ -25,8 +25,7 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 200),
 
               // ── Back Button ──
-              const Backbutton(),
-
+              // const Backbutton(),
               const SizedBox(height: 32),
 
               // ── Header ──
@@ -54,8 +53,7 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 28),
 
               // ── Forgot Password ──
-              const ForgotPasswordRow(),
-
+              // const ForgotPasswordRow(),
               const SizedBox(height: 48),
 
               // ── Terms ──

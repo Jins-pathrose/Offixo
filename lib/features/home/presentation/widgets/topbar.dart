@@ -6,12 +6,9 @@ import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 class TopBar extends StatelessWidget {
   final String clinicName;
   final int notificationCount;
- 
-  const TopBar({
-    required this.clinicName,
-    this.notificationCount = 1,
-  });
- 
+
+  const TopBar({required this.clinicName, this.notificationCount = 1});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -24,13 +21,15 @@ class TopBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             color: Colors.grey.shade300,
             image: const DecorationImage(
-              image: NetworkImage('https://media.gettyimages.com/id/1312706504/photo/modern-hospital-building.jpg?s=1024x1024&w=gi&k=20&c=RXpNBi29PyBzIPD7aWekJImubSm_mZuCXrYCZsRCPDQ='),
+              image: NetworkImage(
+                'https://wallpapers.com/images/featured/hd-office-background-wwmb5ymdbjbjv689.jpg',
+              ),
               fit: BoxFit.cover,
             ),
           ),
         ),
         const SizedBox(width: 12),
- 
+
         // Welcome text
         Expanded(
           child: Column(
@@ -38,27 +37,21 @@ class TopBar extends StatelessWidget {
             children: [
               Text(
                 'Welcome Back,',
-                style: AppStyle.text(
-                  size: 12,
-                  color: Color(0xFF232323),
-                ),
+                style: AppStyle.text(size: 12, color: Color(0xFF232323)),
               ),
               if (clinicName.isEmpty || clinicName == 'Loading...')
                 const ShimmerContainer(width: 120, height: 20, borderRadius: 4)
               else
                 Text(
                   clinicName,
-                  style: AppStyle.text(
-                    size: 18,
-                    weight: FontWeight.w700,
-                  ),
+                  style: AppStyle.text(size: 18, weight: FontWeight.w700),
                 ),
             ],
           ),
         ),
- 
+
         // Notification bell
-        NotificationBell(count: notificationCount),
+        // NotificationBell(count: notificationCount),
       ],
     );
   }

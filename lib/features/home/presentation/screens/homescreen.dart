@@ -2,6 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/screens/addnewstaffscreen.dart';
+import 'package:offixoadmin/features/branch/presentation/screens/branchscreen.dart';
 import 'package:offixoadmin/features/checkincheckouts/presentation/screens/checkincheckoutscreen.dart';
 import 'package:offixoadmin/features/home/data/quickactionmodel.dart';
 import 'package:flutter/material.dart';
@@ -35,35 +36,39 @@ class _HomeView extends StatelessWidget {
   const _HomeView();
 
   static List<QuickActionData> _buildQuickActions(BuildContext context) => [
-        QuickActionData(
-          label: 'Add Staff',
-          onTap: () => Navigator.push(
+    QuickActionData(
+      label: 'Add Staff',
+      onTap:
+          () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddNewStaffScreen()),
           ),
-        ),
-        QuickActionData(
-          label: 'Check-Ins',
-          onTap: () => Navigator.push(
+    ),
+    QuickActionData(
+      label: 'Attendance',
+      onTap:
+          () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AttendanceScreen()),
           ),
-        ),
-        QuickActionData(
-          label: 'Attendance',
-          onTap: () => Navigator.push(
+    ),
+    QuickActionData(
+      label: 'Branches',
+      onTap:
+          () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AttendanceScreen()),
+            MaterialPageRoute(builder: (_) => const BranchesScreen()),
           ),
-        ),
-        QuickActionData(
-          label: 'Today Leaves',
-          onTap: () => Navigator.push(
+    ),
+    QuickActionData(
+      label: 'Today Leaves',
+      onTap:
+          () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const LeaveRequestScreen()),
           ),
-        ),
-      ];
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -109,9 +114,7 @@ class _HomeView extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // ── Top Bar — org name from API ──
-                TopBar(
-                  clinicName: provider.organizationName,
-                ),
+                TopBar(clinicName: provider.organizationName),
 
                 const SizedBox(height: 20),
 
@@ -132,7 +135,7 @@ class _HomeView extends StatelessWidget {
                 // ── Today's Check-ins ──
                 SectionHeader(
                   title: "Today's Check-ins",
-                  trailingLabel: 'View All',
+                  trailingLabel: '',
                   onTrailingTap: () {
                     // TODO: navigate to full check-ins list
                   },
@@ -181,25 +184,35 @@ class _LiveStatusList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Column(
               children: [
-                const Icon(Icons.wifi_off_rounded,
-                    size: 40, color: Colors.grey),
+                const Icon(
+                  Icons.wifi_off_rounded,
+                  size: 40,
+                  color: Colors.grey,
+                ),
                 const SizedBox(height: 8),
-                Text('Failed to load',
-                    style: AppStyle.text(color: Colors.grey)),
+                Text(
+                  'Failed to load',
+                  style: AppStyle.text(color: Colors.grey),
+                ),
                 const SizedBox(height: 10),
                 GestureDetector(
                   onTap: provider.loadAll,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 8),
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       gradient: AppStyle.primaryGradient,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text('Retry',
-                        style: AppStyle.text(
-                            color: Colors.white,
-                            weight: FontWeight.w600)),
+                    child: Text(
+                      'Retry',
+                      style: AppStyle.text(
+                        color: Colors.white,
+                        weight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -212,18 +225,23 @@ class _LiveStatusList extends StatelessWidget {
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 32),
-              child: Text('No check-ins today',
-                  style: AppStyle.text(color: Colors.grey)),
+              child: Text(
+                'No check-ins today',
+                style: AppStyle.text(color: Colors.grey),
+              ),
             ),
           );
         }
         return Column(
-          children: provider.liveStatus
-              .map((member) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: _LiveStatusCard(member: member),
-                  ))
-              .toList(),
+          children:
+              provider.liveStatus
+                  .map(
+                    (member) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _LiveStatusCard(member: member),
+                    ),
+                  )
+                  .toList(),
         );
     }
   }
@@ -262,18 +280,21 @@ class _LiveStatusCard extends StatelessWidget {
               color: const Color(0xFFE0F7FA),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: member.profileImage != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      '${dotenv.env['BASE_URL']}${member.profileImage}',
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
-                          Icons.person,
-                          color: AppStyle.accentCyan),
-                    ),
-                  )
-                : const Icon(Icons.person, color: AppStyle.accentCyan),
+            child:
+                member.profileImage != null
+                    ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        '${dotenv.env['BASE_URL']}${member.profileImage}',
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (_, __, ___) => const Icon(
+                              Icons.person,
+                              color: AppStyle.accentCyan,
+                            ),
+                      ),
+                    )
+                    : const Icon(Icons.person, color: AppStyle.accentCyan),
           ),
           const SizedBox(width: 12),
 
@@ -282,24 +303,36 @@ class _LiveStatusCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(member.name,
-                    style:
-                        AppStyle.text(size: 14, weight: FontWeight.w600)),
+                Text(
+                  member.name,
+                  style: AppStyle.text(size: 14, weight: FontWeight.w600),
+                ),
                 const SizedBox(height: 3),
                 Row(
                   children: [
-                    Text(member.branchName,
-                        style: AppStyle.text(
-                            size: 11,
-                            color: AppStyle.accentCyan,
-                            weight: FontWeight.w500)),
+                    Text(
+                      member.branchName,
+                      style: AppStyle.text(
+                        size: 11,
+                        color: AppStyle.accentCyan,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
                     if (member.lastCheckinTime != null) ...[
-                      Text(' • ',
-                          style: AppStyle.text(
-                              size: 11, color: AppStyle.hintColor)),
-                      Text(member.checkinFormatted,
-                          style: AppStyle.text(
-                              size: 11, color: AppStyle.hintColor)),
+                      Text(
+                        ' • ',
+                        style: AppStyle.text(
+                          size: 11,
+                          color: AppStyle.hintColor,
+                        ),
+                      ),
+                      Text(
+                        member.checkinFormatted,
+                        style: AppStyle.text(
+                          size: 11,
+                          color: AppStyle.hintColor,
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -349,9 +382,10 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withOpacity(0.4)),
       ),
-      child: Text(label,
-          style: AppStyle.text(
-              size: 11, color: color, weight: FontWeight.w600)),
+      child: Text(
+        label,
+        style: AppStyle.text(size: 11, color: color, weight: FontWeight.w600),
+      ),
     );
   }
 }

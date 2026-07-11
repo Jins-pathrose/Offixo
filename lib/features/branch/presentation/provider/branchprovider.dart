@@ -1,16 +1,11 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/branch/data/model/branchmodel.dart';
+import 'package:offixoadmin/features/branch/data/repository/branch_repository.dart';
 
 enum BranchLoadState { idle, loading, loaded, error }
 
 class BranchProvider extends ChangeNotifier {
-  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/maintainer/branches/';
-
-  final StorageService _storageService = StorageService();
+  final BranchRepository _repository = BranchRepository();
 
   List<BranchModel> _all = [];
   List<BranchModel> branches = [];
@@ -19,94 +14,78 @@ class BranchProvider extends ChangeNotifier {
 
   bool isLoading = false;
   bool isLoadingMore = false;
-  bool hasMore = true;
+  
   String? nextPageUrl;
+  String? previousPageUrl;
   int totalCount = 0;
+  int currentPage = 1;
 
-  Future<void> fetchBranches({bool refresh = false}) async {
+  Future<void> fetchBranches({
+    bool refresh = false,
+    String? url,
+    bool isNext = false,
+    bool isPrev = false,
+  }) async {
     if (refresh) {
       _all.clear();
       branches.clear();
       nextPageUrl = null;
-      hasMore = true;
+      previousPageUrl = null;
       totalCount = 0;
-      isLoadingMore = false;
+      currentPage = 1;
+      url = null;
     }
-    
-    if (branches.isEmpty) {
+
+    if (branches.isEmpty && url == null) {
       state = BranchLoadState.loading;
       notifyListeners();
+    } else if (url != null) {
+      isLoadingMore = true;
+      notifyListeners();
+    }
+
+    if (url == null) {
+      isLoading = true;
     }
     
-    isLoading = true;
     error = null;
 
     try {
-      final token = await _storageService.getAccessToken();
-      final res = await http.get(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final data = await _repository.fetchBranches(url);
       
-      if (res.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(res.body);
-        totalCount = data['count'] ?? 0;
-        nextPageUrl = data['next'];
-        hasMore = nextPageUrl != null;
-        
-        final List<dynamic> list = data['results'] ?? [];
-        _all = list.map((e) => BranchModel.fromJson(e as Map<String, dynamic>)).toList();
-        branches = List.from(_all);
-        state = BranchLoadState.loaded;
-      } else {
-        error = 'Failed to load branches';
-        state = BranchLoadState.error;
-      }
+      totalCount = data['count'] ?? 0;
+      nextPageUrl = data['next'];
+      previousPageUrl = data['previous'];
+
+      final List<dynamic> list = data['results'] ?? [];
+      _all = list
+          .map((e) => BranchModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+      branches = List.from(_all);
+      state = BranchLoadState.loaded;
+
+      if (isNext) currentPage++;
+      if (isPrev && currentPage > 1) currentPage--;
+
     } catch (e) {
       error = 'Network error: $e';
       state = BranchLoadState.error;
     } finally {
       isLoading = false;
+      isLoadingMore = false;
       notifyListeners();
     }
   }
 
-  Future<void> loadMoreBranches() async {
-    if (isLoadingMore || !hasMore || nextPageUrl == null) return;
+  Future<void> loadNextPage() async {
+    if (nextPageUrl != null && !isLoadingMore) {
+      await fetchBranches(url: nextPageUrl, isNext: true);
+    }
+  }
 
-    isLoadingMore = true;
-    notifyListeners();
-
-    try {
-      final token = await _storageService.getAccessToken();
-      final res = await http.get(
-        Uri.parse(nextPageUrl!),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-
-      if (res.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(res.body);
-        totalCount = data['count'] ?? 0;
-        nextPageUrl = data['next'];
-        hasMore = nextPageUrl != null;
-
-        final List<dynamic> list = data['results'] ?? [];
-        final newBranches = list.map((e) => BranchModel.fromJson(e as Map<String, dynamic>)).toList();
-        
-        _all.addAll(newBranches);
-        branches.addAll(newBranches);
-      }
-    } catch (e) {
-      debugPrint('Load more error: $e');
-    } finally {
-      isLoadingMore = false;
-      notifyListeners();
+  Future<void> loadPreviousPage() async {
+    if (previousPageUrl != null && !isLoadingMore) {
+      await fetchBranches(url: previousPageUrl, isPrev: true);
     }
   }
 
@@ -116,44 +95,33 @@ class BranchProvider extends ChangeNotifier {
 
   void search(String query) {
     final q = query.toLowerCase().trim();
-    branches =
-        q.isEmpty
-            ? List.from(_all)
-            : _all
-                .where(
-                  (b) =>
-                      b.name.toLowerCase().contains(q) ||
-                      b.address.toLowerCase().contains(q) ||
-                      b.branchCode.toLowerCase().contains(q),
-                )
-                .toList();
+    branches = q.isEmpty
+        ? List.from(_all)
+        : _all.where(
+            (b) =>
+                b.name.toLowerCase().contains(q) ||
+                b.address.toLowerCase().contains(q) ||
+                b.branchCode.toLowerCase().contains(q),
+          ).toList();
     notifyListeners();
   }
 
-  Future<bool> deleteBranch({required int id, required BuildContext context}) async {
+  Future<bool> deleteBranch({
+    required int id,
+    required BuildContext context,
+  }) async {
     try {
-      final token = await _storageService.getAccessToken();
-      final res = await http.delete(
-        Uri.parse('$_baseUrl$id/'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-      if (res.statusCode == 200 ||
-          res.statusCode == 204 ||
-          res.statusCode == 202) {
+      final success = await _repository.deleteBranch(id);
+      if (success) {
         branches.removeWhere((d) => d.id == id);
         _all.removeWhere((d) => d.id == id);
         notifyListeners();
         _snack(context, 'Branch deleted', isError: false);
         return true;
-      } else {
-        _snack(context, 'Failed to delete', isError: true);
-        return false;
       }
+      return false;
     } catch (_) {
-      _snack(context, 'Please try again later', isError: true);
+      _snack(context, 'Failed to delete', isError: true);
       return false;
     }
   }
@@ -162,9 +130,8 @@ class BranchProvider extends ChangeNotifier {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: isError
-            ? const Color(0xFFE53935)
-            : const Color(0xFF22C55E),
+        backgroundColor:
+            isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),

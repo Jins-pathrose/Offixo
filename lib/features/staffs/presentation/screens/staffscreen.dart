@@ -129,7 +129,8 @@ class _StaffScreenBody extends StatelessWidget {
 
               // ── Body ──
               Expanded(child: _buildBody(provider)),
-              if (provider.state == StaffLoadState.loaded && provider.totalCount > 0)
+              if (provider.state == StaffLoadState.loaded &&
+                  provider.totalCount > 0)
                 _buildPaginationControls(context, provider),
             ],
           ),
@@ -138,7 +139,10 @@ class _StaffScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildPaginationControls(BuildContext context, StaffProvider provider) {
+  Widget _buildPaginationControls(
+    BuildContext context,
+    StaffProvider provider,
+  ) {
     final int startItem = (provider.currentPage - 1) * 10 + 1;
     final int endItem = startItem + provider.staffs.length - 1;
 
@@ -156,14 +160,16 @@ class _StaffScreenBody extends StatelessWidget {
               _PaginationButton(
                 title: 'Previous',
                 isLoading: provider.isPreviousLoading,
-                isEnabled: provider.previousUrl != null && !provider.isNextLoading,
+                isEnabled:
+                    provider.previousUrl != null && !provider.isNextLoading,
                 onTap: () => provider.fetchPreviousPage(context),
               ),
               const SizedBox(width: 8),
               _PaginationButton(
                 title: 'Next',
                 isLoading: provider.isNextLoading,
-                isEnabled: provider.nextUrl != null && !provider.isPreviousLoading,
+                isEnabled:
+                    provider.nextUrl != null && !provider.isPreviousLoading,
                 onTap: () => provider.fetchNextPage(context),
               ),
             ],
@@ -213,13 +219,16 @@ class _StaffScreenBody extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => StaffDetailsScreen(staffId: staff.id),
                       ),
                     );
+                    if (result == true) {
+                      provider.loadStaffs(isRefresh: true);
+                    }
                   },
                   child: StaffCard(
                     name: staff.fullName,
@@ -258,29 +267,33 @@ class _PaginationButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isEnabled ? AppStyle.primaryColor.withOpacity(0.1) : Colors.grey.shade200,
+          color:
+              isEnabled
+                  ? AppStyle.primaryColor.withOpacity(0.1)
+                  : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: isEnabled ? AppStyle.primaryColor : Colors.grey.shade300,
           ),
         ),
-        child: isLoading
-            ? SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppStyle.primaryColor,
+        child:
+            isLoading
+                ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppStyle.primaryColor,
+                  ),
+                )
+                : Text(
+                  title,
+                  style: AppStyle.text(
+                    size: 13,
+                    color: isEnabled ? AppStyle.primaryColor : Colors.grey,
+                    weight: FontWeight.w600,
+                  ),
                 ),
-              )
-            : Text(
-                title,
-                style: AppStyle.text(
-                  size: 13,
-                  color: isEnabled ? AppStyle.primaryColor : Colors.grey,
-                  weight: FontWeight.w600,
-                ),
-              ),
       ),
     );
   }

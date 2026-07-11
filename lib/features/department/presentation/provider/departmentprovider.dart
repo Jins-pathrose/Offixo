@@ -1,61 +1,96 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/department/data/model/departmentmodel.dart';
+import 'package:offixoadmin/features/department/data/repository/department_repository.dart';
 
 enum DeptLoadState { idle, loading, loaded, error }
 
 class DepartmentProvider extends ChangeNotifier {
-  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/maintainer/departments/';
-
-  final StorageService _storage = StorageService();
+  final DepartmentRepository _repository = DepartmentRepository();
 
   DeptLoadState state = DeptLoadState.idle;
   List<DepartmentModel> departments = [];
   String? error;
   bool isSubmitting = false;
 
+  bool isLoading = false;
+  bool isLoadingMore = false;
+
+  String? nextPageUrl;
+  String? previousPageUrl;
+  int totalCount = 0;
+  int currentPage = 1;
+
   DepartmentProvider() {
     fetchDepartments();
   }
 
   // ── Fetch ──
-  Future<void> fetchDepartments() async {
-    state = DeptLoadState.loading;
+  Future<void> fetchDepartments({
+    bool refresh = false,
+    String? url,
+    bool isNext = false,
+    bool isPrev = false,
+  }) async {
+    if (refresh) {
+      departments.clear();
+      nextPageUrl = null;
+      previousPageUrl = null;
+      totalCount = 0;
+      currentPage = 1;
+      url = null;
+    }
+
+    if (departments.isEmpty && url == null) {
+      state = DeptLoadState.loading;
+      notifyListeners();
+    } else if (url != null) {
+      isLoadingMore = true;
+      notifyListeners();
+    }
+
+    if (url == null) {
+      isLoading = true;
+    }
+
     error = null;
-    notifyListeners();
+
     try {
-      final token = await _storage.getAccessToken();
-      final res = await http.get(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-      print(res.statusCode);
-      print(res.body);
-      if (res.statusCode == 200) {
-  final Map<String, dynamic> data = jsonDecode(res.body);
+      final data = await _repository.fetchDepartments(url);
 
-  final List<dynamic> list = data['results'];
+      totalCount = data['count'] ?? 0;
+      nextPageUrl = data['next'];
+      previousPageUrl = data['previous'];
 
-  departments = list
-      .map((e) => DepartmentModel.fromJson(e as Map<String, dynamic>))
-      .toList();
+      final List<dynamic> list = data['results'] ?? [];
+      departments = list
+          .map((e) => DepartmentModel.fromJson(e as Map<String, dynamic>))
+          .toList();
 
-  state = DeptLoadState.loaded;
-} else {
-  error = 'Failed to load departments';
-  state = DeptLoadState.error;
-}
+      state = DeptLoadState.loaded;
+
+      if (isNext) currentPage++;
+      if (isPrev && currentPage > 1) currentPage--;
+
     } catch (e) {
       error = 'Network error: $e';
       state = DeptLoadState.error;
+    } finally {
+      isLoading = false;
+      isLoadingMore = false;
+      notifyListeners();
     }
-    notifyListeners();
+  }
+
+  Future<void> loadNextPage() async {
+    if (nextPageUrl != null && !isLoadingMore) {
+      await fetchDepartments(url: nextPageUrl, isNext: true);
+    }
+  }
+
+  Future<void> loadPreviousPage() async {
+    if (previousPageUrl != null && !isLoadingMore) {
+      await fetchDepartments(url: previousPageUrl, isPrev: true);
+    }
   }
 
   // ── Create ──
@@ -66,22 +101,13 @@ class DepartmentProvider extends ChangeNotifier {
     isSubmitting = true;
     notifyListeners();
     try {
-      final token = await _storage.getAccessToken();
-      final res = await http.post(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'name': name.trim()}),
-      );
-      if (res.statusCode == 200 || res.statusCode == 201) {
-        await fetchDepartments();
+      final success = await _repository.createDepartment(name);
+      if (success) {
+        await fetchDepartments(refresh: true);
         _snack(context, 'Department created', isError: false);
         return true;
       } else {
-        _snack(context, _extractError(res.body), isError: true);
+        _snack(context, 'Failed to create', isError: true);
         return false;
       }
     } catch (_) {
@@ -102,22 +128,13 @@ class DepartmentProvider extends ChangeNotifier {
     isSubmitting = true;
     notifyListeners();
     try {
-      final token = await _storage.getAccessToken();
-      final res = await http.patch(
-        Uri.parse('$_baseUrl$id/'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'name': name.trim()}),
-      );
-      if (res.statusCode == 200 || res.statusCode == 201) {
-        await fetchDepartments();
+      final success = await _repository.updateDepartment(id, name);
+      if (success) {
+        await fetchDepartments(refresh: true);
         _snack(context, 'Department updated', isError: false);
         return true;
       } else {
-        _snack(context, _extractError(res.body), isError: true);
+        _snack(context, 'Failed to update', isError: true);
         return false;
       }
     } catch (_) {
@@ -132,17 +149,8 @@ class DepartmentProvider extends ChangeNotifier {
   // ── Delete ──
   Future<bool> delete({required int id, required BuildContext context}) async {
     try {
-      final token = await _storage.getAccessToken();
-      final res = await http.delete(
-        Uri.parse('$_baseUrl$id/'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-      if (res.statusCode == 200 ||
-          res.statusCode == 204 ||
-          res.statusCode == 202) {
+      final success = await _repository.deleteDepartment(id);
+      if (success) {
         departments.removeWhere((d) => d.id == id);
         notifyListeners();
         _snack(context, 'Department deleted', isError: false);
@@ -155,18 +163,6 @@ class DepartmentProvider extends ChangeNotifier {
       _snack(context, 'Please try again later', isError: true);
       return false;
     }
-  }
-
-  String _extractError(String body) {
-    try {
-      final json = jsonDecode(body);
-      if (json is Map) {
-        final first = json.values.first;
-        if (first is List && first.isNotEmpty) return first.first.toString();
-        return first.toString();
-      }
-    } catch (_) {}
-    return 'Please try again later';
   }
 
   void _snack(BuildContext context, String msg, {required bool isError}) {

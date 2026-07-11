@@ -7,7 +7,7 @@ class ProfileInfoTab extends StatelessWidget {
   final ProfileInfo? info;
   final WorkDetails? work;
   const ProfileInfoTab({this.info, this.work});
- 
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -25,10 +25,16 @@ class ProfileInfoTab extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.person, color: AppStyle.accentCyan, size: 20),
+                  const Icon(
+                    Icons.person,
+                    color: AppStyle.accentCyan,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
-                  Text('Profile Info',
-                      style: AppStyle.text(size: 15, weight: FontWeight.w700)),
+                  Text(
+                    'Profile Info',
+                    style: AppStyle.text(size: 15, weight: FontWeight.w700),
+                  ),
                 ],
               ),
               const Divider(height: 20),
@@ -66,9 +72,9 @@ class ProfileInfoTab extends StatelessWidget {
             ],
           ),
         ),
- 
+
         const SizedBox(height: 16),
- 
+
         // ── Work Details Section ──
         Container(
           width: double.infinity,
@@ -82,11 +88,16 @@ class ProfileInfoTab extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.work_outline_rounded,
-                      color: AppStyle.accentCyan, size: 20),
+                  const Icon(
+                    Icons.work_outline_rounded,
+                    color: AppStyle.accentCyan,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
-                  Text('Work Details',
-                      style: AppStyle.text(size: 15, weight: FontWeight.w700)),
+                  Text(
+                    'Work Details',
+                    style: AppStyle.text(size: 15, weight: FontWeight.w700),
+                  ),
                 ],
               ),
               const Divider(height: 20),
@@ -113,24 +124,24 @@ class ProfileInfoTab extends StatelessWidget {
               InfoRow(
                 icon: Icons.currency_rupee_outlined,
                 label: 'Salary Amount',
-                value: work?.salaryAmount != null
-                    ? '₹ ${work!.salaryAmount}'
-                    : '--',
+                value:
+                    work?.salaryAmount != null
+                        ? '₹ ${work!.salaryAmount}'
+                        : '--',
               ),
-              InfoRow(
-                icon: Icons.schedule_outlined,
-                label: 'Working Shift',
-                value: work?.workingShift ?? '--',
-                isLast: true,
-              ),
+              // InfoRow(
+              //   icon: Icons.schedule_outlined,
+              //   label: 'Working Shift',
+              //   value: work?.workingShift ?? '--',
+              //   isLast: true,
+              // ),
             ],
           ),
         ),
- 
+
         const SizedBox(height: 16),
- 
+
         // ── Edit Button ──
-       
       ],
     );
   }

@@ -13,30 +13,33 @@ class ShimmerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    return Padding(
       padding: padding,
-      itemCount: itemCount,
-      physics: const NeverScrollableScrollPhysics(),
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        return const Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ShimmerContainer(width: 50, height: 50, borderRadius: 25),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ShimmerContainer(width: double.infinity, height: 16),
-                  SizedBox(height: 8),
-                  ShimmerContainer(width: 150, height: 14),
-                ],
-              ),
+      child: Column(
+        children: List.generate(
+          itemCount,
+          (index) => Padding(
+            padding: EdgeInsets.only(bottom: index == itemCount - 1 ? 0 : 16.0),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShimmerContainer(width: 50, height: 50, borderRadius: 25),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ShimmerContainer(width: double.infinity, height: 16),
+                      SizedBox(height: 8),
+                      ShimmerContainer(width: 150, height: 14),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TermsText extends StatelessWidget {
   const TermsText();
- 
+
   @override
   Widget build(BuildContext context) {
+    final Uri _policyUrl = Uri.parse(
+      'https://www.freeprivacypolicy.com/live/5eb0d809-d24c-4e9f-850a-4563ca170e5d',
+    );
+
+    Future<void> _openPolicy() async {
+      if (!await launchUrl(_policyUrl, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $_policyUrl');
+      }
+    }
+
     return RichText(
       textAlign: TextAlign.center,
       text: TextSpan(
@@ -19,7 +31,7 @@ class TermsText extends StatelessWidget {
               color: AppStyle.accentCyan,
               weight: FontWeight.w500,
             ),
-            // TODO: recognizer: TapGestureRecognizer()..onTap = () => launchUrl(...)
+            recognizer: TapGestureRecognizer()..onTap = _openPolicy,
           ),
           const TextSpan(text: ' and '),
           TextSpan(
@@ -29,7 +41,7 @@ class TermsText extends StatelessWidget {
               color: AppStyle.accentCyan,
               weight: FontWeight.w500,
             ),
-            // TODO: recognizer: TapGestureRecognizer()..onTap = () => launchUrl(...)
+            recognizer: TapGestureRecognizer()..onTap = _openPolicy,
           ),
         ],
       ),

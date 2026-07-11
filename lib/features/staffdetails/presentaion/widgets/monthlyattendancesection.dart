@@ -106,15 +106,31 @@ class MonthlyAttendanceSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dayStatus = monthly?.dayStatus ?? {};
-    const int totalDays  = 31;
-    const int startWeekday = 0; // Sunday
+    final int totalDays = DateUtils.getDaysInMonth(selectedYear, selectedMonth);
+    
+    // DateTime.weekday returns 1 for Monday, 7 for Sunday.
+    // Our calendar row starts with Sunday, so we want Sunday=0, Monday=1, etc.
+    final firstDayOfMonth = DateTime(selectedYear, selectedMonth, 1);
+    final int startWeekday = firstDayOfMonth.weekday % 7;
+ 
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
  
     final cells = <Widget>[];
     for (int i = 0; i < startWeekday; i++) {
       cells.add(const SizedBox.shrink());
     }
     for (int day = 1; day <= totalDays; day++) {
-      cells.add(CalendarDay(day: day, status: dayStatus[day]));
+      final currentDayDate = DateTime(selectedYear, selectedMonth, day);
+      final isFuture = currentDayDate.isAfter(today);
+      
+      cells.add(
+        CalendarDay(
+          day: day, 
+          status: dayStatus[day], 
+          isFuture: isFuture,
+        ),
+      );
     }
  
     final rows = <Widget>[];

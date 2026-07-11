@@ -27,60 +27,50 @@ class StaffCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundImage: NetworkImage(image),
-          ),
+          CircleAvatar(radius: 30, backgroundImage: NetworkImage(image)),
 
           const SizedBox(width: 12),
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
-                  style: AppStyle.text(
-                    size: 16,
-                    weight: FontWeight.w600,
-                  ),
+                  style: AppStyle.text(size: 16, weight: FontWeight.w600),
                 ),
                 Text(
                   "$branch • $staffId",
-                  style: AppStyle.text(
-                    color: AppStyle.hintColor,
-                    size: 13,
-                  ),
+                  style: AppStyle.text(color: AppStyle.hintColor, size: 13),
                 ),
               ],
             ),
           ),
 
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 18,
-              vertical: 6,
-            ),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: isOnDuty
-                    ? Colors.green
-                    : Colors.red,
-              ),
-              borderRadius:
-                  BorderRadius.circular(30),
-            ),
-            child: Text(
-              isOnDuty ? "On Duty" : "Leave",
-              style: AppStyle.text(
-                size: 12,
-                color: isOnDuty
-                    ? Colors.green
-                    : Colors.red,
-              ),
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(
+          //     horizontal: 18,
+          //     vertical: 6,
+          //   ),
+          //   decoration: BoxDecoration(
+          //     border: Border.all(
+          //       color: isOnDuty
+          //           ? Colors.green
+          //           : Colors.red,
+          //     ),
+          //     borderRadius:
+          //         BorderRadius.circular(30),
+          //   ),
+          //   child: Text(
+          //     isOnDuty ? "On Duty" : "Leave",
+          //     style: AppStyle.text(
+          //       size: 12,
+          //       color: isOnDuty
+          //           ? Colors.green
+          //           : Colors.red,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
