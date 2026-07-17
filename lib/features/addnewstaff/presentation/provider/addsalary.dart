@@ -5,16 +5,14 @@ import 'package:http/http.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
 
 class AddSalaryProvider extends ChangeNotifier {
-  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/salary/employee-salaries/';
+  static String get _baseUrl =>
+      '${dotenv.env['BASE_URL']}/api/salary/employee-salaries/';
 
   final StorageService _storageService = StorageService();
 
   bool isLoading = false;
   Map<String, String?> errors = {};
 
-  /// POST /api/salary/employee-salaries/
-  /// { "member": id, "salary_type": "MONTHLY", "total_salary": 50000,
-  ///   "pf_amount": 2000, "insurance_amount": 1000, "other_deduction": 500 }
   Future<bool> submit({
     required int memberId,
     required String salaryType,
@@ -22,16 +20,25 @@ class AddSalaryProvider extends ChangeNotifier {
     required String pfAmount,
     required String insuranceAmount,
     required String otherDeduction,
+    required String hourlyRate, // Not used for MONTHLY
+    required String workingHours, // Not used for MONTHLY
     required BuildContext context,
   }) async {
     errors = {};
 
-    if (salaryType.trim().isEmpty) errors['salaryType'] = 'Required';
+    // Validate salary type (should always be MONTHLY)
+    if (salaryType.trim().isEmpty) {
+      errors['salaryType'] = 'Required';
+    } else if (salaryType.trim() != 'MONTHLY') {
+      errors['salaryType'] = 'Only MONTHLY salary type is supported';
+    }
+
     if (totalSalary.trim().isEmpty) {
       errors['totalSalary'] = 'Required';
     } else if (num.tryParse(totalSalary.trim()) == null) {
       errors['totalSalary'] = 'Enter a valid amount';
     }
+
     // pf, insurance, other deduction are optional but must be numeric if filled
     if (pfAmount.trim().isNotEmpty && num.tryParse(pfAmount.trim()) == null) {
       errors['pfAmount'] = 'Enter a valid amount';
@@ -66,11 +73,12 @@ class AddSalaryProvider extends ChangeNotifier {
         },
         body: jsonEncode({
           'member': memberId,
-          'salary_type': salaryType.trim(),
+          'salary_type': salaryType.trim(), // Always "MONTHLY"
           'total_salary': num.parse(totalSalary.trim()),
           'pf_amount': num.tryParse(pfAmount.trim()) ?? 0,
           'insurance_amount': num.tryParse(insuranceAmount.trim()) ?? 0,
           'other_deduction': num.tryParse(otherDeduction.trim()) ?? 0,
+          // No hourly_rate or working_hours for MONTHLY
         }),
       );
 
@@ -84,8 +92,11 @@ class AddSalaryProvider extends ChangeNotifier {
         final fieldErrors = _parseFieldErrors(res.body);
         if (fieldErrors.isNotEmpty) {
           errors.addAll(fieldErrors);
-          _showSnack(context, fieldErrors.values.first ?? 'Please try again later',
-              isError: true);
+          _showSnack(
+            context,
+            fieldErrors.values.first ?? 'Please try again later',
+            isError: true,
+          );
         } else {
           _showSnack(context, 'Please try again later', isError: true);
         }
@@ -113,6 +124,8 @@ class AddSalaryProvider extends ChangeNotifier {
         'pf_amount': 'pfAmount',
         'insurance_amount': 'insuranceAmount',
         'other_deduction': 'otherDeduction',
+        'hourly_rate': 'hourlyRate',
+        'working_hours': 'workingHours',
       };
 
       final result = <String, String?>{};
@@ -133,16 +146,21 @@ class AddSalaryProvider extends ChangeNotifier {
     }
   }
 
-  void _showSnack(BuildContext context, String message,
-      {required bool isError}) {
+  void _showSnack(
+    BuildContext context,
+    String message, {
+    required bool isError,
+  }) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor:
-          isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      margin: const EdgeInsets.all(16),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor:
+            isError ? const Color(0xFFE53935) : const Color(0xFF22C55E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 }

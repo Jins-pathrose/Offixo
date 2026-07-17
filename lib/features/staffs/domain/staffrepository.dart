@@ -2,7 +2,7 @@
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:offixoadmin/core/network/global_http_client.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/staffs/data/staffmodel.dart';
 

@@ -8,12 +8,6 @@ import 'package:offixoadmin/features/addnewstaff/presentation/widgets/sectiontit
 import 'package:provider/provider.dart';
 import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 
-const List<Map<String, String>> _salaryTypeChoices = [
-  {'id': 'MONTHLY', 'name': 'Monthly'},
-  {'id': 'HOURLY', 'name': 'Hourly'},
-  {'id': 'DAILY', 'name': 'Daily'},
-];
-
 class AddSalaryScreen extends StatelessWidget {
   final MemberModel member;
   const AddSalaryScreen({super.key, required this.member});
@@ -36,11 +30,15 @@ class _AddSalaryView extends StatefulWidget {
 }
 
 class _AddSalaryViewState extends State<_AddSalaryView> {
-  String? _salaryType;
+  // Fixed salary type as MONTHLY
+  final String _salaryType = 'MONTHLY';
   final _totalSalaryCtrl = TextEditingController();
   final _pfCtrl = TextEditingController();
   final _insuranceCtrl = TextEditingController();
   final _otherDeductionCtrl = TextEditingController();
+  // Keep controllers but won't be used
+  final _hourlyRateCtrl = TextEditingController();
+  final _workingHoursCtrl = TextEditingController();
 
   @override
   void dispose() {
@@ -48,6 +46,8 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
     _pfCtrl.dispose();
     _insuranceCtrl.dispose();
     _otherDeductionCtrl.dispose();
+    _hourlyRateCtrl.dispose();
+    _workingHoursCtrl.dispose();
     super.dispose();
   }
 
@@ -55,11 +55,13 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
     final provider = context.read<AddSalaryProvider>();
     final ok = await provider.submit(
       memberId: widget.member.id,
-      salaryType: _salaryType ?? '',
+      salaryType: _salaryType, // Always MONTHLY
       totalSalary: _totalSalaryCtrl.text,
       pfAmount: _pfCtrl.text,
       insuranceAmount: _insuranceCtrl.text,
       otherDeduction: _otherDeductionCtrl.text,
+      hourlyRate: '', // Not needed for MONTHLY
+      workingHours: '', // Not needed for MONTHLY
       context: context,
     );
 
@@ -118,30 +120,6 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
               // ── App Bar ──
               Row(
                 children: [
-                  // GestureDetector(
-                  //   onTap: () => Navigator.maybePop(context),
-                  //   child: Container(
-                  //     width: 38,
-                  //     height: 38,
-                  //     decoration: BoxDecoration(
-                  //       color: Colors.white,
-                  //       borderRadius: BorderRadius.circular(10),
-                  //       boxShadow: [
-                  //         BoxShadow(
-                  //           color: Colors.black.withOpacity(0.06),
-                  //           blurRadius: 6,
-                  //           offset: const Offset(0, 2),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //     child: const Icon(
-                  //       Icons.arrow_back_ios_new_rounded,
-                  //       size: 16,
-                  //       color: AppStyle.fontColor,
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Salary Details',
@@ -212,19 +190,38 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
               const SectionTitle(title: 'Salary Details'),
               const SizedBox(height: 14),
 
-              // Salary Type
+              // Salary Type - Fixed as MONTHLY (non-editable)
               FormFields(
                 label: 'Salary Type',
                 isRequired: true,
-                child: AppDropdown(
-                  hint: 'Select Salary Type',
-                  value: _salaryType,
-                  items: _salaryTypeChoices.map((e) => e['id']!).toList(),
-                  itemLabels: {
-                    for (final e in _salaryTypeChoices) e['id']!: e['name']!,
-                  },
-                  onChanged: (v) => setState(() => _salaryType = v),
-                  errorText: provider.errors['salaryType'],
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppStyle.borderColor),
+                    color: Colors.grey.shade50,
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Monthly',
+                        style: AppStyle.text(
+                          size: 13,
+                          color: AppStyle.fontColor,
+                          weight: FontWeight.w500,
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(
+                        Icons.check_circle,
+                        size: 18,
+                        color: AppStyle.accentCyan,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 14),

@@ -2,7 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:offixoadmin/core/network/global_http_client.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/settings/data/models/organizationmodel.dart';
 import 'package:offixoadmin/features/settings/domain/enumprofile.dart';

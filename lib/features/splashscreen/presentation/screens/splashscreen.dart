@@ -2,7 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:offixoadmin/core/network/global_http_client.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/bottomnavigation/presentaion/screens/bottomnavigation.dart';
 import 'package:offixoadmin/features/onboarding/presentation/screens/onboardingscreen.dart';

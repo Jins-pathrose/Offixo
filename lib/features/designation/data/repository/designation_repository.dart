@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+import 'package:offixoadmin/core/network/global_http_client.dart' as http;
 import 'package:offixoadmin/core/services/storagedevice.dart';
 
 class DesignationRepository {

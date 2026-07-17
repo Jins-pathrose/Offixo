@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:offixoadmin/core/utils/globals.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/provider/addsalary.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/provider/addstaffprovider.dart';
 import 'package:offixoadmin/features/branch/presentation/provider/branchprovider.dart';
@@ -87,6 +88,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       debugShowCheckedModeBanner: false, 
       home: const SplashScreen(),
       builder: (context, child) {
