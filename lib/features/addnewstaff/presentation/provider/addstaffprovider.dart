@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/network/global_http_client.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:offixoadmin/core/services/storagedevice.dart';
-import 'package:offixoadmin/features/addnewstaff/data/addstaffreposnse.dart';
+import 'package:offixoadmin/features/staffdetails/data/models/staffdetailsresponse.dart';
+import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart';
 import 'package:offixoadmin/features/addnewstaff/domain/dorpdownmodel.dart';
+import 'package:offixoadmin/features/addnewstaff/domain/addstaffmodel.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/screens/addsalaryscreen.dart';
 
 // ─────────────────────────────────────────────
@@ -58,8 +60,38 @@ class AddStaffProvider extends ChangeNotifier {
 
   final StorageService _storageService = StorageService();
 
-  AddStaffProvider() {
+  final StaffDetailsResponse? staffToEdit;
+  final Payslip? existingPayslip;
+  bool get isEditMode => staffToEdit != null;
+
+  AddStaffProvider({this.staffToEdit, this.existingPayslip}) {
+    if (isEditMode) {
+      _initEditMode();
+    }
     fetchDropdownChoices();
+  }
+
+  void _initEditMode() {
+    final staff = staffToEdit!;
+    firstName = staff.firstName;
+    lastName = staff.lastName;
+    phoneNumber = staff.phoneNumber;
+    email = staff.email;
+    bloodGroup = staff.bloodGroup;
+    gender = staff.gender;
+    if (staff.dateOfBirth.isNotEmpty) {
+      try { dateOfBirth = DateTime.parse(staff.dateOfBirth); } catch (_) {}
+    }
+    presentAddress = staff.presentAddress;
+    
+    if (staff.startDate.isNotEmpty) {
+      try { dateOfJoining = DateTime.parse(staff.startDate); } catch (_) {}
+    }
+    
+    department = staff.departmentId.toString();
+    designation = staff.designationId.toString();
+    workingShift = staff.currentShiftId.toString();
+    memberType = staff.memberType;
   }
 
   // ─────────────────────────────────────────
@@ -81,6 +113,11 @@ class AddStaffProvider extends ChangeNotifier {
         final json = jsonDecode(res.body) as Map<String, dynamic>;
         choices = DropdownChoices.fromJson(json);
         dropdownState = DropdownLoadState.loaded;
+
+        if (isEditMode && branch.isEmpty && staffToEdit!.branch != null) {
+           final b = choices.branches.where((e) => e.name == staffToEdit!.branch).firstOrNull;
+           if (b != null) branch = b.id;
+        }
       } else {
         dropdownState = DropdownLoadState.error;
       }
@@ -291,9 +328,12 @@ class AddStaffProvider extends ChangeNotifier {
     if (designation.trim().isEmpty) errors['designation'] = 'Required';
     if (memberType.trim().isEmpty) errors['memberType'] = 'Required';
     if (workingShift.trim().isEmpty) errors['workingShift'] = 'Required';
-    if (frontImage == null) errors['frontImage'] = 'Required';
-    if (rightImage == null) errors['rightImage'] = 'Required';
-    if (leftImage == null) errors['leftImage'] = 'Required';
+    
+    if (!isEditMode) {
+      if (frontImage == null) errors['frontImage'] = 'Required';
+      if (rightImage == null) errors['rightImage'] = 'Required';
+      if (leftImage == null) errors['leftImage'] = 'Required';
+    }
 
     notifyListeners();
     return errors.isEmpty;
@@ -323,7 +363,11 @@ class AddStaffProvider extends ChangeNotifier {
         return;
       }
 
-      final request = http.MultipartRequest('POST', Uri.parse(_baseUrl));
+      final url = isEditMode
+          ? '${dotenv.env['BASE_URL']}/api/member/update/${staffToEdit!.id}/'
+          : _baseUrl;
+      final method = isEditMode ? 'PATCH' : 'POST';
+      final request = http.MultipartRequest(method, Uri.parse(url));
 
       request.headers.addAll({
         'Authorization': 'Bearer $accessToken',
@@ -384,22 +428,41 @@ class AddStaffProvider extends ChangeNotifier {
       if (response.statusCode == 200 ||
           response.statusCode == 201 ||
           lastResponse?.success == true) {
-        final member = lastResponse?.member;
+        var member = lastResponse?.member;
+
+        if (member == null && isEditMode) {
+          member = MemberModel(
+            id: staffToEdit!.id,
+            empNo: staffToEdit!.empNo,
+            firstName: firstName,
+            lastName: lastName,
+          );
+        }
 
         if (member == null) {
           _showSnack(
             context,
-            'Staff created but member id missing',
+            isEditMode ? 'Staff updated but member id missing' : 'Staff created but member id missing',
             isError: true,
           );
           return;
         }
 
         if (context.mounted) {
-          // Navigate to salary creation screen — do not pop yet.
+          _showSnack(
+            context,
+            isEditMode ? 'Staff updated successfully' : 'Staff created successfully',
+            isError: false,
+          );
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddSalaryScreen(member: member)),
+            MaterialPageRoute(
+              builder: (_) => AddSalaryScreen(
+                member: member!,
+                isEditMode: isEditMode,
+                existingPayslip: existingPayslip,
+              ),
+            ),
           );
         }
       } else {

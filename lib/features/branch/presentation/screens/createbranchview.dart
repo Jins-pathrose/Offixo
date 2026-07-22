@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/appdropdown.dart';
+import 'package:offixoadmin/features/addnewstaff/presentation/widgets/apptextfield.dart';
 import 'package:offixoadmin/features/branch/presentation/provider/createbranchprovider.dart';
 import 'package:offixoadmin/features/branch/presentation/screens/officelocationscreen.dart';
 import 'package:offixoadmin/features/branch/presentation/widgets/branchappbar.dart';

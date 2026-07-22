@@ -8,6 +8,7 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final String? errorText;
   final TextEditingController? controller;
+  final String? initialValue;
  
   const AppTextField({
     required this.hint,
@@ -16,6 +17,7 @@ class AppTextField extends StatelessWidget {
     this.onChanged,
     this.errorText,
     this.controller,
+    this.initialValue,
   });
  
   @override
@@ -33,8 +35,9 @@ class AppTextField extends StatelessWidget {
                   : AppStyle.borderColor,
             ),
           ),
-          child: TextField(
+          child: TextFormField(
             controller: controller,
+            initialValue: initialValue,
             onChanged: onChanged,
             keyboardType: keyboardType,
             maxLines: maxLines,

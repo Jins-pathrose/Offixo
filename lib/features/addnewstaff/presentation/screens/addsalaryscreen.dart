@@ -8,22 +8,28 @@ import 'package:offixoadmin/features/addnewstaff/presentation/widgets/sectiontit
 import 'package:provider/provider.dart';
 import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 
+import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart';
+
 class AddSalaryScreen extends StatelessWidget {
   final MemberModel member;
-  const AddSalaryScreen({super.key, required this.member});
+  final bool isEditMode;
+  final Payslip? existingPayslip;
+  const AddSalaryScreen({super.key, required this.member, this.isEditMode = false, this.existingPayslip});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AddSalaryProvider(),
-      child: _AddSalaryView(member: member),
+      child: _AddSalaryView(member: member, isEditMode: isEditMode, existingPayslip: existingPayslip),
     );
   }
 }
 
 class _AddSalaryView extends StatefulWidget {
   final MemberModel member;
-  const _AddSalaryView({required this.member});
+  final bool isEditMode;
+  final Payslip? existingPayslip;
+  const _AddSalaryView({required this.member, this.isEditMode = false, this.existingPayslip});
 
   @override
   State<_AddSalaryView> createState() => _AddSalaryViewState();
@@ -39,6 +45,18 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
   // Keep controllers but won't be used
   final _hourlyRateCtrl = TextEditingController();
   final _workingHoursCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isEditMode && widget.existingPayslip != null) {
+      final slip = widget.existingPayslip!;
+      _totalSalaryCtrl.text = slip.baseSalary != '0' ? slip.baseSalary : '';
+      _pfCtrl.text = slip.pfAmount != '0' ? slip.pfAmount : '';
+      _insuranceCtrl.text = slip.insuranceAmount != '0' ? slip.insuranceAmount : '';
+      _otherDeductionCtrl.text = slip.otherDeduction != '0' ? slip.otherDeduction : '';
+    }
+  }
 
   @override
   void dispose() {
@@ -62,6 +80,7 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
       otherDeduction: _otherDeductionCtrl.text,
       hourlyRate: '', // Not needed for MONTHLY
       workingHours: '', // Not needed for MONTHLY
+      isEditMode: widget.isEditMode,
       context: context,
     );
 

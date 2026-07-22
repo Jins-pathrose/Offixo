@@ -34,10 +34,11 @@ class TopBar extends StatelessWidget {
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Welcome Back,',
-                style: AppStyle.text(size: 12, color: Color(0xFF232323)),
+                style: AppStyle.text(size: 12, color: const Color(0xFF232323)),
               ),
               if (clinicName.isEmpty || clinicName == 'Loading...')
                 const ShimmerContainer(width: 120, height: 20, borderRadius: 4)
@@ -45,6 +46,9 @@ class TopBar extends StatelessWidget {
                 Text(
                   clinicName,
                   style: AppStyle.text(size: 18, weight: FontWeight.w700),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  softWrap: false,
                 ),
             ],
           ),

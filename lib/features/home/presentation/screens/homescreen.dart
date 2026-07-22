@@ -306,16 +306,22 @@ class _LiveStatusCard extends StatelessWidget {
                 Text(
                   member.name,
                   style: AppStyle.text(size: 14, weight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
                 const SizedBox(height: 3),
                 Row(
                   children: [
-                    Text(
-                      member.branchName,
-                      style: AppStyle.text(
-                        size: 11,
-                        color: AppStyle.accentCyan,
-                        weight: FontWeight.w500,
+                    Flexible(
+                      child: Text(
+                        member.branchName,
+                        style: AppStyle.text(
+                          size: 11,
+                          color: AppStyle.accentCyan,
+                          weight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                     if (member.lastCheckinTime != null) ...[
@@ -326,11 +332,15 @@ class _LiveStatusCard extends StatelessWidget {
                           color: AppStyle.hintColor,
                         ),
                       ),
-                      Text(
-                        member.checkinFormatted,
-                        style: AppStyle.text(
-                          size: 11,
-                          color: AppStyle.hintColor,
+                      Flexible(
+                        child: Text(
+                          member.checkinFormatted,
+                          style: AppStyle.text(
+                            size: 11,
+                            color: AppStyle.hintColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ],
@@ -339,6 +349,8 @@ class _LiveStatusCard extends StatelessWidget {
               ],
             ),
           ),
+
+          const SizedBox(width: 8),
 
           // Status badge
           _StatusBadge(status: member.liveStatus),

@@ -78,6 +78,66 @@ class StaffDetailsProvider extends ChangeNotifier {
     return null;
   }
 
+  String _formatTime(String timeStr) {
+    if (timeStr.isEmpty || timeStr == '--') return '--';
+    
+    try {
+      String parseStr = timeStr.trim();
+      
+      // 1. Check if it's just a time string like "HH:MM", "HH:MM:SS", or "HH:MM AM/PM"
+      final timeRegex = RegExp(r'^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM|am|pm)?$');
+      final match = timeRegex.firstMatch(parseStr);
+      
+      if (match != null) {
+        int hour = int.parse(match.group(1)!);
+        int minute = int.parse(match.group(2)!);
+        String? period = match.group(3)?.toUpperCase();
+        
+        if (period == 'PM' && hour < 12) hour += 12;
+        if (period == 'AM' && hour == 12) hour = 0;
+        
+        // Assume this time is in UTC, convert to local
+        final utcTime = DateTime.utc(2000, 1, 1, hour, minute);
+        final localTime = utcTime.toLocal();
+        
+        int localHour = localTime.hour;
+        int localMin = localTime.minute;
+        
+        String localPeriod = localHour >= 12 ? 'PM' : 'AM';
+        if (localHour == 0) localHour = 12;
+        else if (localHour > 12) localHour -= 12;
+        
+        return '${localHour.toString().padLeft(2, '0')}:${localMin.toString().padLeft(2, '0')} $localPeriod';
+      }
+      
+      // 2. If it's a full DateTime string, ensure it's in standard ISO-8601 format
+      // Replace space with T for standard parsing
+      if (parseStr.contains(' ') && parseStr.length > 10 && parseStr[4] == '-') {
+        parseStr = parseStr.replaceFirst(' ', 'T');
+      }
+
+      // If it's a datetime string without timezone, assume UTC by appending 'Z'
+      if (parseStr.contains('T') && !parseStr.endsWith('Z') && !parseStr.contains('+') && !parseStr.contains('-')) {
+        parseStr += 'Z';
+      }
+      
+      DateTime dateTime = DateTime.parse(parseStr).toLocal();
+      int hour = dateTime.hour;
+      final int minute = dateTime.minute;
+      final String period = hour >= 12 ? 'PM' : 'AM';
+      
+      if (hour == 0) {
+        hour = 12;
+      } else if (hour > 12) {
+        hour -= 12;
+      }
+      return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+      
+    } catch (e) {
+      return '$timeStr (raw)';
+    }
+  }
+
   // Today's attendance summary from calendar
   AttendanceSummary? get todayAttendance {
     if (_monthlyAttendance == null) return null;
@@ -94,8 +154,8 @@ class StaffDetailsProvider extends ChangeNotifier {
     
     final details = todayData.attendanceDetails!;
     return AttendanceSummary(
-      checkIn: details.checkinTime,
-      checkOut: details.checkoutTime,
+      checkIn: _formatTime(details.checkinTime),
+      checkOut: _formatTime(details.checkoutTime),
       totalWorked: details.workingHours,
       overtime: details.otHours,
       isLateCheckIn: false,

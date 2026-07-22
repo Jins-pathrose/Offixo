@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/staffdetails/domain/enum.dart';
+import 'package:offixoadmin/features/addnewstaff/presentation/screens/addnewstaffscreen.dart';
+import 'package:offixoadmin/features/staffdetails/presentaion/provider/staffdetailsprovider.dart';
+import 'package:provider/provider.dart';
 
 class QuickActions extends StatelessWidget {
   final StaffDetailsTab activeTab;
@@ -18,7 +21,7 @@ class QuickActions extends StatelessWidget {
       (Icons.grid_view_rounded, 'Main', StaffDetailsTab.main),
       (Icons.person_outline_rounded, 'Profile Info', StaffDetailsTab.profileInfo),
       (Icons.phone_outlined, 'Contact', StaffDetailsTab.contact),
-      (Icons.edit_outlined, 'Edit', StaffDetailsTab.edit),
+      (Icons.edit_outlined, 'Edit', null), // Edit is an action, not a tab
       (Icons.settings_outlined, 'Settings', StaffDetailsTab.settings),
     ];
 
@@ -31,10 +34,27 @@ class QuickActions extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: actions.map((a) {
-          final isActive = a.$3 == activeTab;
+          final isActive = a.$3 != null && a.$3 == activeTab;
 
           return GestureDetector(
-            onTap: () => onTabChanged(a.$3),
+            onTap: () {
+              if (a.$3 == null) { // Edit button tapped
+                final provider = context.read<StaffDetailsProvider>();
+                if (provider.staffDetails != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddNewStaffScreen(
+                        staffToEdit: provider.staffDetails,
+                        existingPayslip: provider.displayPayslip,
+                      ),
+                    ),
+                  );
+                }
+              } else {
+                onTabChanged(a.$3!);
+              }
+            },
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -76,4 +96,4 @@ class QuickActions extends StatelessWidget {
       ),
     );
   }
-}
+}

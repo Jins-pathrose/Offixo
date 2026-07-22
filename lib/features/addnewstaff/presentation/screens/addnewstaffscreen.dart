@@ -2,21 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/provider/addstaffprovider.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/appdropdown.dart';
+import 'package:offixoadmin/features/addnewstaff/presentation/widgets/apptextfield.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/datepickerfield.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/faceimagepicker.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/formfiled.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/savebutton.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/sectiontitle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/staffappbar.dart';
+import 'package:offixoadmin/features/staffdetails/data/models/staffdetailsresponse.dart';
+import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart';
 import 'package:provider/provider.dart';
 
 class AddNewStaffScreen extends StatelessWidget {
-  const AddNewStaffScreen({super.key});
+  final StaffDetailsResponse? staffToEdit;
+  final Payslip? existingPayslip;
+  const AddNewStaffScreen({super.key, this.staffToEdit, this.existingPayslip});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AddStaffProvider(),
+      create: (_) => AddStaffProvider(staffToEdit: staffToEdit, existingPayslip: existingPayslip),
       child: const _AddNewStaffView(),
     );
   }
@@ -63,6 +68,7 @@ class _AddNewStaffView extends StatelessWidget {
                       label: 'First Name',
                       isRequired: true,
                       child: AppTextField(
+                        initialValue: provider.firstName.isNotEmpty ? provider.firstName : null,
                         hint: 'Eg: Jins',
                         onChanged: provider.setFirstName,
                         errorText: provider.errors['firstName'],
@@ -75,6 +81,7 @@ class _AddNewStaffView extends StatelessWidget {
                       label: 'Last Name',
                       isRequired: true,
                       child: AppTextField(
+                        initialValue: provider.lastName.isNotEmpty ? provider.lastName : null,
                         hint: 'Eg: Pathrose',
                         onChanged: provider.setLastName,
                         errorText: provider.errors['lastName'],
@@ -90,6 +97,7 @@ class _AddNewStaffView extends StatelessWidget {
                 label: 'Phone Number',
                 isRequired: true,
                 child: AppTextField(
+                  initialValue: provider.phoneNumber.isNotEmpty ? provider.phoneNumber : null,
                   hint: '+91 9074321123',
                   keyboardType: TextInputType.phone,
                   onChanged: provider.setPhoneNumber,
@@ -103,6 +111,7 @@ class _AddNewStaffView extends StatelessWidget {
                 label: 'Email',
                 isRequired: true,
                 child: AppTextField(
+                  initialValue: provider.email.isNotEmpty ? provider.email : null,
                   hint: 'charlenereed@gmail.com',
                   keyboardType: TextInputType.emailAddress,
                   onChanged: provider.setEmail,
@@ -177,6 +186,7 @@ class _AddNewStaffView extends StatelessWidget {
                 label: 'Present Address',
                 isRequired: true,
                 child: AppTextField(
+                  initialValue: provider.presentAddress.isNotEmpty ? provider.presentAddress : null,
                   hint: 'Enter your address',
                   maxLines: 3,
                   onChanged: provider.setPresentAddress,

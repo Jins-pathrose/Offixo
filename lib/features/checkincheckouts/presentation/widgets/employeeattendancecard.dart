@@ -61,13 +61,15 @@ class EmployeeAttendanceCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          record.branchName,
-                          style: AppStyle.text(
-                            size: 12,
-                            color: AppStyle.hintColor,
+                        Expanded(
+                          child: Text(
+                            record.branchName,
+                            style: AppStyle.text(
+                              size: 12,
+                              color: AppStyle.hintColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),

@@ -22,6 +22,7 @@ class AddSalaryProvider extends ChangeNotifier {
     required String otherDeduction,
     required String hourlyRate, // Not used for MONTHLY
     required String workingHours, // Not used for MONTHLY
+    bool isEditMode = false,
     required BuildContext context,
   }) async {
     errors = {};
@@ -64,30 +65,60 @@ class AddSalaryProvider extends ChangeNotifier {
     try {
       final token = await _storageService.getAccessToken();
 
-      final res = await http.post(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'member': memberId,
-          'salary_type': salaryType.trim(), // Always "MONTHLY"
-          'total_salary': num.parse(totalSalary.trim()),
-          'pf_amount': num.tryParse(pfAmount.trim()) ?? 0,
-          'insurance_amount': num.tryParse(insuranceAmount.trim()) ?? 0,
-          'other_deduction': num.tryParse(otherDeduction.trim()) ?? 0,
-          // No hourly_rate or working_hours for MONTHLY
-        }),
-      );
+      final url =
+          isEditMode
+              ? '${dotenv.env['BASE_URL']}/api/salary/employee-salaries/$memberId/update/'
+              : _baseUrl;
 
+      final request =
+          isEditMode
+              ? http.patch(
+                Uri.parse(url),
+                headers: {
+                  'Authorization': 'Bearer $token',
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: jsonEncode({
+                  'member': memberId,
+                  'salary_type': salaryType.trim(),
+                  'total_salary': num.parse(totalSalary.trim()),
+                  'pf_amount': num.tryParse(pfAmount.trim()) ?? 0,
+                  'insurance_amount': num.tryParse(insuranceAmount.trim()) ?? 0,
+                  'other_deduction': num.tryParse(otherDeduction.trim()) ?? 0,
+                }),
+              )
+              : http.post(
+                Uri.parse(url),
+                headers: {
+                  'Authorization': 'Bearer $token',
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: jsonEncode({
+                  'member': memberId,
+                  'salary_type': salaryType.trim(),
+                  'total_salary': num.parse(totalSalary.trim()),
+                  'pf_amount': num.tryParse(pfAmount.trim()) ?? 0,
+                  'insurance_amount': num.tryParse(insuranceAmount.trim()) ?? 0,
+                  'other_deduction': num.tryParse(otherDeduction.trim()) ?? 0,
+                }),
+              );
+
+      final res = await request;
+      debugPrint('Member ID: ${memberId}');
       debugPrint('Salary Status: ${res.statusCode}');
       debugPrint('Salary Body: ${res.body}');
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         success = true;
-        _showSnack(context, 'Salary added successfully', isError: false);
+        _showSnack(
+          context,
+          isEditMode
+              ? 'Salary updated successfully'
+              : 'Salary added successfully',
+          isError: false,
+        );
       } else {
         final fieldErrors = _parseFieldErrors(res.body);
         if (fieldErrors.isNotEmpty) {

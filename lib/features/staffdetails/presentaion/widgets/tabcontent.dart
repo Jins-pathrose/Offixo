@@ -6,7 +6,6 @@ import 'package:offixoadmin/features/staffdetails/data/models/salarydetailsmodel
 import 'package:offixoadmin/features/staffdetails/presentaion/provider/staffdetailsprovider.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/attendancetabcontent.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/contacttab.dart';
-import 'package:offixoadmin/features/staffdetails/presentaion/widgets/edittab.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/profileinfotab.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/leavetab.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/salarytab.dart';
@@ -51,7 +50,6 @@ class TabContent extends StatelessWidget {
             permanentAddress: provider.permanentAddress,
           ),
         ),
-      StaffDetailsTab.edit => EditTab(provider: provider),
       StaffDetailsTab.settings => SettingsTab(provider: provider),
     };
   }
