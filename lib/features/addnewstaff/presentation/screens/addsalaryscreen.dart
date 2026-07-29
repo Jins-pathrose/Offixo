@@ -2,25 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/addnewstaff/domain/addstaffmodel.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/provider/addsalary.dart';
-import 'package:offixoadmin/features/addnewstaff/presentation/widgets/appdropdown.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/formfiled.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/sectiontitle.dart';
 import 'package:provider/provider.dart';
-import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
-
 import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart';
+import 'package:offixoadmin/features/addnewstaff/domain/employee_salary_model.dart';
 
 class AddSalaryScreen extends StatelessWidget {
   final MemberModel member;
   final bool isEditMode;
   final Payslip? existingPayslip;
-  const AddSalaryScreen({super.key, required this.member, this.isEditMode = false, this.existingPayslip});
+  final EmployeeSalaryModel? existingSalary;
+  const AddSalaryScreen({
+    super.key,
+    required this.member,
+    this.isEditMode = false,
+    this.existingPayslip,
+    this.existingSalary,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AddSalaryProvider(),
-      child: _AddSalaryView(member: member, isEditMode: isEditMode, existingPayslip: existingPayslip),
+      child: _AddSalaryView(
+        member: member,
+        isEditMode: isEditMode,
+        existingPayslip: existingPayslip,
+        existingSalary: existingSalary,
+      ),
     );
   }
 }
@@ -29,7 +39,13 @@ class _AddSalaryView extends StatefulWidget {
   final MemberModel member;
   final bool isEditMode;
   final Payslip? existingPayslip;
-  const _AddSalaryView({required this.member, this.isEditMode = false, this.existingPayslip});
+  final EmployeeSalaryModel? existingSalary;
+  const _AddSalaryView({
+    required this.member,
+    this.isEditMode = false,
+    this.existingPayslip,
+    this.existingSalary,
+  });
 
   @override
   State<_AddSalaryView> createState() => _AddSalaryViewState();
@@ -49,12 +65,25 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
   @override
   void initState() {
     super.initState();
-    if (widget.isEditMode && widget.existingPayslip != null) {
+    if (widget.existingSalary != null) {
+      final sal = widget.existingSalary!;
+      final total = double.tryParse(sal.totalSalary) ?? 0.0;
+      final pf = double.tryParse(sal.pfAmount) ?? 0.0;
+      final ins = double.tryParse(sal.insuranceAmount) ?? 0.0;
+      final oth = double.tryParse(sal.otherDeduction) ?? 0.0;
+      
+      _totalSalaryCtrl.text = total > 0 ? total.toStringAsFixed(0) : '';
+      _pfCtrl.text = pf > 0 ? pf.toStringAsFixed(0) : '';
+      _insuranceCtrl.text = ins > 0 ? ins.toStringAsFixed(0) : '';
+      _otherDeductionCtrl.text = oth > 0 ? oth.toStringAsFixed(0) : '';
+    } else if (widget.isEditMode && widget.existingPayslip != null) {
       final slip = widget.existingPayslip!;
       _totalSalaryCtrl.text = slip.baseSalary != '0' ? slip.baseSalary : '';
       _pfCtrl.text = slip.pfAmount != '0' ? slip.pfAmount : '';
-      _insuranceCtrl.text = slip.insuranceAmount != '0' ? slip.insuranceAmount : '';
-      _otherDeductionCtrl.text = slip.otherDeduction != '0' ? slip.otherDeduction : '';
+      _insuranceCtrl.text =
+          slip.insuranceAmount != '0' ? slip.insuranceAmount : '';
+      _otherDeductionCtrl.text =
+          slip.otherDeduction != '0' ? slip.otherDeduction : '';
     }
   }
 
@@ -73,6 +102,7 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
     final provider = context.read<AddSalaryProvider>();
     final ok = await provider.submit(
       memberId: widget.member.id,
+      salaryId: widget.existingSalary?.id,
       salaryType: _salaryType, // Always MONTHLY
       totalSalary: _totalSalaryCtrl.text,
       pfAmount: _pfCtrl.text,
@@ -86,7 +116,7 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
 
     // Pop back to staff list (close both this screen and the previous one)
     if (ok && mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.pop(context);
     }
   }
 
@@ -118,7 +148,7 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                       ),
                     )
                     : Text(
-                      'Save Salary',
+                      widget.isEditMode ? 'Update Salary' : 'Save Salary',
                       style: AppStyle.text(
                         size: 15,
                         color: Colors.white,
@@ -141,7 +171,7 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Salary Details',
+                      widget.isEditMode ? 'Edit Salary' : 'Salary Details',
                       style: AppStyle.text(size: 20, weight: FontWeight.w700),
                     ),
                   ),
@@ -234,7 +264,7 @@ class _AddSalaryViewState extends State<_AddSalaryView> {
                         ),
                       ),
                       const Spacer(),
-                      Icon(
+                      const Icon(
                         Icons.check_circle,
                         size: 18,
                         color: AppStyle.accentCyan,

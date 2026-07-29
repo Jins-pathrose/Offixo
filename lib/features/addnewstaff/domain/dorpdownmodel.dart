@@ -20,7 +20,7 @@ class ShiftDropdownItem {
   factory ShiftDropdownItem.fromJson(Map<String, dynamic> json) =>
       ShiftDropdownItem(
         id: json['id'].toString(),
-        name: json['shift_name'] ?? '',
+        name: json['shift_name'] ?? json['name'] ?? '',
       );
 }
 
@@ -57,7 +57,7 @@ class DropdownChoices {
         designations: (json['designations'] as List? ?? [])
             .map((e) => DropdownItem.fromJson(e))
             .toList(),
-        shifts: (json['shifts'] as List? ?? [])
+        shifts: (json['shifts'] as List? ?? json['shift'] as List? ?? [])
             .map((e) => ShiftDropdownItem.fromJson(e))
             .toList(),
         genders: (json['genders'] as List? ?? [])

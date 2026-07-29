@@ -116,6 +116,7 @@ class _AddNewStaffView extends StatelessWidget {
                   keyboardType: TextInputType.emailAddress,
                   onChanged: provider.setEmail,
                   errorText: provider.errors['email'],
+                  enabled: !provider.isEditMode,
                 ),
               ),
               const SizedBox(height: 14),
@@ -317,9 +318,10 @@ class _AddNewStaffView extends StatelessWidget {
                   Expanded(
                     child: FaceImagePicker(
                       label: 'Front Side',
-                      isRequired: true,
+                      isRequired: !provider.isEditMode,
                       scanLabel: 'Scan front side',
                       image: provider.frontImage,
+                      networkImageUrl: provider.isEditMode ? provider.staffToEdit?.faceImage1 : null,
                       onTap: () => context
                           .read<AddStaffProvider>()
                           .pickImage(FaceImageSlot.front, context),
@@ -329,9 +331,10 @@ class _AddNewStaffView extends StatelessWidget {
                   Expanded(
                     child: FaceImagePicker(
                       label: 'Right Side',
-                      isRequired: true,
+                      isRequired: !provider.isEditMode,
                       scanLabel: 'Scan Right side',
                       image: provider.rightImage,
+                      networkImageUrl: provider.isEditMode ? provider.staffToEdit?.faceImage2 : null,
                       onTap: () => context
                           .read<AddStaffProvider>()
                           .pickImage(FaceImageSlot.right, context),
@@ -346,9 +349,10 @@ class _AddNewStaffView extends StatelessWidget {
                   Expanded(
                     child: FaceImagePicker(
                       label: 'Left Side',
-                      isRequired: true,
+                      isRequired: !provider.isEditMode,
                       scanLabel: 'Scan Left side',
                       image: provider.leftImage,
+                      networkImageUrl: provider.isEditMode ? provider.staffToEdit?.faceImage3 : null,
                       onTap: () => context
                           .read<AddStaffProvider>()
                           .pickImage(FaceImageSlot.left, context),

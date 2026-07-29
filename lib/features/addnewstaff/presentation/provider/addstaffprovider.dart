@@ -88,9 +88,9 @@ class AddStaffProvider extends ChangeNotifier {
       try { dateOfJoining = DateTime.parse(staff.startDate); } catch (_) {}
     }
     
-    department = staff.departmentId.toString();
-    designation = staff.designationId.toString();
-    workingShift = staff.currentShiftId.toString();
+    department = staff.departmentId == 0 ? '' : staff.departmentId.toString();
+    designation = staff.designationId == 0 ? '' : staff.designationId.toString();
+    workingShift = staff.currentShiftId == 0 ? '' : staff.currentShiftId.toString();
     memberType = staff.memberType;
   }
 
@@ -454,16 +454,7 @@ class AddStaffProvider extends ChangeNotifier {
             isEditMode ? 'Staff updated successfully' : 'Staff created successfully',
             isError: false,
           );
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AddSalaryScreen(
-                member: member!,
-                isEditMode: isEditMode,
-                existingPayslip: existingPayslip,
-              ),
-            ),
-          );
+          Navigator.pop(context);
         }
       } else {
         // Try to extract field-level validation errors

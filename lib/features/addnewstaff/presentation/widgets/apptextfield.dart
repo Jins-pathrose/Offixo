@@ -9,6 +9,7 @@ class AppTextField extends StatelessWidget {
   final String? errorText;
   final TextEditingController? controller;
   final String? initialValue;
+  final bool enabled;
  
   const AppTextField({
     required this.hint,
@@ -18,6 +19,7 @@ class AppTextField extends StatelessWidget {
     this.errorText,
     this.controller,
     this.initialValue,
+    this.enabled = true,
   });
  
   @override
@@ -27,7 +29,7 @@ class AppTextField extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: enabled ? Colors.white : Colors.grey[200],
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: errorText != null
@@ -36,6 +38,7 @@ class AppTextField extends StatelessWidget {
             ),
           ),
           child: TextFormField(
+            enabled: enabled,
             controller: controller,
             initialValue: initialValue,
             onChanged: onChanged,

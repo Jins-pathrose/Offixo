@@ -107,6 +107,8 @@ class Staffrepository {
 
   Future<StaffDetailsResponse> getStaffDetails(int memberId) async {
     final apiName = 'getStaffDetails';
+    print(memberId);
+    print("ithaaan member id");
     final url = '$baseUrl/api/member/update/$memberId/';
     print('🌐 [$apiName] GET: $url');
 

@@ -6,6 +6,7 @@ import 'package:offixoadmin/features/designation/presentation/screens/designatio
 import 'package:offixoadmin/features/leavetype/presentation/screens/leavetypescreen.dart';
 import 'package:offixoadmin/features/login/presentation/screen/loginscreen.dart';
 import 'package:offixoadmin/features/settings/data/authservice.dart';
+import 'package:offixoadmin/features/settings/presentation/screens/salaryscreen.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/cliniccard.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/menucard.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/menuitem.dart';
@@ -40,22 +41,28 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _showLogoutConfirmation(BuildContext context) async {
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text('Logout'),
+            content: const Text('Are you sure you want to logout?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Logout'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
     );
 
     if (shouldLogout == true) {
@@ -95,48 +102,68 @@ class SettingsScreen extends StatelessWidget {
                   MenuItem(
                     icon: Icons.account_tree_outlined,
                     label: 'Branches',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const BranchesScreen()),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const BranchesScreen(),
+                          ),
+                        ),
                   ),
                   MenuItem(
                     icon: Icons.domain_outlined,
                     label: 'Departments',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DepartmentsScreen(),
-                      ),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DepartmentsScreen(),
+                          ),
+                        ),
                   ),
                   MenuItem(
                     icon: Icons.badge_outlined,
                     label: 'Designations',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DesignationsScreen(),
-                      ),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DesignationsScreen(),
+                          ),
+                        ),
                   ),
                   MenuItem(
                     icon: Icons.work_outline_rounded,
                     label: 'Leave Types',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LeaveTypeScreen(),
-                      ),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LeaveTypeScreen(),
+                          ),
+                        ),
                   ),
                   MenuItem(
                     icon: Icons.access_time_outlined,
                     label: 'Shifts',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ShiftScreen()),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ShiftScreen(),
+                          ),
+                        ),
+                  ),
+                  MenuItem(
+                    icon: Icons.monetization_on_outlined,
+                    label: 'Salary',
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SalaryScreen(),
+                          ),
+                        ),
                     isLast: true,
                   ),
                 ],

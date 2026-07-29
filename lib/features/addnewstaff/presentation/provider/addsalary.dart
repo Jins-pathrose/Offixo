@@ -15,6 +15,7 @@ class AddSalaryProvider extends ChangeNotifier {
 
   Future<bool> submit({
     required int memberId,
+    int? salaryId,
     required String salaryType,
     required String totalSalary,
     required String pfAmount,
@@ -65,14 +66,17 @@ class AddSalaryProvider extends ChangeNotifier {
     try {
       final token = await _storageService.getAccessToken();
 
+      // For updates, the backend typically expects the primary key of the salary record
+      final idForUrl = salaryId ?? memberId;
+      
       final url =
           isEditMode
-              ? '${dotenv.env['BASE_URL']}/api/salary/employee-salaries/$memberId/update/'
+              ? '${dotenv.env['BASE_URL']}/api/salary/employee-salaries/$idForUrl/update/'
               : _baseUrl;
 
       final request =
           isEditMode
-              ? http.patch(
+              ? http.put(
                 Uri.parse(url),
                 headers: {
                   'Authorization': 'Bearer $token',

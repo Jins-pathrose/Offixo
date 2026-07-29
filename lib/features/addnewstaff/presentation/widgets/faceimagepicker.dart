@@ -9,6 +9,7 @@ class FaceImagePicker extends StatelessWidget {
   final bool isRequired;
   final String scanLabel;
   final File? image;
+  final String? networkImageUrl;
   final VoidCallback? onTap;
 
   const FaceImagePicker({
@@ -16,6 +17,7 @@ class FaceImagePicker extends StatelessWidget {
     required this.scanLabel,
     this.isRequired = false,
     this.image,
+    this.networkImageUrl,
     this.onTap,
   });
 
@@ -58,7 +60,9 @@ class FaceImagePicker extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: image != null
                 ? Image.file(image!, fit: BoxFit.cover, width: double.infinity)
-                : Column(
+                : (networkImageUrl != null && networkImageUrl!.isNotEmpty)
+                    ? Image.network(networkImageUrl!, fit: BoxFit.cover, width: double.infinity)
+                    : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SvgPicture.asset(
