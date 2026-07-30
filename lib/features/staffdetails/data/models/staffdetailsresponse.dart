@@ -34,6 +34,7 @@ class StaffDetailsResponse {
   final String startDate;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final Map<String, dynamic>? rawJson;
 
   StaffDetailsResponse.fromJson(Map<String, dynamic> json)
     : id = json['id'] ?? 0,
@@ -84,7 +85,8 @@ class StaffDetailsResponse {
               : {}),
       startDate = json['start_date'] ?? '',
       createdAt = DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      updatedAt = DateTime.tryParse(json['updated_at'] ?? '') ?? DateTime.now();
+      updatedAt = DateTime.tryParse(json['updated_at'] ?? '') ?? DateTime.now(),
+      rawJson = json;
 
   String get fullName => '$firstName $lastName';
   String get designationDept => '$designationName • $departmentName';

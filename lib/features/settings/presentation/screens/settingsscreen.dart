@@ -169,7 +169,6 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-
               // ── Menu Group 2 ──
               MenuCard(
                 items: [

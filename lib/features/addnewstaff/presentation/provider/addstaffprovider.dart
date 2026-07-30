@@ -114,9 +114,20 @@ class AddStaffProvider extends ChangeNotifier {
         choices = DropdownChoices.fromJson(json);
         dropdownState = DropdownLoadState.loaded;
 
-        if (isEditMode && branch.isEmpty && staffToEdit!.branch != null) {
-           final b = choices.branches.where((e) => e.name == staffToEdit!.branch).firstOrNull;
-           if (b != null) branch = b.id;
+        if (isEditMode) {
+          if (branch.isEmpty && staffToEdit!.branch != null) {
+             final b = choices.branches.where((e) => e.name == staffToEdit!.branch).firstOrNull;
+             if (b != null) branch = b.id;
+          }
+          
+          if (staffToEdit!.currentShiftName.isNotEmpty) {
+             // Fallback to name matching if currentShiftId was 0 or mismatch
+             final shiftExists = choices.shifts.any((e) => e.id == workingShift);
+             if (!shiftExists) {
+               final s = choices.shifts.where((e) => e.name == staffToEdit!.currentShiftName).firstOrNull;
+               if (s != null) workingShift = s.id;
+             }
+          }
         }
       } else {
         dropdownState = DropdownLoadState.error;
@@ -389,6 +400,7 @@ class AddStaffProvider extends ChangeNotifier {
         'designation_id': designation.trim(),
         'member_type': memberType.trim(),
         'shift_id': workingShift.trim(),
+        'current_shift_id': workingShift.trim(),
       });
 
       if (frontImage != null) {
@@ -502,6 +514,7 @@ class AddStaffProvider extends ChangeNotifier {
       'designation_id': 'designation',
       'member_type': 'memberType',
       'shift_id': 'workingShift',
+      'current_shift_id': 'workingShift',
       'face_image_1': 'frontImage',
       'face_image_2': 'rightImage',
       'face_image_3': 'leftImage',

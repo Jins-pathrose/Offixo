@@ -51,7 +51,9 @@ class _AddNewStaffView extends StatelessWidget {
               const SizedBox(height: 16),
 
               // ── App Bar ──
-              const StaffAppBar(),
+              StaffAppBar(
+                title: provider.isEditMode ? 'Edit Staff' : 'Add New Staff',
+              ),
               const SizedBox(height: 24),
 
               // ════════════════════════════════

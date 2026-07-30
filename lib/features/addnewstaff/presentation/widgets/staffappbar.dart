@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 
 class StaffAppBar extends StatelessWidget {
-  const StaffAppBar();
+  final String title;
+  const StaffAppBar({super.key, this.title = 'Add New Staff'});
  
   @override
   Widget build(BuildContext context) {
@@ -10,7 +11,7 @@ class StaffAppBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Add New Staff',
+          title,
           style: AppStyle.text(size: 20, weight: FontWeight.w700),
         ),
         GestureDetector(

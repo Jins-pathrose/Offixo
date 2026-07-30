@@ -41,6 +41,11 @@ class QuickActions extends StatelessWidget {
               if (a.$3 == null) { // Edit button tapped
                 final provider = context.read<StaffDetailsProvider>();
                 if (provider.staffDetails != null) {
+                  // Print the raw JSON API response as requested
+                  debugPrint('--- API GET RESPONSE (EDIT PROFILE) ---');
+                  debugPrint(provider.staffDetails!.rawJson.toString());
+                  debugPrint('---------------------------------------');
+                  
                   Navigator.push(
                     context,
                     MaterialPageRoute(

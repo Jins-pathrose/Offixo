@@ -85,15 +85,16 @@ class LeaveTab extends StatelessWidget {
               Text('Leave Balance',
                   style: AppStyle.text(size: 15, weight: FontWeight.w700)),
               const Divider(height: 20),
-              Row(children: [
-                LeaveBalanceItem(
-                    label: 'Casual Leave',
-                    count: leave?.casualLeaveBalance ?? 0),
-                const SizedBox(width: 32),
-                LeaveBalanceItem(
-                    label: 'Sick Leave',
-                    count: leave?.sickLeaveBalance ?? 0),
-              ]),
+              Wrap(
+                spacing: 32,
+                runSpacing: 16,
+                children: leave?.balances.map((balance) {
+                  return LeaveBalanceItem(
+                    label: balance.leaveTypeName,
+                    count: balance.remainingDays.toInt(),
+                  );
+                }).toList() ?? [],
+              ),
             ],
           ),
         ),

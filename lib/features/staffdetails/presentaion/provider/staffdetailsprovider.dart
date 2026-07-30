@@ -193,21 +193,8 @@ class StaffDetailsProvider extends ChangeNotifier {
     )).toList();
   }
 
-  // Leave balance
-  int get casualLeaveBalance {
-    final cl = _leaveBalance?.leaveBalanceDetails.firstWhere(
-      (d) => d.leaveTypeCode == 'CL',
-      orElse: () => LeaveBalanceDetail.fromJson({}),
-    );
-    return cl?.remainingDays.toInt() ?? 0;
-  }
-
-  int get sickLeaveBalance {
-    final sl = _leaveBalance?.leaveBalanceDetails.firstWhere(
-      (d) => d.leaveTypeCode == 'SL',
-      orElse: () => LeaveBalanceDetail.fromJson({}),
-    );
-    return sl?.remainingDays.toInt() ?? 0;
+  List<LeaveBalanceDetail> get leaveBalances {
+    return _leaveBalance?.leaveBalanceDetails ?? [];
   }
 
   Payslip? get displayPayslip => _payslipPreview;
