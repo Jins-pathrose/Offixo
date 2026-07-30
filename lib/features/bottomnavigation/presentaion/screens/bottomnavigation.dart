@@ -30,7 +30,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       // extendBody lets page content scroll behind the floating nav bar
       // while the nav bar itself handles the system inset
       extendBody: true,
-      body: pages[currentIndex],
+      body: IndexedStack(
+        index: currentIndex,
+        children: pages,
+      ),
       bottomNavigationBar: CustomBottomNav(
         selectedIndex: currentIndex,
         onTap: (index) {
