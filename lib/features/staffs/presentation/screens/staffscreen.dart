@@ -21,8 +21,37 @@ class StaffScreen extends StatelessWidget {
   }
 }
 
-class _StaffScreenBody extends StatelessWidget {
+class _StaffScreenBody extends StatefulWidget {
   const _StaffScreenBody();
+
+  @override
+  State<_StaffScreenBody> createState() => _StaffScreenBodyState();
+}
+
+class _StaffScreenBodyState extends State<_StaffScreenBody> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final provider = context.read<StaffProvider>();
+      if (!provider.isNextLoading) {
+        provider.fetchNextPage(context);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,52 +158,9 @@ class _StaffScreenBody extends StatelessWidget {
 
               // ── Body ──
               Expanded(child: _buildBody(provider)),
-              if (provider.state == StaffLoadState.loaded &&
-                  provider.totalCount > 0)
-                _buildPaginationControls(context, provider),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildPaginationControls(
-    BuildContext context,
-    StaffProvider provider,
-  ) {
-    final int startItem = (provider.currentPage - 1) * 10 + 1;
-    final int endItem = startItem + provider.staffs.length - 1;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Showing $startItem–$endItem of ${provider.totalCount} Staff',
-            style: AppStyle.text(size: 13, color: Colors.grey.shade700),
-          ),
-          Row(
-            children: [
-              _PaginationButton(
-                title: 'Previous',
-                isLoading: provider.isPreviousLoading,
-                isEnabled:
-                    provider.previousUrl != null && !provider.isNextLoading,
-                onTap: () => provider.fetchPreviousPage(context),
-              ),
-              const SizedBox(width: 8),
-              _PaginationButton(
-                title: 'Next',
-                isLoading: provider.isNextLoading,
-                isEnabled:
-                    provider.nextUrl != null && !provider.isPreviousLoading,
-                onTap: () => provider.fetchNextPage(context),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -213,8 +199,18 @@ class _StaffScreenBody extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: () => provider.loadStaffs(isRefresh: true),
           child: ListView.builder(
-            itemCount: provider.staffs.length,
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount:
+                provider.staffs.length + (provider.isNextLoading ? 3 : 0),
             itemBuilder: (context, index) {
+              if (index >= provider.staffs.length) {
+                return const Padding(
+                  padding: EdgeInsets.only(bottom: 16.0),
+                  child: ShimmerListItem(),
+                );
+              }
+
               final staff = provider.staffs[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -243,58 +239,5 @@ class _StaffScreenBody extends StatelessWidget {
           ),
         );
     }
-  }
-}
-
-class _PaginationButton extends StatelessWidget {
-  final String title;
-  final bool isLoading;
-  final bool isEnabled;
-  final VoidCallback onTap;
-
-  const _PaginationButton({
-    required this.title,
-    required this.isLoading,
-    required this.isEnabled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: isEnabled && !isLoading ? onTap : null,
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color:
-              isEnabled
-                  ? AppStyle.primaryColor.withOpacity(0.1)
-                  : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isEnabled ? AppStyle.primaryColor : Colors.grey.shade300,
-          ),
-        ),
-        child:
-            isLoading
-                ? SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppStyle.primaryColor,
-                  ),
-                )
-                : Text(
-                  title,
-                  style: AppStyle.text(
-                    size: 13,
-                    color: isEnabled ? AppStyle.primaryColor : Colors.grey,
-                    weight: FontWeight.w600,
-                  ),
-                ),
-      ),
-    );
   }
 }

@@ -26,33 +26,60 @@ class StaffProvider extends ChangeNotifier {
 
   List<StaffModel> get staffs => _filteredStaffs;
 
-  Future<void> loadStaffs({String? url, bool isRefresh = false}) async {
-    if (url == null && !isRefresh) {
+  Future<void> loadStaffs({String? url, bool isRefresh = false, bool loadMore = false}) async {
+    if (isRefresh) {
+      nextUrl = null;
+      _allStaffs.clear();
+      currentPage = 1;
       state = StaffLoadState.loading;
       notifyListeners();
+    } else if (loadMore) {
+      if (nextUrl == null || isNextLoading) return;
+      isNextLoading = true;
+      notifyListeners();
+    } else if (url == null && _allStaffs.isEmpty) {
+      state = StaffLoadState.loading;
+      notifyListeners();
+    } else if (url == null) {
+      return;
     }
 
     try {
-      final response = await _repository.fetchStaffs(url: url);
-      _allStaffs = response.results;
+      final urlToFetch = loadMore ? nextUrl : url;
+      final response = await _repository.fetchStaffs(url: urlToFetch);
+      
+      if (loadMore) {
+        _allStaffs.addAll(response.results);
+      } else {
+        _allStaffs = response.results;
+      }
+      
       totalCount = response.count;
       nextUrl = response.next;
-      previousUrl = response.previous;
 
-      if (url == null) {
-        currentPage = 1; // reset if it's initial load or refresh without url
+      if (url == null && !loadMore) {
+        currentPage = 1;
       }
 
       _applyFilter();
       state = StaffLoadState.loaded;
     } catch (e) {
-      if (url == null) {
-        errorMessage = e.toString();
-        state = StaffLoadState.error;
+      if (!loadMore) {
+        if (url == null || isRefresh) {
+          errorMessage = e.toString();
+          state = StaffLoadState.error;
+        } else {
+          rethrow;
+        }
       } else {
+        errorMessage = e.toString();
+        // Rethrow so the UI can catch it and show a Snackbar
         rethrow;
       }
     } finally {
+      if (loadMore) {
+        isNextLoading = false;
+      }
       notifyListeners();
     }
   }
@@ -60,11 +87,8 @@ class StaffProvider extends ChangeNotifier {
   Future<void> fetchNextPage(BuildContext context) async {
     if (nextUrl == null || isNextLoading) return;
 
-    isNextLoading = true;
-    notifyListeners();
-
     try {
-      await loadStaffs(url: nextUrl);
+      await loadStaffs(loadMore: true);
       currentPage++;
     } catch (e) {
       if (context.mounted) {
@@ -72,30 +96,6 @@ class StaffProvider extends ChangeNotifier {
           const SnackBar(content: Text('Failed to load next page')),
         );
       }
-    } finally {
-      isNextLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> fetchPreviousPage(BuildContext context) async {
-    if (previousUrl == null || isPreviousLoading) return;
-
-    isPreviousLoading = true;
-    notifyListeners();
-
-    try {
-      await loadStaffs(url: previousUrl);
-      currentPage--;
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load previous page')),
-        );
-      }
-    } finally {
-      isPreviousLoading = false;
-      notifyListeners();
     }
   }
 

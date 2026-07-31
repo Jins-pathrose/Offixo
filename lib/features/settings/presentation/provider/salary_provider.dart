@@ -71,9 +71,11 @@ class SalaryProvider extends ChangeNotifier {
         errorMessage = null;
       } else {
         errorMessage = 'Failed to load staff list. Server responded with ${response.statusCode}';
+        if (isLoadingMore) throw Exception(errorMessage);
       }
     } catch (e) {
       errorMessage = 'Network error: $e';
+      if (isLoadingMore) throw Exception(errorMessage);
     } finally {
       isLoading = false;
       isLoadingMore = false;

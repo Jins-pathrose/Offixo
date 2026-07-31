@@ -4,6 +4,7 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/settings/presentation/provider/salary_provider.dart';
 import 'package:offixoadmin/features/settings/domain/staff_list_model.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/screens/addsalaryscreen.dart';
+import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
 import 'dart:async';
 
 class SalaryScreen extends StatelessWidget {
@@ -44,12 +45,20 @@ class _SalaryScreenViewState extends State<_SalaryScreenView> {
     super.dispose();
   }
 
-  void _onScroll() {
+  void _onScroll() async {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       final provider = context.read<SalaryProvider>();
       if (!provider.isLoading && !provider.isLoadingMore) {
-        provider.fetchStaffList();
+        try {
+          await provider.fetchStaffList();
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Failed to load next page')),
+            );
+          }
+        }
       }
     }
   }
@@ -136,7 +145,7 @@ class _SalaryScreenViewState extends State<_SalaryScreenView> {
             // List
             Expanded(
               child: provider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const ShimmerList(itemCount: 6, padding: EdgeInsets.all(20))
                   : provider.errorMessage != null && provider.staffList.isEmpty
                       ? Center(
                           child: Text(
@@ -152,51 +161,52 @@ class _SalaryScreenViewState extends State<_SalaryScreenView> {
                                 style: AppStyle.text(color: AppStyle.hintColor),
                               ),
                             )
-                          : ListView.separated(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.all(20),
-                              itemCount: provider.staffList.length +
-                                  (provider.isLoadingMore ? 1 : 0),
-                              separatorBuilder: (_, __) => const SizedBox(height: 12),
-                              itemBuilder: (context, index) {
-                                if (index == provider.staffList.length) {
-                                  return const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    child: Center(child: CircularProgressIndicator()),
-                                  );
-                                }
+                          : RefreshIndicator(
+                              onRefresh: () => provider.fetchStaffList(refresh: true),
+                              child: ListView.separated(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.all(20),
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemCount: provider.staffList.length +
+                                    (provider.isLoadingMore ? 3 : 0),
+                                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                itemBuilder: (context, index) {
+                                  if (index >= provider.staffList.length) {
+                                    return const ShimmerListItem();
+                                  }
 
-                                final staff = provider.staffList[index];
-                                return _StaffCard(
-                                  staff: staff,
-                                  onTap: () async {
-                                    showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (context) => const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-
-                                    final existingSalary = await provider.checkStaffSalary(staff.id);
-
-                                    if (context.mounted) {
-                                      Navigator.pop(context); // Close loading dialog
-                                      
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => AddSalaryScreen(
-                                            member: staff.toMemberModel(),
-                                            isEditMode: existingSalary != null,
-                                            existingSalary: existingSalary,
-                                          ),
+                                  final staff = provider.staffList[index];
+                                  return _StaffCard(
+                                    staff: staff,
+                                    onTap: () async {
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => const Center(
+                                          child: CircularProgressIndicator(),
                                         ),
                                       );
-                                    }
-                                  },
-                                );
-                              },
+
+                                      final existingSalary = await provider.checkStaffSalary(staff.id);
+
+                                      if (context.mounted) {
+                                        Navigator.pop(context); // Close loading dialog
+                                        
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => AddSalaryScreen(
+                                              member: staff.toMemberModel(),
+                                              isEditMode: existingSalary != null,
+                                              existingSalary: existingSalary,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
                             ),
             ),
           ],
