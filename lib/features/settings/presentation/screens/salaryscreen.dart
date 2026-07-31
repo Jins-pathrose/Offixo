@@ -243,31 +243,21 @@ class _StaffCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Profile Image
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey[200],
-                image: staff.profileImage != null && staff.profileImage!.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(staff.profileImage!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: staff.profileImage == null || staff.profileImage!.isEmpty
-                  ? Center(
-                      child: Text(
-                        _getInitials(staff.fullName),
-                        style: AppStyle.text(
-                          size: 16,
-                          weight: FontWeight.w600,
-                          color: Colors.grey[600],
-                        ),
-                      ),
+            ClipOval(
+              child: staff.profileImage != null && staff.profileImage!.isNotEmpty
+                  ? Image.network(
+                      staff.profileImage!,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildPlaceholder(),
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return _buildPlaceholder();
+                      },
                     )
-                  : null,
+                  : _buildPlaceholder(),
             ),
             const SizedBox(width: 16),
 
@@ -348,6 +338,24 @@ class _StaffCard extends StatelessWidget {
               color: AppStyle.hintColor,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: 50,
+      height: 50,
+      color: Colors.grey[200],
+      child: Center(
+        child: Text(
+          _getInitials(staff.fullName),
+          style: AppStyle.text(
+            size: 16,
+            weight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
         ),
       ),
     );

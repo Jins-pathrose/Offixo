@@ -27,7 +27,22 @@ class StaffCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(radius: 30, backgroundImage: NetworkImage(image)),
+          ClipOval(
+            child: image.isNotEmpty
+                ? Image.network(
+                    image,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildPlaceholder(),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return _buildPlaceholder();
+                    },
+                  )
+                : _buildPlaceholder(),
+          ),
 
           const SizedBox(width: 12),
 
@@ -46,33 +61,33 @@ class StaffCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // Container(
-          //   padding: const EdgeInsets.symmetric(
-          //     horizontal: 18,
-          //     vertical: 6,
-          //   ),
-          //   decoration: BoxDecoration(
-          //     border: Border.all(
-          //       color: isOnDuty
-          //           ? Colors.green
-          //           : Colors.red,
-          //     ),
-          //     borderRadius:
-          //         BorderRadius.circular(30),
-          //   ),
-          //   child: Text(
-          //     isOnDuty ? "On Duty" : "Leave",
-          //     style: AppStyle.text(
-          //       size: 12,
-          //       color: isOnDuty
-          //           ? Colors.green
-          //           : Colors.red,
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: 60,
+      height: 60,
+      color: Colors.grey[200],
+      child: Center(
+        child: Text(
+          _getInitials(name),
+          style: AppStyle.text(
+            size: 20,
+            weight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getInitials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    return name[0].toUpperCase();
   }
 }

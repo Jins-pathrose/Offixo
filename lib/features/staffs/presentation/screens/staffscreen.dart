@@ -76,13 +76,16 @@ class _StaffScreenBodyState extends State<_StaffScreenBody> {
                     style: AppStyle.text(size: 20, weight: FontWeight.w600),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const AddNewStaffScreen(),
                         ),
                       );
+                      if (result == true && context.mounted) {
+                        provider.loadStaffs(isRefresh: true);
+                      }
                     },
                     child: Container(
                       height: 45,

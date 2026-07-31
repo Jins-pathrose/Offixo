@@ -466,7 +466,7 @@ class AddStaffProvider extends ChangeNotifier {
             isEditMode ? 'Staff updated successfully' : 'Staff created successfully',
             isError: false,
           );
-          Navigator.pop(context);
+          Navigator.pop(context, true);
         }
       } else {
         // Try to extract field-level validation errors
