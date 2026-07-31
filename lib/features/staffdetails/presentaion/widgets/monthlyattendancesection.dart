@@ -4,6 +4,7 @@ import 'package:offixoadmin/features/staffdetails/data/models/monthlyattendance.
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/calendarday.dart';
 import 'package:provider/provider.dart';
 import 'package:offixoadmin/core/utils/pdf_service.dart';
+import 'package:offixoadmin/core/services/notification_service.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/provider/staffdetailsprovider.dart';
 
 class MonthlyAttendanceSection extends StatelessWidget {
@@ -216,8 +217,11 @@ class MonthlyAttendanceSection extends StatelessWidget {
 
             if (context.mounted) {
               if (path != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Report saved to $path', style: const TextStyle(fontSize: 12))),
+                NotificationService().showDownloadNotification(
+                  0,
+                  'Download Complete',
+                  'Attendance Report downloaded successfully.',
+                  path,
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(

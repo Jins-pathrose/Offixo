@@ -152,6 +152,15 @@ class HomeProvider extends ChangeNotifier {
         }
       });
 
+      allMembers.sort((a, b) {
+        if (a.lastCheckinTime == null && b.lastCheckinTime == null) return 0;
+        if (a.lastCheckinTime == null) return 1;
+        if (b.lastCheckinTime == null) return -1;
+        final dateA = DateTime.tryParse(a.lastCheckinTime!) ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = DateTime.tryParse(b.lastCheckinTime!) ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return dateB.compareTo(dateA); // descending order
+      });
+
       liveStatus = allMembers;
       totalMembers = json['total_members_counted'] ?? liveStatus.length;
       totalCheckedIn =

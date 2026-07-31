@@ -18,6 +18,7 @@ import 'package:offixoadmin/features/staffs/presentation/controller/staffprovide
 import 'package:offixoadmin/core/providers/update_provider.dart';
 import 'package:offixoadmin/core/widgets/update_dialog.dart';
 import 'package:offixoadmin/core/services/update_service.dart';
+import 'package:offixoadmin/core/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +26,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
   await dotenv.load(fileName: ".env");
   await SharedPreferences.getInstance();
   runApp(

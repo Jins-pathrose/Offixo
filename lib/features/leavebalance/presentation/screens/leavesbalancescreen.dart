@@ -4,6 +4,7 @@ import 'package:offixoadmin/features/leavebalance/data/models/leavebalancemodel.
 import 'package:offixoadmin/features/leavebalance/presentation/provider/leavebalanceprovider.dart';
 import 'package:provider/provider.dart';
 import 'package:offixoadmin/common/shimmer/shimmer_list.dart';
+
 class LeaveBalanceScreen extends StatelessWidget {
   const LeaveBalanceScreen({super.key});
 
@@ -37,22 +38,28 @@ class _LeaveBalanceView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Leave Balances',
-                      style:
-                          AppStyle.text(size: 20, weight: FontWeight.w700)),
+                  Text(
+                    'Leave Balances',
+                    style: AppStyle.text(size: 20, weight: FontWeight.w700),
+                  ),
                   if (provider.year != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF00BCD4),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text('${provider.year}',
-                          style: AppStyle.text(
-                              size: 12,
-                              color: Colors.white,
-                              weight: FontWeight.w600)),
+                      child: Text(
+                        '${provider.year}',
+                        style: AppStyle.text(
+                          size: 12,
+                          color: Colors.white,
+                          weight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -64,10 +71,11 @@ class _LeaveBalanceView extends StatelessWidget {
                 style: AppStyle.text(size: 13),
                 decoration: InputDecoration(
                   hintText: 'Search by name, ID, branch...',
-                  hintStyle:
-                      AppStyle.text(size: 13, color: AppStyle.hintColor),
-                  prefixIcon: const Icon(Icons.search_outlined,
-                      color: AppStyle.hintColor),
+                  hintStyle: AppStyle.text(size: 13, color: AppStyle.hintColor),
+                  prefixIcon: const Icon(
+                    Icons.search_outlined,
+                    color: AppStyle.hintColor,
+                  ),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -82,8 +90,7 @@ class _LeaveBalanceView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                     borderSide: const BorderSide(color: AppStyle.accentCyan),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
               ),
               const SizedBox(height: 16),
@@ -108,24 +115,31 @@ class _LeaveBalanceView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.wifi_off_rounded,
-                  size: 48, color: Colors.grey),
+              const Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey),
               const SizedBox(height: 12),
-              Text('Failed to load balances',
-                  style: AppStyle.text(color: Colors.grey)),
+              Text(
+                'Failed to load balances',
+                style: AppStyle.text(color: Colors.grey),
+              ),
               const SizedBox(height: 12),
               GestureDetector(
                 onTap: provider.loadBalances,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     gradient: AppStyle.primaryGradient,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text('Retry',
-                      style: AppStyle.text(
-                          color: Colors.white, weight: FontWeight.w600)),
+                  child: Text(
+                    'Retry',
+                    style: AppStyle.text(
+                      color: Colors.white,
+                      weight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -135,8 +149,10 @@ class _LeaveBalanceView extends StatelessWidget {
       case BalanceLoadState.loaded:
         if (provider.employees.isEmpty) {
           return Center(
-            child: Text('No employees found',
-                style: AppStyle.text(color: Colors.grey)),
+            child: Text(
+              'No employees found',
+              style: AppStyle.text(color: Colors.grey),
+            ),
           );
         }
         return RefreshIndicator(
@@ -145,8 +161,9 @@ class _LeaveBalanceView extends StatelessWidget {
           child: ListView.separated(
             itemCount: provider.employees.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) =>
-                _EmployeeBalanceCard(employee: provider.employees[index]),
+            itemBuilder:
+                (context, index) =>
+                    _EmployeeBalanceCard(employee: provider.employees[index]),
           ),
         );
     }
@@ -188,9 +205,10 @@ class _EmployeeBalanceCard extends StatelessWidget {
                       ? employee.fullName[0].toUpperCase()
                       : '?',
                   style: AppStyle.text(
-                      size: 18,
-                      color: AppStyle.accentCyan,
-                      weight: FontWeight.w700),
+                    size: 18,
+                    color: AppStyle.accentCyan,
+                    weight: FontWeight.w700,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -198,26 +216,38 @@ class _EmployeeBalanceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(employee.fullName,
-                        style: AppStyle.text(
-                            size: 14, weight: FontWeight.w600)),
+                    Text(
+                      employee.fullName,
+                      style: AppStyle.text(size: 14, weight: FontWeight.w600),
+                    ),
                     const SizedBox(height: 3),
                     Row(
                       children: [
-                        Text(employee.designation,
+                        Flexible(
+                          child: Text(
+                            employee.designation,
+                            overflow: TextOverflow.ellipsis,
                             style: AppStyle.text(
-                                size: 11,
-                                color: AppStyle.accentCyan,
-                                weight: FontWeight.w500)),
-                        Text(' • ${employee.empNo}',
-                            style: AppStyle.text(
-                                size: 11, color: AppStyle.hintColor)),
+                              size: 11,
+                              color: AppStyle.accentCyan,
+                              weight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          ' • ${employee.empNo}',
+                          style: AppStyle.text(
+                            size: 11,
+                            color: AppStyle.hintColor,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 2),
-                    Text(employee.branchName,
-                        style: AppStyle.text(
-                            size: 11, color: AppStyle.hintColor)),
+                    Text(
+                      employee.branchName,
+                      style: AppStyle.text(size: 11, color: AppStyle.hintColor),
+                    ),
                   ],
                 ),
               ),
@@ -225,23 +255,33 @@ class _EmployeeBalanceCard extends StatelessWidget {
               // Total remaining badge
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 6),
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF22C55E).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: const Color(0xFF22C55E).withOpacity(0.3)),
+                    color: const Color(0xFF22C55E).withOpacity(0.3),
+                  ),
                 ),
                 child: Column(
                   children: [
-                    Text(employee.totalRemaining.toStringAsFixed(0),
-                        style: AppStyle.text(
-                            size: 15,
-                            color: const Color(0xFF22C55E),
-                            weight: FontWeight.w700)),
-                    Text('left',
-                        style: AppStyle.text(
-                            size: 9, color: const Color(0xFF22C55E))),
+                    Text(
+                      employee.totalRemaining.toStringAsFixed(0),
+                      style: AppStyle.text(
+                        size: 15,
+                        color: const Color(0xFF22C55E),
+                        weight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      'left',
+                      style: AppStyle.text(
+                        size: 9,
+                        color: const Color(0xFF22C55E),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -297,28 +337,36 @@ class _LeaveTypeRow extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 2),
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: _color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(balance.leaveTypeCode,
-                      style: AppStyle.text(
-                          size: 10,
-                          color: _color,
-                          weight: FontWeight.w700)),
+                  child: Text(
+                    balance.leaveTypeCode,
+                    style: AppStyle.text(
+                      size: 10,
+                      color: _color,
+                      weight: FontWeight.w700,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 8),
-                Text(balance.leaveTypeName,
-                    style: AppStyle.text(size: 12, weight: FontWeight.w500)),
+                Text(
+                  balance.leaveTypeName,
+                  style: AppStyle.text(size: 12, weight: FontWeight.w500),
+                ),
               ],
             ),
             Text(
               '${balance.remainingBalance.toStringAsFixed(0)} / ${balance.totalAllocated.toStringAsFixed(0)}',
               style: AppStyle.text(
-                  size: 12,
-                  color: AppStyle.hintColor,
-                  weight: FontWeight.w600),
+                size: 12,
+                color: AppStyle.hintColor,
+                weight: FontWeight.w600,
+              ),
             ),
           ],
         ),

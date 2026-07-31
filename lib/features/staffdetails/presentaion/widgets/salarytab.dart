@@ -4,6 +4,7 @@ import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart'
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/salarymeritcard.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/widgets/salaryrow.dart';
 import 'package:offixoadmin/core/utils/pdf_service.dart';
+import 'package:offixoadmin/core/services/notification_service.dart';
 
 class SalaryTab extends StatelessWidget {
   final Payslip? payslip;
@@ -253,8 +254,11 @@ class SalaryTab extends StatelessWidget {
                   );
                   if (context.mounted) {
                     if (path != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Payslip saved to $path', style: const TextStyle(fontSize: 12))),
+                      NotificationService().showDownloadNotification(
+                        1,
+                        'Download Complete',
+                        'Payslip downloaded successfully.',
+                        path,
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(

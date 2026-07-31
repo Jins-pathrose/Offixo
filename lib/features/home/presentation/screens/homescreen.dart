@@ -4,11 +4,7 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/screens/addnewstaffscreen.dart';
 import 'package:offixoadmin/features/branch/presentation/screens/branchscreen.dart';
 import 'package:offixoadmin/features/checkincheckouts/presentation/screens/checkincheckoutscreen.dart';
-import 'package:offixoadmin/features/home/data/quickactionmodel.dart';
-import 'package:flutter/material.dart';
-import 'package:offixoadmin/core/appstyle/appstyle.dart';
-import 'package:offixoadmin/features/addnewstaff/presentation/screens/addnewstaffscreen.dart';
-import 'package:offixoadmin/features/checkincheckouts/presentation/screens/checkincheckoutscreen.dart';
+import 'package:offixoadmin/features/staffdetails/presentaion/screens/staffdetailscreen.dart';
 import 'package:offixoadmin/features/home/data/quickactionmodel.dart';
 import 'package:offixoadmin/features/home/data/statcardmodel.dart';
 import 'package:offixoadmin/features/home/presentation/provider/homeprovider.dart';
@@ -238,7 +234,19 @@ class _LiveStatusList extends StatelessWidget {
                   .map(
                     (member) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
-                      child: _LiveStatusCard(member: member),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => StaffDetailsScreen(
+                                staffId: member.memberId,
+                              ),
+                            ),
+                          );
+                        },
+                        child: _LiveStatusCard(member: member),
+                      ),
                     ),
                   )
                   .toList(),
