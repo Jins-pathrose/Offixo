@@ -23,6 +23,7 @@ class MaintainerProfileProvider extends ChangeNotifier {
   Future<void> fetchProfile() async {
     state = ProfileLoadState.loading;
     error = null;
+    profile = null;
     notifyListeners();
     try {
       final token = await _storageService.getAccessToken();

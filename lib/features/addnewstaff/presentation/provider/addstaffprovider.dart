@@ -9,7 +9,6 @@ import 'package:offixoadmin/features/staffdetails/data/models/staffdetailsrespon
 import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart';
 import 'package:offixoadmin/features/addnewstaff/domain/dorpdownmodel.dart';
 import 'package:offixoadmin/features/addnewstaff/domain/addstaffmodel.dart';
-import 'package:offixoadmin/features/addnewstaff/presentation/screens/addsalaryscreen.dart';
 
 // ─────────────────────────────────────────────
 // ENUM
@@ -80,17 +79,23 @@ class AddStaffProvider extends ChangeNotifier {
     bloodGroup = staff.bloodGroup;
     gender = staff.gender;
     if (staff.dateOfBirth.isNotEmpty) {
-      try { dateOfBirth = DateTime.parse(staff.dateOfBirth); } catch (_) {}
+      try {
+        dateOfBirth = DateTime.parse(staff.dateOfBirth);
+      } catch (_) {}
     }
     presentAddress = staff.presentAddress;
-    
+
     if (staff.startDate.isNotEmpty) {
-      try { dateOfJoining = DateTime.parse(staff.startDate); } catch (_) {}
+      try {
+        dateOfJoining = DateTime.parse(staff.startDate);
+      } catch (_) {}
     }
-    
+
     department = staff.departmentId == 0 ? '' : staff.departmentId.toString();
-    designation = staff.designationId == 0 ? '' : staff.designationId.toString();
-    workingShift = staff.currentShiftId == 0 ? '' : staff.currentShiftId.toString();
+    designation =
+        staff.designationId == 0 ? '' : staff.designationId.toString();
+    workingShift =
+        staff.currentShiftId == 0 ? '' : staff.currentShiftId.toString();
     memberType = staff.memberType;
   }
 
@@ -116,17 +121,23 @@ class AddStaffProvider extends ChangeNotifier {
 
         if (isEditMode) {
           if (branch.isEmpty && staffToEdit!.branch != null) {
-             final b = choices.branches.where((e) => e.name == staffToEdit!.branch).firstOrNull;
-             if (b != null) branch = b.id;
+            final b =
+                choices.branches
+                    .where((e) => e.name == staffToEdit!.branch)
+                    .firstOrNull;
+            if (b != null) branch = b.id;
           }
-          
+
           if (staffToEdit!.currentShiftName.isNotEmpty) {
-             // Fallback to name matching if currentShiftId was 0 or mismatch
-             final shiftExists = choices.shifts.any((e) => e.id == workingShift);
-             if (!shiftExists) {
-               final s = choices.shifts.where((e) => e.name == staffToEdit!.currentShiftName).firstOrNull;
-               if (s != null) workingShift = s.id;
-             }
+            // Fallback to name matching if currentShiftId was 0 or mismatch
+            final shiftExists = choices.shifts.any((e) => e.id == workingShift);
+            if (!shiftExists) {
+              final s =
+                  choices.shifts
+                      .where((e) => e.name == staffToEdit!.currentShiftName)
+                      .firstOrNull;
+              if (s != null) workingShift = s.id;
+            }
           }
         }
       } else {
@@ -220,7 +231,12 @@ class AddStaffProvider extends ChangeNotifier {
     if (source == null) return;
 
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: source, imageQuality: 80);
+    final picked = await picker.pickImage(
+      source: source,
+      imageQuality: 80,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
 
     if (picked == null) return;
 
@@ -321,12 +337,19 @@ class AddStaffProvider extends ChangeNotifier {
 
     if (bloodGroup.trim().isEmpty) errors['bloodGroup'] = 'Required';
     if (gender.trim().isEmpty) errors['gender'] = 'Required';
-    
+
     if (dateOfBirth == null) {
       errors['dateOfBirth'] = 'Required';
     } else {
       final now = DateTime.now();
-      final age = now.year - dateOfBirth!.year - ((now.month > dateOfBirth!.month || (now.month == dateOfBirth!.month && now.day >= dateOfBirth!.day)) ? 0 : 1);
+      final age =
+          now.year -
+          dateOfBirth!.year -
+          ((now.month > dateOfBirth!.month ||
+                  (now.month == dateOfBirth!.month &&
+                      now.day >= dateOfBirth!.day))
+              ? 0
+              : 1);
       if (age < 18) {
         errors['dateOfBirth'] = 'Must be at least 18 years old';
       }
@@ -339,7 +362,7 @@ class AddStaffProvider extends ChangeNotifier {
     if (designation.trim().isEmpty) errors['designation'] = 'Required';
     if (memberType.trim().isEmpty) errors['memberType'] = 'Required';
     if (workingShift.trim().isEmpty) errors['workingShift'] = 'Required';
-    
+
     if (!isEditMode) {
       if (frontImage == null) errors['frontImage'] = 'Required';
       if (rightImage == null) errors['rightImage'] = 'Required';
@@ -355,8 +378,8 @@ class AddStaffProvider extends ChangeNotifier {
   // ─────────────────────────────────────────
   Future<void> submit(BuildContext context) async {
     if (!_validate()) {
-      if (errors.containsKey('frontImage') || 
-          errors.containsKey('rightImage') || 
+      if (errors.containsKey('frontImage') ||
+          errors.containsKey('rightImage') ||
           errors.containsKey('leftImage')) {
         _showSnack(context, 'Please upload all 3 face images', isError: true);
       }
@@ -374,9 +397,10 @@ class AddStaffProvider extends ChangeNotifier {
         return;
       }
 
-      final url = isEditMode
-          ? '${dotenv.env['BASE_URL']}/api/member/update/${staffToEdit!.id}/'
-          : _baseUrl;
+      final url =
+          isEditMode
+              ? '${dotenv.env['BASE_URL']}/api/member/update/${staffToEdit!.id}/'
+              : _baseUrl;
       final method = isEditMode ? 'PATCH' : 'POST';
       final request = http.MultipartRequest(method, Uri.parse(url));
 
@@ -454,7 +478,9 @@ class AddStaffProvider extends ChangeNotifier {
         if (member == null) {
           _showSnack(
             context,
-            isEditMode ? 'Staff updated but member id missing' : 'Staff created but member id missing',
+            isEditMode
+                ? 'Staff updated but member id missing'
+                : 'Staff created but member id missing',
             isError: true,
           );
           return;
@@ -463,7 +489,9 @@ class AddStaffProvider extends ChangeNotifier {
         if (context.mounted) {
           _showSnack(
             context,
-            isEditMode ? 'Staff updated successfully' : 'Staff created successfully',
+            isEditMode
+                ? 'Staff updated successfully'
+                : 'Staff created successfully',
             isError: false,
           );
           Navigator.pop(context, true);

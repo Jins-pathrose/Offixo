@@ -54,7 +54,7 @@ class LeaveTab extends StatelessWidget {
               const SizedBox(height: 16),
  
               Row(
-                children: ['Date', 'Type', 'Status', 'Details']
+                children: ['Date', 'Type', 'Status']
                     .map((h) => Expanded(
                           child: Text(h,
                               style: AppStyle.text(

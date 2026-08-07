@@ -37,18 +37,17 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => AddStaffProvider()),
         ChangeNotifierProvider(create: (_) => StaffProvider()),
         ChangeNotifierProvider(create: (_) => AddStaffProvider()),
-        ChangeNotifierProvider(create: (_) => BranchProvider(),),
-        ChangeNotifierProvider(create: (_)=> CreateBranchProvider()),
-        ChangeNotifierProvider(create: (_)=> HomeProvider()),
-        ChangeNotifierProvider(create: (_)=> MaintainerProfileProvider()),
-        ChangeNotifierProvider(create: (_)=> LeaveTypeProvider()),
-        ChangeNotifierProvider(create: (_)=> LeaveRequestProvider()),
-        ChangeNotifierProvider(create: (_)=> LeaveSettingsProvider()),
-        ChangeNotifierProvider(create: (_)=> DepartmentProvider()),
-        ChangeNotifierProvider(create: (_)=> AddSalaryProvider()),
-        ChangeNotifierProvider(create: (_)=> AttendanceProvider()),
-        ChangeNotifierProvider(create: (_)=> ShiftProvider()),
-        
+        ChangeNotifierProvider(create: (_) => BranchProvider()),
+        ChangeNotifierProvider(create: (_) => CreateBranchProvider()),
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => MaintainerProfileProvider()),
+        ChangeNotifierProvider(create: (_) => LeaveTypeProvider()),
+        ChangeNotifierProvider(create: (_) => LeaveRequestProvider()),
+        ChangeNotifierProvider(create: (_) => LeaveSettingsProvider()),
+        ChangeNotifierProvider(create: (_) => DepartmentProvider()),
+        ChangeNotifierProvider(create: (_) => AddSalaryProvider()),
+        ChangeNotifierProvider(create: (_) => AttendanceProvider()),
+        ChangeNotifierProvider(create: (_) => ShiftProvider()),
       ],
       child: const MyApp(),
     ),
@@ -91,7 +90,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
-      debugShowCheckedModeBanner: false, 
+      debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
       builder: (context, child) {
         return Scaffold(
@@ -110,9 +109,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     return Positioned.fill(
                       child: Container(
                         color: Colors.black54,
-                        child: Center(
+                        child: const Center(
                           child: UpdateDialog(
-                            isImmediate: UpdateService.defaultStrategy == UpdateStrategy.immediate,
+                            isImmediate:
+                                UpdateService.defaultStrategy ==
+                                UpdateStrategy.immediate,
                           ),
                         ),
                       ),

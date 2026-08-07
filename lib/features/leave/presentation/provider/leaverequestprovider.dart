@@ -157,11 +157,19 @@ class LeaveRequestProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _showSnack(
-          context,
-          'Failed: ${jsonDecode(res.body)['detail'] ?? res.statusCode}',
-          isError: true,
-        );
+        String errorMessage = res.statusCode.toString();
+        try {
+          final errorBody = jsonDecode(res.body);
+          if (errorBody is Map<String, dynamic>) {
+            errorMessage =
+                errorBody['error'] ??
+                errorBody['detail'] ??
+                errorBody['message'] ??
+                res.statusCode.toString();
+          }
+        } catch (_) {}
+
+        _showSnack(context, 'Failed: $errorMessage', isError: true);
         return false;
       }
     } catch (e) {

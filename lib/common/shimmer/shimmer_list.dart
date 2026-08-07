@@ -38,14 +38,17 @@ class ShimmerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: Column(
-        children: List.generate(
-          itemCount,
-          (index) => Padding(
-            padding: EdgeInsets.only(bottom: index == itemCount - 1 ? 0 : 16.0),
-            child: const ShimmerListItem(),
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Padding(
+        padding: padding,
+        child: Column(
+          children: List.generate(
+            itemCount,
+            (index) => Padding(
+              padding: EdgeInsets.only(bottom: index == itemCount - 1 ? 0 : 16.0),
+              child: const ShimmerListItem(),
+            ),
           ),
         ),
       ),

@@ -191,10 +191,21 @@ class _StaffScreenBodyState extends State<_StaffScreenBody> {
 
       case StaffLoadState.loaded:
         if (provider.staffs.isEmpty) {
-          return Center(
-            child: Text(
-              'No staff found',
-              style: AppStyle.text(color: Colors.grey),
+          return RefreshIndicator(
+            onRefresh: () => provider.loadStaffs(isRefresh: true),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Text(
+                      'No staff found',
+                      style: AppStyle.text(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }

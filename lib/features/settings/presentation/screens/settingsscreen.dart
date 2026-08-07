@@ -75,120 +75,129 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppStyle.backgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // A small delay to show the refresh indicator
+            await Future.delayed(const Duration(seconds: 1));
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
 
-              // ── Title ──
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  'Settings',
-                  style: AppStyle.text(size: 22, weight: FontWeight.w700),
-                ),
-              ),
-              const SizedBox(height: 16),
+                  // ── Title ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      'Settings',
+                      style: AppStyle.text(size: 22, weight: FontWeight.w700),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-              // ── Clinic Card ──
-              const ClinicCard(),
-              const SizedBox(height: 16),
+                  // ── Clinic Card ──
+                  const ClinicCard(),
+                  const SizedBox(height: 16),
 
-              // ── Menu Group 1 ──
-              MenuCard(
-                items: [
-                  MenuItem(
-                    icon: Icons.account_tree_outlined,
-                    label: 'Branches',
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const BranchesScreen(),
-                          ),
-                        ),
+                  // ── Menu Group 1 ──
+                  MenuCard(
+                    items: [
+                      MenuItem(
+                        icon: Icons.account_tree_outlined,
+                        label: 'Branches',
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const BranchesScreen(),
+                              ),
+                            ),
+                      ),
+                      MenuItem(
+                        icon: Icons.domain_outlined,
+                        label: 'Departments',
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const DepartmentsScreen(),
+                              ),
+                            ),
+                      ),
+                      MenuItem(
+                        icon: Icons.badge_outlined,
+                        label: 'Designations',
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const DesignationsScreen(),
+                              ),
+                            ),
+                      ),
+                      MenuItem(
+                        icon: Icons.work_outline_rounded,
+                        label: 'Leave Types',
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LeaveTypeScreen(),
+                              ),
+                            ),
+                      ),
+                      MenuItem(
+                        icon: Icons.access_time_outlined,
+                        label: 'Shifts',
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ShiftScreen(),
+                              ),
+                            ),
+                      ),
+                      MenuItem(
+                        icon: Icons.monetization_on_outlined,
+                        label: 'Salary',
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SalaryScreen(),
+                              ),
+                            ),
+                        isLast: true,
+                      ),
+                    ],
                   ),
-                  MenuItem(
-                    icon: Icons.domain_outlined,
-                    label: 'Departments',
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const DepartmentsScreen(),
-                          ),
-                        ),
-                  ),
-                  MenuItem(
-                    icon: Icons.badge_outlined,
-                    label: 'Designations',
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const DesignationsScreen(),
-                          ),
-                        ),
-                  ),
-                  MenuItem(
-                    icon: Icons.work_outline_rounded,
-                    label: 'Leave Types',
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LeaveTypeScreen(),
-                          ),
-                        ),
-                  ),
-                  MenuItem(
-                    icon: Icons.access_time_outlined,
-                    label: 'Shifts',
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ShiftScreen(),
-                          ),
-                        ),
-                  ),
-                  MenuItem(
-                    icon: Icons.monetization_on_outlined,
-                    label: 'Salary',
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SalaryScreen(),
-                          ),
-                        ),
-                    isLast: true,
+                  const SizedBox(height: 16),
+                  // ── Menu Group 2 ──
+                  MenuCard(
+                    items: [
+                      MenuItem(
+                        icon: Icons.logout_rounded,
+                        label: 'Logout',
+                        onTap: () => _showLogoutConfirmation(context),
+                      ),
+                      // MenuItem(
+                      //   icon: Icons.delete_outline_rounded,
+                      //   label: 'Delete User Profile',
+                      //   labelColor: const Color(0xFFE53935),
+                      //   iconColor: const Color(0xFFE53935),
+                      //   onTap: () => _showComingSoon(context),
+                      //   isLast: true,
+                      //   showChevron: false,
+                      // ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              // ── Menu Group 2 ──
-              MenuCard(
-                items: [
-                  MenuItem(
-                    icon: Icons.logout_rounded,
-                    label: 'Logout',
-                    onTap: () => _showLogoutConfirmation(context),
-                  ),
-                  MenuItem(
-                    icon: Icons.delete_outline_rounded,
-                    label: 'Delete User Profile',
-                    labelColor: const Color(0xFFE53935),
-                    iconColor: const Color(0xFFE53935),
-                    onTap: () => _showComingSoon(context),
-                    isLast: true,
-                    showChevron: false,
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),

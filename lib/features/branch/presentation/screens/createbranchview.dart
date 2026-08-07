@@ -113,7 +113,9 @@ class _CreateBranchViewState extends State<CreateBranchView> {
 
               // ── Punch-in Radius ──
               const FieldLabel(
-                  label: 'Punch-in Radius (Meters)', isRequired: true),
+                label: 'Punch-in Radius (Meters)',
+                isRequired: true,
+              ),
               const SizedBox(height: 6),
               AppTextField(
                 controller: _radiusCtrl,

@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/branch/presentation/provider/createbranchprovider.dart';
 import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
+
 class OfficeLocationScreen extends StatefulWidget {
   const OfficeLocationScreen({super.key});
 
@@ -17,7 +18,7 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _mapController;
 
-  LatLng _currentCenter = const LatLng(10.8505, 76.2711); // Kerala default
+  LatLng _currentCenter = const LatLng(10.7765, 76.6543); // Kerala default
   String _currentAddress = '';
   bool _isLoadingAddress = false;
   bool _isLoadingLocation = false;
@@ -27,7 +28,6 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
   }
 
   @override
@@ -40,23 +40,56 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
 
   // ── Get device current location ──
   Future<void> _getCurrentLocation() async {
+    if (!mounted) return;
     setState(() => _isLoadingLocation = true);
+
     try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please enable Location Services')),
+          );
+        }
+        return;
+      }
+
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return;
+        }
       }
       if (permission == LocationPermission.deniedForever) return;
 
-      final pos = await Geolocator.getCurrentPosition(
+      // Quick win: Last known position
+      Position? pos = await Geolocator.getLastKnownPosition();
+      if (pos != null && mounted) {
+        _moveToLocation(LatLng(pos.latitude, pos.longitude));
+      }
+
+      // Fetch actual current position with timeout
+      pos = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
       );
-      final latLng = LatLng(pos.latitude, pos.longitude);
-      _moveToLocation(latLng);
+
+      if (mounted) {
+        final latLng = LatLng(pos.latitude, pos.longitude);
+        _moveToLocation(latLng);
+      }
     } catch (e) {
       debugPrint('Location error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to fetch accurate location')),
+        );
+      }
     } finally {
-      setState(() => _isLoadingLocation = false);
+      if (mounted) {
+        setState(() => _isLoadingLocation = false);
+      }
     }
   }
 
@@ -67,9 +100,7 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
       _isLoadingAddress = true;
     });
 
-    _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(latLng, 16),
-    );
+    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(latLng, 16));
 
     await _reverseGeocode(latLng);
   }
@@ -83,17 +114,16 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
       );
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
-        final parts = [
-          p.street,
-          p.subLocality,
-          p.locality,
-          p.administrativeArea,
-        ].where((s) => s != null && s.isNotEmpty).toList();
+        final parts =
+            [
+              p.street,
+              p.subLocality,
+              p.locality,
+              p.administrativeArea,
+            ].where((s) => s != null && s.isNotEmpty).toList();
         setState(() {
           _currentAddress = parts.join(', ');
-          _searchController.text = parts
-              .where((s) => s != p.street)
-              .join(', ');
+          _searchController.text = parts.where((s) => s != p.street).join(', ');
         });
       }
     } catch (e) {
@@ -166,7 +196,10 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
                           target: _currentCenter,
                           zoom: 15,
                         ),
-                        onMapCreated: (c) => _mapController = c,
+                        onMapCreated: (c) {
+                          _mapController = c;
+                          _getCurrentLocation();
+                        },
                         onCameraMove: _onCameraMove,
                         onCameraIdle: _onCameraIdle,
                         myLocationEnabled: true,
@@ -187,8 +220,11 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
                                 color: Color(0xFFFF7043),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.location_on,
-                                  color: Colors.white, size: 20),
+                              child: const Icon(
+                                Icons.location_on,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                             Container(
                               width: 2,
@@ -218,20 +254,24 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
                                 ),
                               ],
                             ),
-                            child: _isLoadingLocation
-                                ? const Padding(
-                                    padding: EdgeInsets.all(10),
-                                    child: SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: AppStyle.accentCyan,
+                            child:
+                                _isLoadingLocation
+                                    ? const Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: AppStyle.accentCyan,
+                                        ),
                                       ),
+                                    )
+                                    : const Icon(
+                                      Icons.navigation_rounded,
+                                      color: AppStyle.accentCyan,
+                                      size: 20,
                                     ),
-                                  )
-                                : const Icon(Icons.navigation_rounded,
-                                    color: AppStyle.accentCyan, size: 20),
                           ),
                         ),
                       ),
@@ -263,8 +303,10 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text('Office Location',
-                style: AppStyle.text(size: 18, weight: FontWeight.w700)),
+            child: Text(
+              'Office Location',
+              style: AppStyle.text(size: 18, weight: FontWeight.w700),
+            ),
           ),
           GestureDetector(
             onTap: () => Navigator.maybePop(context),
@@ -275,11 +317,14 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: const Color(0xFFFFCDD2)),
               ),
-              child: Text('Skip',
-                  style: AppStyle.text(
-                      size: 13,
-                      color: const Color(0xFFE53935),
-                      weight: FontWeight.w500)),
+              child: Text(
+                'Skip',
+                style: AppStyle.text(
+                  size: 13,
+                  color: const Color(0xFFE53935),
+                  weight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
         ],
@@ -295,10 +340,7 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10),
           ],
         ),
         child: TextField(
@@ -309,21 +351,28 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
           decoration: InputDecoration(
             hintText: 'Search location...',
             hintStyle: AppStyle.text(size: 14, color: AppStyle.hintColor),
-            prefixIcon:
-                const Icon(Icons.search_rounded, color: AppStyle.hintColor),
-            suffixIcon: _searchController.text.isNotEmpty
-                ? GestureDetector(
-                    onTap: () {
-                      _searchController.clear();
-                      setState(() {});
-                    },
-                    child: const Icon(Icons.close_rounded,
-                        color: AppStyle.hintColor),
-                  )
-                : null,
+            prefixIcon: const Icon(
+              Icons.search_rounded,
+              color: AppStyle.hintColor,
+            ),
+            suffixIcon:
+                _searchController.text.isNotEmpty
+                    ? GestureDetector(
+                      onTap: () {
+                        _searchController.clear();
+                        setState(() {});
+                      },
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: AppStyle.hintColor,
+                      ),
+                    )
+                    : null,
             border: InputBorder.none,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
           onChanged: (v) {
             setState(() {});
@@ -369,8 +418,10 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
             ),
           ),
 
-          Text('Choose Location',
-              style: AppStyle.text(size: 16, weight: FontWeight.w700)),
+          Text(
+            'Choose Location',
+            style: AppStyle.text(size: 16, weight: FontWeight.w700),
+          ),
           const SizedBox(height: 14),
 
           // Current location row
@@ -383,29 +434,42 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
                   color: const Color(0xFFE0F7FA),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.location_on_outlined,
-                    color: AppStyle.accentCyan, size: 20),
+                child: const Icon(
+                  Icons.location_on_outlined,
+                  color: AppStyle.accentCyan,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Current Location',
-                        style: AppStyle.text(
-                            size: 12, color: AppStyle.accentCyan)),
+                    Text(
+                      'Current Location',
+                      style: AppStyle.text(
+                        size: 12,
+                        color: AppStyle.accentCyan,
+                      ),
+                    ),
                     const SizedBox(height: 2),
                     _isLoadingAddress
-                        ? const ShimmerContainer(width: 100, height: 14, borderRadius: 4)
+                        ? const ShimmerContainer(
+                          width: 100,
+                          height: 14,
+                          borderRadius: 4,
+                        )
                         : Text(
-                            _currentAddress.isNotEmpty
-                                ? _currentAddress
-                                : 'Move map to select location',
-                            style:
-                                AppStyle.text(size: 14, weight: FontWeight.w600),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          _currentAddress.isNotEmpty
+                              ? _currentAddress
+                              : 'Move map to select location',
+                          style: AppStyle.text(
+                            size: 14,
+                            weight: FontWeight.w600,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                   ],
                 ),
               ),
@@ -423,9 +487,14 @@ class _OfficeLocationScreenState extends State<OfficeLocationScreen> {
                 borderRadius: BorderRadius.circular(30),
               ),
               alignment: Alignment.center,
-              child: Text('Continue',
-                  style: AppStyle.text(
-                      size: 16, color: Colors.white, weight: FontWeight.w600)),
+              child: Text(
+                'Continue',
+                style: AppStyle.text(
+                  size: 16,
+                  color: Colors.white,
+                  weight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],

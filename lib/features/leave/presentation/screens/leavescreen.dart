@@ -155,10 +155,22 @@ class _LeaveRequestView extends StatelessWidget {
       case LeaveLoadState.loaded:
         final list = provider.filtered;
         if (list.isEmpty) {
-          return Center(
-            child: Text(
-                'No ${_filterLabel(provider.activeFilter)} requests',
-                style: AppStyle.text(color: Colors.grey)),
+          return RefreshIndicator(
+            onRefresh: provider.loadRequests,
+            color: AppStyle.accentCyan,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Text(
+                        'No ${_filterLabel(provider.activeFilter)} requests',
+                        style: AppStyle.text(color: Colors.grey)),
+                  ),
+                ),
+              ],
+            ),
           );
         }
         return RefreshIndicator(

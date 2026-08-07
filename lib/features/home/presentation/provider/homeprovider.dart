@@ -104,6 +104,11 @@ class HomeProvider extends ChangeNotifier {
   Future<void> loadAll() async {
     state = HomeLoadState.loading;
     error = null;
+    organizationName = '';
+    liveStatus = [];
+    totalCheckedIn = 0;
+    totalCheckedOut = 0;
+    totalMembers = 0;
     notifyListeners();
     try {
       await Future.wait([_fetchProfile(), _fetchLiveStatus()]);

@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/bottomnavigation/presentaion/screens/bottomnavigation.dart';
 import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
+import 'package:offixoadmin/features/settings/presentation/provider/maintainerprofileprovider.dart';
+import 'package:offixoadmin/features/home/presentation/provider/homeprovider.dart';
 
 class ContinueButton extends StatelessWidget {
   const ContinueButton();
@@ -20,6 +22,10 @@ class ContinueButton extends StatelessWidget {
               : () async {
                 final success = await loginProvider.login(context);
                 if (success && context.mounted) {
+                  // Fetch the profile for the new user before navigating
+                  context.read<MaintainerProfileProvider>().fetchProfile();
+                  context.read<HomeProvider>().loadAll();
+                  
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(

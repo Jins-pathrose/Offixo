@@ -12,13 +12,14 @@ class ClinicCard extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.85,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (_, scrollController) => const MaintainerProfileSheet(),
-      ),
+      builder:
+          (_) => DraggableScrollableSheet(
+            initialChildSize: 0.85,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (_, scrollController) => const MaintainerProfileSheet(),
+          ),
     );
   }
 
@@ -51,8 +52,11 @@ class ClinicCard extends StatelessWidget {
                 color: Colors.white.withOpacity(0.2),
               ),
               clipBehavior: Clip.antiAlias,
-              child: const Icon(Icons.business_outlined,
-                  color: Colors.white, size: 32),
+              child: const Icon(
+                Icons.business_outlined,
+                color: Colors.white,
+                size: 32,
+              ),
             ),
             const SizedBox(width: 14),
 
@@ -62,16 +66,21 @@ class ClinicCard extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 3),
+                      horizontal: 10,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text('Premium Plan',
-                        style: AppStyle.text(
-                            size: 11,
-                            color: Colors.white,
-                            weight: FontWeight.w500)),
+                    child: Text(
+                      'Premium Plan',
+                      style: AppStyle.text(
+                        size: 11,
+                        color: Colors.white,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 6),
 
@@ -79,21 +88,28 @@ class ClinicCard extends StatelessWidget {
                   Text(
                     orgName.isNotEmpty ? orgName : '...',
                     style: AppStyle.text(
-                        size: 18,
-                        color: Colors.white,
-                        weight: FontWeight.w700),
+                      size: 18,
+                      color: Colors.white,
+                      weight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 2),
-                  Text('Plan Expire on 15.02.2030',
-                      style: AppStyle.text(
-                          size: 12,
-                          color: Colors.white.withOpacity(0.85))),
+                  Text(
+                    'Plan Expire on 15.02.2030',
+                    style: AppStyle.text(
+                      size: 12,
+                      color: Colors.white.withOpacity(0.85),
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            Icon(Icons.chevron_right_rounded,
-                color: Colors.white.withOpacity(0.8), size: 20),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.white.withOpacity(0.8),
+              size: 20,
+            ),
           ],
         ),
       ),

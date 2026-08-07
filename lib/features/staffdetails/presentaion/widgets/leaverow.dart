@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
-import 'package:offixoadmin/features/leave/presentation/screens/leavescreen.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/leaverecordmodel.dart';
 
 class LeaveRow extends StatelessWidget {
@@ -26,23 +25,6 @@ class LeaveRow extends StatelessWidget {
                         ? const Color(0xFF22C55E)
                         : const Color(0xFFE53935),
                 weight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LeaveRequestScreen(),
-                  ),
-                );
-              },
-              child: Icon(
-                Icons.remove_red_eye_outlined,
-                size: 18,
-                color: AppStyle.accentCyan,
               ),
             ),
           ),
