@@ -6,6 +6,7 @@ import 'package:offixoadmin/features/designation/presentation/screens/designatio
 import 'package:offixoadmin/features/leavetype/presentation/screens/leavetypescreen.dart';
 import 'package:offixoadmin/features/login/presentation/screen/loginscreen.dart';
 import 'package:offixoadmin/features/settings/data/authservice.dart';
+import 'package:offixoadmin/features/settings/presentation/screens/resigned_members_screen.dart';
 import 'package:offixoadmin/features/settings/presentation/screens/salaryscreen.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/cliniccard.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/menucard.dart';
@@ -180,19 +181,22 @@ class SettingsScreen extends StatelessWidget {
                   MenuCard(
                     items: [
                       MenuItem(
+                        icon: Icons.person_off_outlined,
+                        label: 'Resigned Employees',
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ResignedMembersScreen(),
+                              ),
+                            ),
+                      ),
+                      MenuItem(
                         icon: Icons.logout_rounded,
                         label: 'Logout',
                         onTap: () => _showLogoutConfirmation(context),
+                        isLast: true,
                       ),
-                      // MenuItem(
-                      //   icon: Icons.delete_outline_rounded,
-                      //   label: 'Delete User Profile',
-                      //   labelColor: const Color(0xFFE53935),
-                      //   iconColor: const Color(0xFFE53935),
-                      //   onTap: () => _showComingSoon(context),
-                      //   isLast: true,
-                      //   showChevron: false,
-                      // ),
                     ],
                   ),
                 ],

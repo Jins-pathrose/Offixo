@@ -486,13 +486,13 @@ Future<void> _loadPayslipPreview(int month, int year) async {
     }
   }
 
-  Future<void> deleteStaff() async {
+  Future<void> markAsResigned() async {
     if (_isDisposed) return;
     _isLoading = true;
     notifyListeners();
     
     try {
-      await _repository.deleteStaffMember(staffId);
+      await _repository.markMemberAsResigned(staffId);
       if (!_isDisposed) {
         _isLoading = false;
         notifyListeners();

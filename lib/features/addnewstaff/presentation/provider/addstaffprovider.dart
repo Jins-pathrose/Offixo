@@ -24,6 +24,8 @@ class AddStaffProvider extends ChangeNotifier {
   static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/member/create/';
   static String _dropdownUrl =
       '${dotenv.env['BASE_URL']}/api/member/dropdown-choices/';
+  static String get _registrationLinkUrl =>
+      '${dotenv.env['BASE_URL']}/api/maintainer/get-registration-link/';
 
   // ── Basic Details ──
   String firstName = '';
@@ -37,7 +39,7 @@ class AddStaffProvider extends ChangeNotifier {
 
   // ── Work Details ──
   DateTime? dateOfJoining;
-  String branch = ''; // stores branch ID
+  List<String> branchIds = []; // stores branch IDs
   String department = ''; // stores department ID
   String designation = ''; // stores designation ID
   String memberType = ''; // stores member_type code (FULL_TIME, etc.)
@@ -57,6 +59,12 @@ class AddStaffProvider extends ChangeNotifier {
   DropdownLoadState dropdownState = DropdownLoadState.idle;
   DropdownChoices choices = DropdownChoices.empty();
 
+  // ── Registration Link ──
+  bool isLinkLoading = false;
+  String registrationLink = '';
+  String orgName = '';
+  String linkErrorMsg = '';
+
   final StorageService _storageService = StorageService();
 
   final StaffDetailsResponse? staffToEdit;
@@ -68,6 +76,9 @@ class AddStaffProvider extends ChangeNotifier {
       _initEditMode();
     }
     fetchDropdownChoices();
+    if (!isEditMode) {
+      fetchRegistrationLink();
+    }
   }
 
   void _initEditMode() {
@@ -120,12 +131,26 @@ class AddStaffProvider extends ChangeNotifier {
         dropdownState = DropdownLoadState.loaded;
 
         if (isEditMode) {
-          if (branch.isEmpty && staffToEdit!.branch != null) {
-            final b =
-                choices.branches
-                    .where((e) => e.name == staffToEdit!.branch)
-                    .firstOrNull;
-            if (b != null) branch = b.id;
+          if (branchIds.isEmpty) {
+            if (staffToEdit!.branches != null && staffToEdit!.branches!.isNotEmpty) {
+              final List<String> extractedIds = [];
+              for (var b in staffToEdit!.branches!) {
+                if (b is Map) {
+                  final matched = choices.branches.where((e) => e.id == b['id']?.toString() || e.name == b['name']?.toString()).firstOrNull;
+                  if (matched != null) extractedIds.add(matched.id);
+                } else {
+                  final matched = choices.branches.where((e) => e.id == b.toString() || e.name == b.toString()).firstOrNull;
+                  if (matched != null) extractedIds.add(matched.id);
+                }
+              }
+              branchIds = extractedIds.toSet().toList();
+            } else if (staffToEdit!.branch != null) {
+              final b =
+                  choices.branches
+                      .where((e) => e.name == staffToEdit!.branch)
+                      .firstOrNull;
+              if (b != null) branchIds = [b.id];
+            }
           }
 
           if (staffToEdit!.currentShiftName.isNotEmpty) {
@@ -148,6 +173,42 @@ class AddStaffProvider extends ChangeNotifier {
       dropdownState = DropdownLoadState.error;
     }
     notifyListeners();
+  }
+
+  // ─────────────────────────────────────────
+  // Fetch Registration Link
+  // ─────────────────────────────────────────
+  Future<void> fetchRegistrationLink() async {
+    isLinkLoading = true;
+    linkErrorMsg = '';
+    notifyListeners();
+    try {
+      final token = await _storageService.getAccessToken();
+      final res = await http.get(
+        Uri.parse(_registrationLinkUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+      if (res.statusCode == 200) {
+        final json = jsonDecode(res.body) as Map<String, dynamic>;
+        if (json['success'] == true) {
+          registrationLink = json['registration_link'] ?? '';
+          orgName = json['org_name'] ?? '';
+        } else {
+          linkErrorMsg = 'Failed to load registration link';
+        }
+      } else {
+        linkErrorMsg = 'Failed to load registration link (${res.statusCode})';
+      }
+    } catch (e) {
+      debugPrint('Registration link fetch error: $e');
+      linkErrorMsg = 'Failed to load registration link';
+    } finally {
+      isLinkLoading = false;
+      notifyListeners();
+    }
   }
 
   // ─────────────────────────────────────────
@@ -198,8 +259,8 @@ class AddStaffProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setBranch(String? v) {
-    branch = v ?? '';
+  void setBranches(List<String> v) {
+    branchIds = v;
     notifyListeners();
   }
 
@@ -357,7 +418,7 @@ class AddStaffProvider extends ChangeNotifier {
 
     if (presentAddress.trim().isEmpty) errors['presentAddress'] = 'Required';
     if (dateOfJoining == null) errors['dateOfJoining'] = 'Required';
-    if (branch.trim().isEmpty) errors['branch'] = 'Required';
+    if (branchIds.isEmpty) errors['branch_ids'] = 'Required';
     if (department.trim().isEmpty) errors['department'] = 'Required';
     if (designation.trim().isEmpty) errors['designation'] = 'Required';
     if (memberType.trim().isEmpty) errors['memberType'] = 'Required';
@@ -419,7 +480,7 @@ class AddStaffProvider extends ChangeNotifier {
         'date_of_birth': _formatDate(dateOfBirth!),
         'present_address': presentAddress.trim(),
         'start_date': _formatDate(dateOfJoining!),
-        'branch_id': branch.trim(),
+        'branch_ids': branchIds.join(','),
         'department_id': department.trim(),
         'designation_id': designation.trim(),
         'member_type': memberType.trim(),
@@ -497,17 +558,33 @@ class AddStaffProvider extends ChangeNotifier {
           Navigator.pop(context, true);
         }
       } else {
-        // Try to extract field-level validation errors
-        final fieldErrors = _parseFieldErrors(jsonResponse);
+        String? nonFieldErrorMsg;
+        if (jsonResponse != null &&
+            jsonResponse['non_field_errors'] is List &&
+            (jsonResponse['non_field_errors'] as List).isNotEmpty) {
+          nonFieldErrorMsg =
+              (jsonResponse['non_field_errors'] as List).first.toString();
+        }
 
-        if (fieldErrors.isNotEmpty) {
-          errors.addAll(fieldErrors);
-          final firstMessage =
-              fieldErrors.values.first ?? 'Please try again later';
-          _showSnack(context, firstMessage, isError: true);
-          notifyListeners();
+        if (nonFieldErrorMsg != null) {
+          _showSnack(context, nonFieldErrorMsg, isError: true);
         } else {
-          _showSnack(context, 'Please try again later', isError: true);
+          // Try to extract field-level validation errors
+          final fieldErrors = _parseFieldErrors(jsonResponse);
+
+          if (fieldErrors.isNotEmpty) {
+            errors.addAll(fieldErrors);
+            final firstMessage =
+                fieldErrors.values.first ?? 'Please try again later';
+            _showSnack(context, firstMessage, isError: true);
+            notifyListeners();
+          } else {
+            final fallbackMsg =
+                jsonResponse?['message']?.toString() ??
+                jsonResponse?['detail']?.toString() ??
+                'Please try again later';
+            _showSnack(context, fallbackMsg, isError: true);
+          }
         }
       }
     } on SocketException {
@@ -537,7 +614,7 @@ class AddStaffProvider extends ChangeNotifier {
       'date_of_birth': 'dateOfBirth',
       'present_address': 'presentAddress',
       'start_date': 'dateOfJoining',
-      'branch_id': 'branch',
+      'branch_ids': 'branch_ids',
       'department_id': 'department',
       'designation_id': 'designation',
       'member_type': 'memberType',

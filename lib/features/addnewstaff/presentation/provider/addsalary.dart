@@ -68,7 +68,7 @@ class AddSalaryProvider extends ChangeNotifier {
 
       // For updates, the backend typically expects the primary key of the salary record
       final idForUrl = salaryId ?? memberId;
-      
+
       final url =
           isEditMode
               ? '${dotenv.env['BASE_URL']}/api/salary/employee-salaries/$idForUrl/update/'

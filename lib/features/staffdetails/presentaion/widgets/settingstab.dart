@@ -31,18 +31,18 @@ class SettingsTab extends StatelessWidget {
       //   onTap: () {},
       // ),
       SettingsItem(
-        icon: Icons.delete_outline_rounded,
+        icon: Icons.person_remove_alt_1_outlined,
         iconColor: const Color(0xFFE53935),
-        label: 'Delete User Profile',
+        label: 'Mark Employee as Resigned',
         isDestructive: true,
         onTap: () async {
           final confirm = await showDialog<bool>(
             context: context,
             builder:
                 (context) => AlertDialog(
-                  title: const Text('Delete User Profile'),
+                  title: const Text('Mark as Resigned'),
                   content: const Text(
-                    'Are you sure you want to delete this user? This action cannot be undone.',
+                    'Are you sure you want to mark this employee as resigned?',
                   ),
                   actions: [
                     TextButton(
@@ -52,7 +52,7 @@ class SettingsTab extends StatelessWidget {
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      child: const Text('Delete'),
+                      child: const Text('Mark as Resigned'),
                     ),
                   ],
                 ),
@@ -63,14 +63,14 @@ class SettingsTab extends StatelessWidget {
             final messenger = ScaffoldMessenger.of(context);
             
             try {
-              await provider.deleteStaff();
+              await provider.markAsResigned();
               messenger.showSnackBar(
-                const SnackBar(content: Text('Staff member deleted successfully.')),
+                const SnackBar(content: Text('Staff member marked as resigned successfully.')),
               );
               navigator.pop(true);
             } catch (e) {
               messenger.showSnackBar(
-                const SnackBar(content: Text('Failed to delete user.')),
+                const SnackBar(content: Text('Failed to mark as resigned.')),
               );
             }
           }

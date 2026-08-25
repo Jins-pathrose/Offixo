@@ -12,7 +12,7 @@ class EmailField extends StatelessWidget {
   Widget build(BuildContext context) {
     final loginProvider = context.read<LoginProvider>();
     return AppTextField(
-      hintText: 'fahadrahman@gmail.com',
+      hintText: 'Enter Your Email',
       keyboardType: TextInputType.emailAddress,
       controller: loginProvider.emailController,
       onChanged: (v) => loginProvider.setEmail(v),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/provider/addstaffprovider.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/appdropdown.dart';
+import 'package:offixoadmin/features/addnewstaff/presentation/widgets/multiselectdropdown.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/apptextfield.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/datepickerfield.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/faceimagepicker.dart';
@@ -9,6 +10,7 @@ import 'package:offixoadmin/features/addnewstaff/presentation/widgets/formfiled.
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/savebutton.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/sectiontitle.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/widgets/staffappbar.dart';
+import 'package:offixoadmin/features/addnewstaff/presentation/widgets/self_registration_link_card.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/staffdetailsresponse.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +23,11 @@ class AddNewStaffScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AddStaffProvider(staffToEdit: staffToEdit, existingPayslip: existingPayslip),
+      create:
+          (_) => AddStaffProvider(
+            staffToEdit: staffToEdit,
+            existingPayslip: existingPayslip,
+          ),
       child: const _AddNewStaffView(),
     );
   }
@@ -56,6 +62,8 @@ class _AddNewStaffView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
+              const SelfRegistrationLinkCard(),
+
               // ════════════════════════════════
               //  SECTION: Basic Details
               // ════════════════════════════════
@@ -70,7 +78,10 @@ class _AddNewStaffView extends StatelessWidget {
                       label: 'First Name',
                       isRequired: true,
                       child: AppTextField(
-                        initialValue: provider.firstName.isNotEmpty ? provider.firstName : null,
+                        initialValue:
+                            provider.firstName.isNotEmpty
+                                ? provider.firstName
+                                : null,
                         hint: 'Eg: Jins',
                         onChanged: provider.setFirstName,
                         errorText: provider.errors['firstName'],
@@ -83,7 +94,10 @@ class _AddNewStaffView extends StatelessWidget {
                       label: 'Last Name',
                       isRequired: true,
                       child: AppTextField(
-                        initialValue: provider.lastName.isNotEmpty ? provider.lastName : null,
+                        initialValue:
+                            provider.lastName.isNotEmpty
+                                ? provider.lastName
+                                : null,
                         hint: 'Eg: Pathrose',
                         onChanged: provider.setLastName,
                         errorText: provider.errors['lastName'],
@@ -99,7 +113,10 @@ class _AddNewStaffView extends StatelessWidget {
                 label: 'Phone Number',
                 isRequired: true,
                 child: AppTextField(
-                  initialValue: provider.phoneNumber.isNotEmpty ? provider.phoneNumber : null,
+                  initialValue:
+                      provider.phoneNumber.isNotEmpty
+                          ? provider.phoneNumber
+                          : null,
                   hint: '+91 9074321123',
                   keyboardType: TextInputType.phone,
                   onChanged: provider.setPhoneNumber,
@@ -113,7 +130,8 @@ class _AddNewStaffView extends StatelessWidget {
                 label: 'Email',
                 isRequired: true,
                 child: AppTextField(
-                  initialValue: provider.email.isNotEmpty ? provider.email : null,
+                  initialValue:
+                      provider.email.isNotEmpty ? provider.email : null,
                   hint: 'charlenereed@gmail.com',
                   keyboardType: TextInputType.emailAddress,
                   onChanged: provider.setEmail,
@@ -132,15 +150,13 @@ class _AddNewStaffView extends StatelessWidget {
                       isRequired: true,
                       child: AppDropdown(
                         hint: 'Select',
-                        value: provider.bloodGroup.isEmpty
-                            ? null
-                            : provider.bloodGroup,
-                        items: choices.bloodGroups
-                            .map((e) => e.id)
-                            .toList(),
+                        value:
+                            provider.bloodGroup.isEmpty
+                                ? null
+                                : provider.bloodGroup,
+                        items: choices.bloodGroups.map((e) => e.id).toList(),
                         itemLabels: {
-                          for (final e in choices.bloodGroups)
-                            e.id: e.name
+                          for (final e in choices.bloodGroups) e.id: e.name,
                         },
                         onChanged: provider.setBloodGroup,
                         errorText: provider.errors['bloodGroup'],
@@ -154,13 +170,10 @@ class _AddNewStaffView extends StatelessWidget {
                       isRequired: true,
                       child: AppDropdown(
                         hint: 'Select',
-                        value: provider.gender.isEmpty
-                            ? null
-                            : provider.gender,
-                        items:
-                            choices.genders.map((e) => e.id).toList(),
+                        value: provider.gender.isEmpty ? null : provider.gender,
+                        items: choices.genders.map((e) => e.id).toList(),
                         itemLabels: {
-                          for (final e in choices.genders) e.id: e.name
+                          for (final e in choices.genders) e.id: e.name,
                         },
                         onChanged: provider.setGender,
                         errorText: provider.errors['gender'],
@@ -189,7 +202,10 @@ class _AddNewStaffView extends StatelessWidget {
                 label: 'Present Address',
                 isRequired: true,
                 child: AppTextField(
-                  initialValue: provider.presentAddress.isNotEmpty ? provider.presentAddress : null,
+                  initialValue:
+                      provider.presentAddress.isNotEmpty
+                          ? provider.presentAddress
+                          : null,
                   hint: 'Enter your address',
                   maxLines: 3,
                   onChanged: provider.setPresentAddress,
@@ -221,15 +237,13 @@ class _AddNewStaffView extends StatelessWidget {
               FormFields(
                 label: 'Branch',
                 isRequired: true,
-                child: AppDropdown(
-                  hint: 'Select Branch',
-                  value: provider.branch.isEmpty ? null : provider.branch,
+                child: MultiSelectDropdown(
+                  hint: 'Select Branches',
+                  selectedValues: provider.branchIds,
                   items: choices.branches.map((e) => e.id).toList(),
-                  itemLabels: {
-                    for (final e in choices.branches) e.id: e.name
-                  },
-                  onChanged: provider.setBranch,
-                  errorText: provider.errors['branch'],
+                  itemLabels: {for (final e in choices.branches) e.id: e.name},
+                  onChanged: provider.setBranches,
+                  errorText: provider.errors['branch_ids'],
                 ),
               ),
               const SizedBox(height: 14),
@@ -244,7 +258,7 @@ class _AddNewStaffView extends StatelessWidget {
                       provider.department.isEmpty ? null : provider.department,
                   items: choices.departments.map((e) => e.id).toList(),
                   itemLabels: {
-                    for (final e in choices.departments) e.id: e.name
+                    for (final e in choices.departments) e.id: e.name,
                   },
                   onChanged: provider.setDepartment,
                   errorText: provider.errors['department'],
@@ -258,12 +272,13 @@ class _AddNewStaffView extends StatelessWidget {
                 isRequired: true,
                 child: AppDropdown(
                   hint: 'Select Designation',
-                  value: provider.designation.isEmpty
-                      ? null
-                      : provider.designation,
+                  value:
+                      provider.designation.isEmpty
+                          ? null
+                          : provider.designation,
                   items: choices.designations.map((e) => e.id).toList(),
                   itemLabels: {
-                    for (final e in choices.designations) e.id: e.name
+                    for (final e in choices.designations) e.id: e.name,
                   },
                   onChanged: provider.setDesignation,
                   errorText: provider.errors['designation'],
@@ -277,12 +292,11 @@ class _AddNewStaffView extends StatelessWidget {
                 isRequired: true,
                 child: AppDropdown(
                   hint: 'Select Member Type',
-                  value: provider.memberType.isEmpty
-                      ? null
-                      : provider.memberType,
+                  value:
+                      provider.memberType.isEmpty ? null : provider.memberType,
                   items: choices.memberTypes.map((e) => e.id).toList(),
                   itemLabels: {
-                    for (final e in choices.memberTypes) e.id: e.name
+                    for (final e in choices.memberTypes) e.id: e.name,
                   },
                   onChanged: provider.setMemberType,
                   errorText: provider.errors['memberType'],
@@ -296,13 +310,12 @@ class _AddNewStaffView extends StatelessWidget {
                 isRequired: true,
                 child: AppDropdown(
                   hint: 'Select Shift',
-                  value: provider.workingShift.isEmpty
-                      ? null
-                      : provider.workingShift,
+                  value:
+                      provider.workingShift.isEmpty
+                          ? null
+                          : provider.workingShift,
                   items: choices.shifts.map((e) => e.id).toList(),
-                  itemLabels: {
-                    for (final e in choices.shifts) e.id: e.name
-                  },
+                  itemLabels: {for (final e in choices.shifts) e.id: e.name},
                   onChanged: provider.setWorkingShift,
                   errorText: provider.errors['workingShift'],
                 ),
@@ -323,10 +336,15 @@ class _AddNewStaffView extends StatelessWidget {
                       isRequired: !provider.isEditMode,
                       scanLabel: 'Scan front side',
                       image: provider.frontImage,
-                      networkImageUrl: provider.isEditMode ? provider.staffToEdit?.faceImage1 : null,
-                      onTap: () => context
-                          .read<AddStaffProvider>()
-                          .pickImage(FaceImageSlot.front, context),
+                      networkImageUrl:
+                          provider.isEditMode
+                              ? provider.staffToEdit?.faceImage1
+                              : null,
+                      onTap:
+                          () => context.read<AddStaffProvider>().pickImage(
+                            FaceImageSlot.front,
+                            context,
+                          ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -336,10 +354,15 @@ class _AddNewStaffView extends StatelessWidget {
                       isRequired: !provider.isEditMode,
                       scanLabel: 'Scan Right side',
                       image: provider.rightImage,
-                      networkImageUrl: provider.isEditMode ? provider.staffToEdit?.faceImage2 : null,
-                      onTap: () => context
-                          .read<AddStaffProvider>()
-                          .pickImage(FaceImageSlot.right, context),
+                      networkImageUrl:
+                          provider.isEditMode
+                              ? provider.staffToEdit?.faceImage2
+                              : null,
+                      onTap:
+                          () => context.read<AddStaffProvider>().pickImage(
+                            FaceImageSlot.right,
+                            context,
+                          ),
                     ),
                   ),
                 ],
@@ -354,10 +377,15 @@ class _AddNewStaffView extends StatelessWidget {
                       isRequired: !provider.isEditMode,
                       scanLabel: 'Scan Left side',
                       image: provider.leftImage,
-                      networkImageUrl: provider.isEditMode ? provider.staffToEdit?.faceImage3 : null,
-                      onTap: () => context
-                          .read<AddStaffProvider>()
-                          .pickImage(FaceImageSlot.left, context),
+                      networkImageUrl:
+                          provider.isEditMode
+                              ? provider.staffToEdit?.faceImage3
+                              : null,
+                      onTap:
+                          () => context.read<AddStaffProvider>().pickImage(
+                            FaceImageSlot.left,
+                            context,
+                          ),
                     ),
                   ),
                   const Expanded(child: SizedBox()),

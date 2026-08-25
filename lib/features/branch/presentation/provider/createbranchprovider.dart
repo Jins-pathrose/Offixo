@@ -155,7 +155,11 @@ class CreateBranchProvider extends ChangeNotifier {
         if (context.mounted) Navigator.maybePop(context);
       } else {
         final json = jsonDecode(res.body);
-        final message = json['message'] ?? json['detail'] ?? 'Failed to ${isEdit ? "update" : "create"} branch';
+        String? errorMessage;
+        if (json['non_field_errors'] != null && json['non_field_errors'] is List && json['non_field_errors'].isNotEmpty) {
+          errorMessage = json['non_field_errors'][0].toString();
+        }
+        final message = errorMessage ?? json['message'] ?? json['detail'] ?? 'Failed to ${isEdit ? "update" : "create"} branch';
         _showSnack(context, message, isError: true);
       }
     } catch (e) {

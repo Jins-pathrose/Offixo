@@ -14,6 +14,8 @@ class LeaveRequestModel {
   final String appliedAt;
   final String? reviewedByName;
   final String? rejectionReason;
+  final String? medicalCertificate;
+  final String? medicalCertificateUrl;
 
   const LeaveRequestModel({
     required this.id,
@@ -31,6 +33,8 @@ class LeaveRequestModel {
     required this.appliedAt,
     this.reviewedByName,
     this.rejectionReason,
+    this.medicalCertificate,
+    this.medicalCertificateUrl,
   });
 
   factory LeaveRequestModel.fromJson(Map<String, dynamic> json) =>
@@ -50,6 +54,8 @@ class LeaveRequestModel {
         appliedAt: json['applied_at'] ?? '',
         reviewedByName: json['reviewed_by_name'],
         rejectionReason: json['rejection_reason'],
+        medicalCertificate: json['medical_certificate'],
+        medicalCertificateUrl: json['medical_certificate_url'],
       );
 
   // "2026-06-15" → "15.06.2026"

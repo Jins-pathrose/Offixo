@@ -138,6 +138,44 @@ class _HomeView extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
+                // ── Branch Selector ──
+                if (provider.state == HomeLoadState.loaded && provider.branches.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: provider.branches.map((branch) {
+                          final isSelected = provider.selectedBranch == branch;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: GestureDetector(
+                              onTap: () => provider.setBranch(branch),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? AppStyle.accentCyan : Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isSelected ? AppStyle.accentCyan : Colors.grey.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  branch.toUpperCase(),
+                                  style: AppStyle.text(
+                                    color: isSelected ? Colors.white : Colors.black87,
+                                    weight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                    size: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+
                 // ── Live Status List ──
                 _LiveStatusList(provider: provider),
 

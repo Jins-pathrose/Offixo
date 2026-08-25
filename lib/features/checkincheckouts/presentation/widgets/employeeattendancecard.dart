@@ -2,171 +2,248 @@ import 'package:flutter/material.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/checkincheckouts/data/attendancemodel.dart';
 
-class EmployeeAttendanceCard extends StatelessWidget {
+class EmployeeAttendanceCard extends StatefulWidget {
   final AttendanceRecord record;
 
   const EmployeeAttendanceCard({super.key, required this.record});
 
   @override
+  State<EmployeeAttendanceCard> createState() => _EmployeeAttendanceCardState();
+}
+
+class _EmployeeAttendanceCardState extends State<EmployeeAttendanceCard> {
+  bool _isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
+    final record = widget.record;
     final statusColor = _statusColor(record.status);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return GestureDetector(
+      onTap: () {
+        if (record.breaks.isNotEmpty) {
+          setState(() {
+            _isExpanded = !_isExpanded;
+          });
+        }
+      },
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        alignment: Alignment.topCenter,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Top row: avatar + name + status chip ──
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Avatar(name: record.employeeName),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      record.employeeName,
-                      style: AppStyle.text(size: 14, weight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    Row(
+              // ── Top row: avatar + name + status chip ──
+              Row(
+                children: [
+                  _Avatar(name: record.employeeName),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          record.empNo,
-                          style: AppStyle.text(
-                            size: 12,
-                            color: AppStyle.hintColor,
-                          ),
+                          record.employeeName,
+                          style: AppStyle.text(size: 14, weight: FontWeight.w600),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: 6),
-                        Container(
-                          width: 3,
-                          height: 3,
-                          decoration: const BoxDecoration(
-                            color: AppStyle.hintColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            record.branchName,
-                            style: AppStyle.text(
-                              size: 12,
-                              color: AppStyle.hintColor,
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            Text(
+                              record.empNo,
+                              style: AppStyle.text(
+                                size: 12,
+                                color: AppStyle.hintColor,
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                            const SizedBox(width: 6),
+                            Container(
+                              width: 3,
+                              height: 3,
+                              decoration: const BoxDecoration(
+                                color: AppStyle.hintColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                record.branchName,
+                                style: AppStyle.text(
+                                  size: 12,
+                                  color: AppStyle.hintColor,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Status chip
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  record.status,
-                  style: AppStyle.text(
-                    size: 11,
-                    color: statusColor,
-                    weight: FontWeight.w700,
                   ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-          Divider(color: AppStyle.borderColor, height: 1),
-          const SizedBox(height: 14),
-
-          // ── Check-in / Check-out / Hours row ──
-          Row(
-            children: [
-              _TimeCell(
-                icon: Icons.login_rounded,
-                label: 'Check In',
-                time: record.checkinTime ?? '--:--',
-                color: const Color(0xFF22C55E),
-              ),
-              _verticalDivider(),
-              _TimeCell(
-                icon: Icons.logout_rounded,
-                label: 'Check Out',
-                time: record.checkoutTime ?? '--:--',
-                color: const Color(0xFFEF4444),
-              ),
-              _verticalDivider(),
-              _TimeCell(
-                icon: Icons.access_time_rounded,
-                label: 'Hours',
-                time: record.workingHours,
-                color: AppStyle.accentCyan,
-              ),
-            ],
-          ),
-
-          // ── Break info (show only if breaks exist) ──
-          if (record.totalBreaksTaken > 0) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withOpacity(0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.coffee_rounded,
-                    size: 14,
-                    color: Color(0xFFF59E0B),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${record.totalBreaksTaken} break${record.totalBreaksTaken > 1 ? 's' : ''}',
-                    style: AppStyle.text(
-                      size: 12,
-                      color: const Color(0xFFF59E0B),
-                      weight: FontWeight.w600,
+                  const SizedBox(width: 8),
+                  // Status chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
                     ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'Total: ${record.totalBreakDuration}',
-                    style: AppStyle.text(
-                      size: 12,
-                      color: const Color(0xFFF59E0B),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      record.status,
+                      style: AppStyle.text(
+                        size: 11,
+                        color: statusColor,
+                        weight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ],
+
+              const SizedBox(height: 14),
+              Divider(color: AppStyle.borderColor, height: 1),
+              const SizedBox(height: 14),
+
+              // ── Check-in / Check-out / Hours row ──
+              Row(
+                children: [
+                  _TimeCell(
+                    icon: Icons.login_rounded,
+                    label: 'Check In',
+                    time: record.checkinTime ?? '--:--',
+                    color: const Color(0xFF22C55E),
+                  ),
+                  _verticalDivider(),
+                  _TimeCell(
+                    icon: Icons.logout_rounded,
+                    label: 'Check Out',
+                    time: record.checkoutTime ?? '--:--',
+                    color: const Color(0xFFEF4444),
+                  ),
+                  _verticalDivider(),
+                  _TimeCell(
+                    icon: Icons.access_time_rounded,
+                    label: 'Hours',
+                    time: record.workingHours,
+                    color: AppStyle.accentCyan,
+                  ),
+                ],
+              ),
+
+              // ── Break info (show only if breaks exist) ──
+              if (record.totalBreaksTaken > 0) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF59E0B).withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.coffee_rounded,
+                        size: 14,
+                        color: Color(0xFFF59E0B),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${record.totalBreaksTaken} break${record.totalBreaksTaken > 1 ? 's' : ''}',
+                        style: AppStyle.text(
+                          size: 12,
+                          color: const Color(0xFFF59E0B),
+                          weight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'Total: ${record.totalBreakDuration}',
+                        style: AppStyle.text(
+                          size: 12,
+                          color: const Color(0xFFF59E0B),
+                        ),
+                      ),
+                      if (record.breaks.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Icon(
+                          _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                          size: 16,
+                          color: const Color(0xFFF59E0B),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                
+                // Detailed Break List
+                if (_isExpanded && record.breaks.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.2)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Break Details',
+                          style: AppStyle.text(size: 13, weight: FontWeight.w600, color: const Color(0xFFF59E0B)),
+                        ),
+                        const SizedBox(height: 10),
+                        ...record.breaks.asMap().entries.map((entry) {
+                          final isLast = entry.key == record.breaks.length - 1;
+                          final b = entry.value;
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: isLast ? 0 : 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.subdirectory_arrow_right_rounded, size: 14, color: Colors.grey),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(b.reason, style: AppStyle.text(size: 12, weight: FontWeight.w500)),
+                                      Text('${b.breakStart} - ${b.breakEnd ?? 'In Progress'}', style: AppStyle.text(size: 11, color: AppStyle.hintColor)),
+                                    ],
+                                  ),
+                                ),
+                                Text(b.duration, style: AppStyle.text(size: 12, weight: FontWeight.w600, color: const Color(0xFFF59E0B))),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

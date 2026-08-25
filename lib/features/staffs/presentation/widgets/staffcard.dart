@@ -7,6 +7,8 @@ class StaffCard extends StatelessWidget {
   final String staffId;
   final String image;
   final bool isOnDuty;
+  final bool isCheckInLoading;
+  final VoidCallback? onCheckInOut;
 
   const StaffCard({
     super.key,
@@ -15,6 +17,8 @@ class StaffCard extends StatelessWidget {
     required this.staffId,
     required this.image,
     required this.isOnDuty,
+    this.isCheckInLoading = false,
+    this.onCheckInOut,
   });
 
   @override
@@ -61,6 +65,30 @@ class StaffCard extends StatelessWidget {
               ],
             ),
           ),
+
+          const SizedBox(width: 8),
+          isCheckInLoading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : ElevatedButton(
+                  onPressed: onCheckInOut,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isOnDuty ? Colors.red : AppStyle.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: const Size(0, 32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    isOnDuty ? "Check-Out" : "Check-In",
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                ),
         ],
       ),
     );

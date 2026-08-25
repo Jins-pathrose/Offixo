@@ -245,7 +245,11 @@ class _StaffScreenBodyState extends State<_StaffScreenBody> {
                     branch: staff.designation,
                     staffId: staff.empNo,
                     image: staff.faceImage ?? '',
-                    isOnDuty: staff.isActive,
+                    isOnDuty: provider.isStaffCheckedIn(staff),
+                    isCheckInLoading: provider.isStaffCheckInLoading(staff.id),
+                    onCheckInOut: () {
+                      provider.toggleCheckInOut(context, staff);
+                    },
                   ),
                 ),
               );

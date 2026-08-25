@@ -21,6 +21,7 @@ import 'package:offixoadmin/core/services/update_service.dart';
 import 'package:offixoadmin/core/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:offixoadmin/features/pending_requests/presentation/provider/pending_request_provider.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -48,6 +49,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => AddSalaryProvider()),
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
         ChangeNotifierProvider(create: (_) => ShiftProvider()),
+        ChangeNotifierProvider(create: (_) => PendingRequestProvider()),
       ],
       child: const MyApp(),
     ),

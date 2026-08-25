@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:offixoadmin/core/appstyle/appstyle.dart';
+import 'package:offixoadmin/features/pending_requests/presentation/provider/pending_request_provider.dart';
+import 'package:provider/provider.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int selectedIndex;
@@ -25,37 +27,21 @@ class CustomBottomNav extends StatelessWidget {
         20,
         12 + bottomInset, // pushes the nav bar above the system nav
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(35),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 12,
-          ),
-        ],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 12)],
       ),
       child: Row(
         children: [
           Expanded(
-            child: _navItem(
-              svgPath: 'assets/svg/Vector (5).svg',
-              index: 0,
-            ),
+            child: _navItem(svgPath: 'assets/svg/Vector (5).svg', index: 0),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
 
-          Expanded(
-            child: _navItem(
-              svgPath: 'assets/svg/Users.svg',
-              index: 1,
-            ),
-          ),
-          const SizedBox(width: 10),
+          Expanded(child: _navItem(svgPath: 'assets/svg/Users.svg', index: 1)),
+          const SizedBox(width: 8),
 
           Expanded(
             child: _navItem(
@@ -63,12 +49,25 @@ class CustomBottomNav extends StatelessWidget {
               index: 2,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
+
+          Expanded(
+            child: Consumer<PendingRequestProvider>(
+              builder: (context, provider, _) {
+                return _navItem(
+                  iconData: Icons.pending_actions,
+                  index: 3,
+                  badgeCount: provider.pendingCount,
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
 
           Expanded(
             child: _navItem(
               svgPath: 'assets/svg/lsicon_setting-outline.svg',
-              index: 3,
+              index: 4,
             ),
           ),
         ],
@@ -77,8 +76,10 @@ class CustomBottomNav extends StatelessWidget {
   }
 
   Widget _navItem({
-    required String svgPath,
+    String? svgPath,
+    IconData? iconData,
     required int index,
+    int badgeCount = 0,
   }) {
     final isSelected = selectedIndex == index;
 
@@ -92,14 +93,53 @@ class CustomBottomNav extends StatelessWidget {
           borderRadius: BorderRadius.circular(25),
         ),
         child: Center(
-          child: SvgPicture.asset(
-            svgPath,
-            width: 22,
-            height: 22,
-            colorFilter: ColorFilter.mode(
-              isSelected ? Colors.white : Colors.black87,
-              BlendMode.srcIn,
-            ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              if (svgPath != null)
+                SvgPicture.asset(
+                  svgPath,
+                  width: 22,
+                  height: 22,
+                  colorFilter: ColorFilter.mode(
+                    isSelected ? Colors.white : Colors.black87,
+                    BlendMode.srcIn,
+                  ),
+                )
+              else if (iconData != null)
+                Icon(
+                  iconData,
+                  size: 24,
+                  color: isSelected ? Colors.white : Colors.black87,
+                ),
+              if (badgeCount > 0)
+                Positioned(
+                  right: -8,
+                  top: -8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Center(
+                      child: Text(
+                        badgeCount > 99 ? '99+' : badgeCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

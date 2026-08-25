@@ -148,6 +148,8 @@ class LeaveRequestProvider extends ChangeNotifier {
                       'applied_at': l.appliedAt,
                       'reviewed_by_name': null,
                       'rejection_reason': rejectionReason,
+                      'medical_certificate': l.medicalCertificate,
+                      'medical_certificate_url': l.medicalCertificateUrl,
                     }),
                   ),
                 });

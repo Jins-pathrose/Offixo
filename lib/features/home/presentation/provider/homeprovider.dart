@@ -92,10 +92,23 @@ class HomeProvider extends ChangeNotifier {
 
   // ── Data ──
   String organizationName = '';
-  List<LiveStatusMember> liveStatus = [];
+  List<LiveStatusMember> _allMembers = [];
+  List<String> branches = [];
+  String? selectedBranch;
+
+  List<LiveStatusMember> get liveStatus {
+    if (selectedBranch == null) return _allMembers;
+    return _allMembers.where((m) => m.branchName == selectedBranch).toList();
+  }
+
   int totalCheckedIn = 0;
   int totalCheckedOut = 0;
   int totalMembers = 0;
+
+  void setBranch(String branch) {
+    selectedBranch = branch;
+    notifyListeners();
+  }
 
   HomeProvider() {
     loadAll();
@@ -105,7 +118,9 @@ class HomeProvider extends ChangeNotifier {
     state = HomeLoadState.loading;
     error = null;
     organizationName = '';
-    liveStatus = [];
+    _allMembers = [];
+    branches = [];
+    selectedBranch = null;
     totalCheckedIn = 0;
     totalCheckedOut = 0;
     totalMembers = 0;
@@ -144,10 +159,15 @@ class HomeProvider extends ChangeNotifier {
     );
     if (res.statusCode == 200) {
       final json = jsonDecode(res.body) as Map<String, dynamic>;
-      final branches = (json['branches'] as Map<String, dynamic>? ?? {});
+      final branchesMap = (json['branches'] as Map<String, dynamic>? ?? {});
+
+      branches = branchesMap.keys.toList();
+      if (branches.isNotEmpty && selectedBranch == null) {
+        selectedBranch = branches.first;
+      }
 
       final List<LiveStatusMember> allMembers = [];
-      branches.forEach((branchName, members) {
+      branchesMap.forEach((branchName, members) {
         final list = (members as List? ?? []);
         for (final m in list) {
           final map = Map<String, dynamic>.from(m as Map);
@@ -166,12 +186,12 @@ class HomeProvider extends ChangeNotifier {
         return dateB.compareTo(dateA); // descending order
       });
 
-      liveStatus = allMembers;
-      totalMembers = json['total_members_counted'] ?? liveStatus.length;
+      _allMembers = allMembers;
+      totalMembers = json['total_members_counted'] ?? _allMembers.length;
       totalCheckedIn =
-          liveStatus.where((m) => m.liveStatus == 'CHECKED_IN').length;
+          _allMembers.where((m) => m.liveStatus == 'CHECKED_IN').length;
       totalCheckedOut =
-          liveStatus.where((m) => m.liveStatus == 'CHECKED_OUT').length;
+          _allMembers.where((m) => m.liveStatus == 'CHECKED_OUT').length;
     } else {
       throw Exception('Live status failed: ${res.statusCode}');
     }

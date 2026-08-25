@@ -22,6 +22,7 @@ class StaffDetailsResponse {
   final String permanentAddress;
   final String emergencyContactName;
   final String emergencyContactPhone;
+  final List<dynamic>? branches;
   final String? proofDocument;
   final bool isBiometricEnabled;
   final String? faceImage1;
@@ -61,6 +62,7 @@ class StaffDetailsResponse {
       permanentAddress = json['permanent_address'] ?? '',
       emergencyContactName = json['emergency_contact_name'] ?? '',
       emergencyContactPhone = json['emergency_contact_phone'] ?? '',
+      branches = json['branches'] as List<dynamic>?,
       proofDocument = json['proof_document'] is Map
           ? json['proof_document']['url']?.toString()
           : json['proof_document']?.toString(),

@@ -30,6 +30,7 @@ class StaffProvider extends ChangeNotifier {
     if (isRefresh) {
       nextUrl = null;
       _allStaffs.clear();
+      _checkInStatus.clear();
       currentPage = 1;
       state = StaffLoadState.loading;
       notifyListeners();
@@ -114,6 +115,54 @@ class StaffProvider extends ChangeNotifier {
             s.empNo.toLowerCase().contains(_searchQuery) ||
             s.phoneNumber.contains(_searchQuery);
       }).toList();
+    }
+  }
+
+  // --- Check In / Check Out Logic ---
+
+  final Map<int, bool> _checkInStatus = {};
+  final Map<int, bool> _checkInLoading = {};
+
+  bool isStaffCheckedIn(StaffModel staff) {
+    return _checkInStatus[staff.id] ?? (staff.attendanceStatus == "CHECKED_IN");
+  }
+
+  bool isStaffCheckInLoading(int staffId) {
+    return _checkInLoading[staffId] ?? false;
+  }
+
+  Future<void> toggleCheckInOut(BuildContext context, StaffModel staff) async {
+    final staffId = staff.id;
+    if (isStaffCheckInLoading(staffId)) return;
+
+    final currentlyCheckedIn = isStaffCheckedIn(staff);
+    
+    _checkInLoading[staffId] = true;
+    notifyListeners();
+
+    try {
+      if (currentlyCheckedIn) {
+        await _repository.checkOutStaff(staffId);
+      } else {
+        await _repository.checkInStaff(staffId);
+      }
+      
+      _checkInStatus[staffId] = !currentlyCheckedIn;
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(currentlyCheckedIn ? 'Checked out successfully' : 'Checked in successfully')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception:', '').trim())),
+        );
+      }
+    } finally {
+      _checkInLoading[staffId] = false;
+      notifyListeners();
     }
   }
 }

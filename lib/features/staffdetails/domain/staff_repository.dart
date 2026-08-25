@@ -5,6 +5,7 @@ import 'package:offixoadmin/core/services/storagedevice.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/leaveanalyticsresponse.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/leavebalanceresponse.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/monthlyattendanceresponse.dart';
+import 'package:offixoadmin/features/settings/data/models/resigned_member.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/payrollresponse.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart';
 import 'package:offixoadmin/features/staffdetails/data/models/staffdetailsresponse.dart';
@@ -127,15 +128,19 @@ class Staffrepository {
     int year,
   ) async {
     final apiName = 'getMonthlyAttendance';
-    final url =
-        '$baseUrl/api/member/monthly-calendar/?member_id=$memberId&month=$month&year=$year';
+
+    final url = '$baseUrl/api/maintainer_duty/attendance/monthly/';
+
     print('🌐 [$apiName] GET: $url');
 
     final headers = await _getHeaders();
 
     final response = await http.get(Uri.parse(url), headers: headers);
+
     print('response : $response');
+
     final data = await _handleResponse(response, apiName);
+
     return MonthlyAttendanceResponse.fromJson(data);
   }
 
@@ -372,22 +377,51 @@ class Staffrepository {
     }
   }
 
-  Future<void> deleteStaffMember(int memberId) async {
-    final apiName = 'deleteStaffMember';
-    final url = '$baseUrl/api/member/update/$memberId/';
-    print('🌐 [$apiName] DELETE: $url');
+  Future<void> markMemberAsResigned(int memberId) async {
+    final apiName = 'markMemberAsResigned';
+    final url = '$baseUrl/api/maintainer_duty/resigned-members/';
+    print('🌐 [$apiName] POST: $url');
 
     final headers = await _getHeaders();
 
-    final response = await http.delete(Uri.parse(url), headers: headers);
+    final response = await http.post(
+      Uri.parse(url),
+      headers: headers,
+      body: json.encode({'member_id': memberId}),
+    );
 
     print('📡 [$apiName] Status: ${response.statusCode}');
 
-    if (response.statusCode != 200 && response.statusCode != 204) {
+    if (response.statusCode != 200 && response.statusCode != 201) {
       print('⚠️ [$apiName] Unexpected status: ${response.statusCode}');
       print('⚠️ [$apiName] Response: ${response.body}');
       throw Exception(
-        'Failed to delete staff member: ${response.statusCode}\n${response.body}',
+        'Failed to mark member as resigned: ${response.statusCode}\n${response.body}',
+      );
+    }
+  }
+
+  Future<List<ResignedMember>> getResignedMembers() async {
+    final apiName = 'getResignedMembers';
+    final url = '$baseUrl/api/maintainer_duty/resigned-members/';
+    print('🌐 [$apiName] GET: $url');
+
+    final headers = await _getHeaders();
+
+    final response = await http.get(Uri.parse(url), headers: headers);
+    print('📡 [$apiName] Status: ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      if (decoded['success'] == true && decoded['deleted_accounts'] != null) {
+        final List<dynamic> accounts = decoded['deleted_accounts'];
+        return accounts.map((e) => ResignedMember.fromJson(e)).toList();
+      }
+      return [];
+    } else {
+      print('⚠️ [$apiName] Unexpected status: ${response.statusCode}');
+      throw Exception(
+        'Failed to fetch resigned members: ${response.statusCode}\n${response.body}',
       );
     }
   }

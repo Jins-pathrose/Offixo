@@ -4,6 +4,7 @@ import 'package:offixoadmin/features/leave/data/model/leaverequestmodel.dart';
 import 'package:offixoadmin/features/leave/presentation/provider/leaverequestprovider.dart';
 import 'package:offixoadmin/features/leave/presentation/widgets/detailcolum.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LeaveDetailSheet extends StatelessWidget {
   final LeaveRequestModel leave;
@@ -192,6 +193,42 @@ class LeaveDetailSheet extends StatelessWidget {
                   Text(leave.rejectionReason!,
                       style: AppStyle.text(size: 13)),
                 ],
+
+                if (leave.medicalCertificateUrl != null &&
+                    leave.medicalCertificateUrl!.isNotEmpty) ...[
+                  const Divider(height: 20),
+                  Text('Document Attached',
+                      style: AppStyle.text(
+                          size: 11, color: AppStyle.accentCyan)),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () async {
+                      final url = Uri.parse(leave.medicalCertificateUrl!);
+                      try {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      } catch (e) {
+                        debugPrint('Could not launch url: $e');
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppStyle.accentCyan.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppStyle.accentCyan.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.description_outlined, size: 16, color: AppStyle.accentCyan),
+                          const SizedBox(width: 8),
+                          Text('View Medical Certificate',
+                              style: AppStyle.text(size: 13, color: AppStyle.accentCyan, weight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -204,13 +241,7 @@ class LeaveDetailSheet extends StatelessWidget {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () async {
-                      final ok =
-                          await provider.approve(leave.id, context);
-                      if (ok && context.mounted) {
-                        Navigator.maybePop(context);
-                      }
-                    },
+                    onTap: () => _showApproveDialog(context, provider),
                     child: Container(
                       height: 50,
                       decoration: BoxDecoration(
@@ -308,17 +339,14 @@ class LeaveDetailSheet extends StatelessWidget {
                     size: 14, color: AppStyle.hintColor)),
           ),
           GestureDetector(
-            onTap: () async {
+            onTap: () {
               if (controller.text.trim().isEmpty) return;
               Navigator.pop(dialogCtx);
-              final ok = await provider.reject(
+              _runWithLoader(context, () => provider.reject(
                 requestId: leave.id,
                 rejectionReason: controller.text.trim(),
                 context: context,
-              );
-              if (ok && context.mounted) {
-                Navigator.maybePop(context);
-              }
+              ));
             },
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -336,5 +364,61 @@ class LeaveDetailSheet extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showApproveDialog(
+      BuildContext context, LeaveRequestProvider provider) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
+        title: Text('Approve Leave',
+            style: AppStyle.text(size: 16, weight: FontWeight.w700)),
+        content: Text('Are you sure you want to approve this leave request?',
+            style: AppStyle.text(size: 14, color: AppStyle.hintColor)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text('Cancel',
+                style: AppStyle.text(
+                    size: 14, color: AppStyle.hintColor)),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(dialogCtx);
+              _runWithLoader(context, () => provider.approve(leave.id, context));
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF22C55E),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text('Approve',
+                  style: AppStyle.text(
+                      color: Colors.white,
+                      weight: FontWeight.w600)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _runWithLoader(BuildContext context, Future<bool> Function() action) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator(color: AppStyle.accentCyan)),
+    );
+    final ok = await action();
+    if (context.mounted) {
+      Navigator.pop(context); // Close the loader
+      if (ok) {
+        Navigator.maybePop(context); // Close the sheet
+      }
+    }
   }
 }

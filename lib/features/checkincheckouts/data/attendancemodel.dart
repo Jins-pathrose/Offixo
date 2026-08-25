@@ -1,3 +1,26 @@
+class BreakRecord {
+  final String breakStart;
+  final String? breakEnd;
+  final String reason;
+  final String duration;
+
+  const BreakRecord({
+    required this.breakStart,
+    this.breakEnd,
+    required this.reason,
+    required this.duration,
+  });
+
+  factory BreakRecord.fromJson(Map<String, dynamic> json) {
+    return BreakRecord(
+      breakStart: json['break_start'] as String? ?? '--:--',
+      breakEnd: json['break_end'] as String?,
+      reason: json['reason'] as String? ?? 'Break',
+      duration: json['duration'] as String? ?? 'N/A',
+    );
+  }
+}
+
 class AttendanceRecord {
   final int attendanceId;
   final int memberId;
@@ -10,6 +33,7 @@ class AttendanceRecord {
   final String workingHours;
   final int totalBreaksTaken;
   final String totalBreakDuration;
+  final List<BreakRecord> breaks;
 
   const AttendanceRecord({
     required this.attendanceId,
@@ -23,6 +47,7 @@ class AttendanceRecord {
     required this.workingHours,
     required this.totalBreaksTaken,
     required this.totalBreakDuration,
+    this.breaks = const [],
   });
 
   factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
@@ -38,6 +63,10 @@ class AttendanceRecord {
       workingHours: json['working_hours'] as String? ?? '00:00',
       totalBreaksTaken: json['total_breaks_taken'] as int? ?? 0,
       totalBreakDuration: json['total_break_duration'] as String? ?? '00:00:00',
+      breaks: (json['breaks'] as List<dynamic>?)
+              ?.map((e) => BreakRecord.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
