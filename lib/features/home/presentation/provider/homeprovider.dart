@@ -101,6 +101,14 @@ class HomeProvider extends ChangeNotifier {
     return _allMembers.where((m) => m.branchName == selectedBranch).toList();
   }
 
+  int? getAttendanceIdForMember(int memberId) {
+    try {
+      return _allMembers.firstWhere((m) => m.memberId == memberId).attendanceId;
+    } catch (_) {
+      return null;
+    }
+  }
+
   int totalCheckedIn = 0;
   int totalCheckedOut = 0;
   int totalMembers = 0;
@@ -181,8 +189,12 @@ class HomeProvider extends ChangeNotifier {
         if (a.lastCheckinTime == null && b.lastCheckinTime == null) return 0;
         if (a.lastCheckinTime == null) return 1;
         if (b.lastCheckinTime == null) return -1;
-        final dateA = DateTime.tryParse(a.lastCheckinTime!) ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final dateB = DateTime.tryParse(b.lastCheckinTime!) ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateA =
+            DateTime.tryParse(a.lastCheckinTime!) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB =
+            DateTime.tryParse(b.lastCheckinTime!) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
         return dateB.compareTo(dateA); // descending order
       });
 

@@ -23,15 +23,15 @@ class ShiftModel {
 
   factory ShiftModel.fromJson(Map<String, dynamic> json) {
     return ShiftModel(
-      id: json['id'] as int,
-      organization: json['organization'] as int,
-      organizationName: json['organization_name'] as String? ?? '',
+      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      organization: json['organization'] is int ? json['organization'] as int : int.tryParse(json['organization']?.toString() ?? '0') ?? 0,
+      organizationName: json['organization_name']?.toString() ?? '',
       branch: json['branch'] as int?,
-      shiftName: json['shift_name'] as String,
-      startTime: json['start_time'] as String,
-      endTime: json['end_time'] as String,
-      regularWorkingHours: json['regular_working_hours'] as int,
-      isActive: json['is_active'] as bool? ?? true,
+      shiftName: json['shift_name']?.toString() ?? '',
+      startTime: json['start_time']?.toString() ?? '',
+      endTime: json['end_time']?.toString() ?? '',
+      regularWorkingHours: num.tryParse(json['regular_working_hours']?.toString() ?? '0')?.toInt() ?? 0,
+      isActive: json['is_active'] == true || json['is_active'] == 'true',
     );
   }
 

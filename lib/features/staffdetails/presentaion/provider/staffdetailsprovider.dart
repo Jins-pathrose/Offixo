@@ -14,12 +14,12 @@ class StaffDetailsProvider extends ChangeNotifier {
   bool _isDisposed = false;
   bool _isDataLoaded = false;
   bool _isLoadingData = false; // Prevent concurrent loads
-  
+
   StaffDetailsProvider({required this.staffId}) {
     print('🔵 Provider created for staffId: $staffId');
     // Don't load here - let the view trigger it
   }
-  
+
   final Staffrepository _repository = Staffrepository();
 
   // State
@@ -63,8 +63,10 @@ class StaffDetailsProvider extends ChangeNotifier {
   String get dateOfBirth => _staffDetails?.dateOfBirth ?? '--';
   String get presentAddress => _staffDetails?.presentAddress ?? '--';
   String get permanentAddress => _staffDetails?.permanentAddress ?? '--';
-  String get emergencyContactName => _staffDetails?.emergencyContactName ?? '--';
-  String get emergencyContactPhone => _staffDetails?.emergencyContactPhone ?? '--';
+  String get emergencyContactName =>
+      _staffDetails?.emergencyContactName ?? '--';
+  String get emergencyContactPhone =>
+      _staffDetails?.emergencyContactPhone ?? '--';
   String get startDate => _staffDetails?.startDate ?? '--';
   String get department => _staffDetails?.departmentName ?? '--';
   String get designation => _staffDetails?.designationName ?? '--';
@@ -80,59 +82,58 @@ class StaffDetailsProvider extends ChangeNotifier {
 
   String _formatTime(String timeStr) {
     if (timeStr.isEmpty || timeStr == '--') return '--';
-    
+
     try {
       String parseStr = timeStr.trim();
-      
+
       // 1. Check if it's just a time string like "HH:MM", "HH:MM:SS", or "HH:MM AM/PM"
-      final timeRegex = RegExp(r'^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM|am|pm)?$');
+      final timeRegex = RegExp(
+        r'^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM|am|pm)?$',
+      );
       final match = timeRegex.firstMatch(parseStr);
-      
+
       if (match != null) {
         int hour = int.parse(match.group(1)!);
         int minute = int.parse(match.group(2)!);
         String? period = match.group(3)?.toUpperCase();
-        
+
         if (period == 'PM' && hour < 12) hour += 12;
         if (period == 'AM' && hour == 12) hour = 0;
-        
-        // Assume this time is in UTC, convert to local
-        final utcTime = DateTime.utc(2000, 1, 1, hour, minute);
-        final localTime = utcTime.toLocal();
-        
-        int localHour = localTime.hour;
-        int localMin = localTime.minute;
-        
+
+        // Use the parsed time directly without assuming UTC
+        int localHour = hour;
+        int localMin = minute;
+
         String localPeriod = localHour >= 12 ? 'PM' : 'AM';
-        if (localHour == 0) localHour = 12;
-        else if (localHour > 12) localHour -= 12;
-        
+        if (localHour == 0)
+          localHour = 12;
+        else if (localHour > 12)
+          localHour -= 12;
+
         return '${localHour.toString().padLeft(2, '0')}:${localMin.toString().padLeft(2, '0')} $localPeriod';
       }
-      
+
       // 2. If it's a full DateTime string, ensure it's in standard ISO-8601 format
       // Replace space with T for standard parsing
-      if (parseStr.contains(' ') && parseStr.length > 10 && parseStr[4] == '-') {
+      if (parseStr.contains(' ') &&
+          parseStr.length > 10 &&
+          parseStr[4] == '-') {
         parseStr = parseStr.replaceFirst(' ', 'T');
       }
 
-      // If it's a datetime string without timezone, assume UTC by appending 'Z'
-      if (parseStr.contains('T') && !parseStr.endsWith('Z') && !parseStr.contains('+') && !parseStr.contains('-')) {
-        parseStr += 'Z';
-      }
-      
+      // Parse the DateTime string. If it contains timezone info, toLocal() will convert it.
+      // If it doesn't, it will be parsed as local time.
       DateTime dateTime = DateTime.parse(parseStr).toLocal();
       int hour = dateTime.hour;
       final int minute = dateTime.minute;
       final String period = hour >= 12 ? 'PM' : 'AM';
-      
+
       if (hour == 0) {
         hour = 12;
       } else if (hour > 12) {
         hour -= 12;
       }
       return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
-      
     } catch (e) {
       return '$timeStr (raw)';
     }
@@ -141,17 +142,17 @@ class StaffDetailsProvider extends ChangeNotifier {
   // Today's attendance summary from calendar
   AttendanceSummary? get todayAttendance {
     if (_monthlyAttendance == null) return null;
-    
+
     final today = DateTime.now();
     final todayStr = today.toString().split(' ')[0];
-    
+
     final todayData = _monthlyAttendance!.calendarData.firstWhere(
       (d) => d.date == todayStr,
       orElse: () => CalendarDayData.fromJson({}),
     );
-    
+
     if (todayData.attendanceDetails == null) return null;
-    
+
     final details = todayData.attendanceDetails!;
     return AttendanceSummary(
       checkIn: _formatTime(details.checkinTime),
@@ -161,6 +162,24 @@ class StaffDetailsProvider extends ChangeNotifier {
       isLateCheckIn: false,
       lateByText: null,
     );
+  }
+
+  int? get todayAttendanceId {
+    if (_monthlyAttendance == null) return null;
+
+    final today = DateTime.now();
+    final todayStr = today.toString().split(' ')[0];
+
+    try {
+      final todayData = _monthlyAttendance!.calendarData.firstWhere(
+        (d) => d.date == todayStr,
+      );
+      final id = todayData.attendanceDetails?.attendanceId;
+      if (id != null && id != 0) return id;
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
 
   // Monthly calendar data
@@ -175,22 +194,42 @@ class StaffDetailsProvider extends ChangeNotifier {
 
   String get monthLabel {
     if (_monthlyAttendance == null) return '--';
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[_monthlyAttendance!.month - 1];
   }
 
   // Leave summary
-  int get pendingLeaves => _leaveAnalytics?.yearlyStatusCounts.pendingCount ?? 0;
-  int get approvedLeaves => _leaveAnalytics?.yearlyStatusCounts.approvedCount ?? 0;
-  int get rejectedLeaves => _leaveAnalytics?.yearlyStatusCounts.rejectedCount ?? 0;
+  int get pendingLeaves =>
+      _leaveAnalytics?.yearlyStatusCounts.pendingCount ?? 0;
+  int get approvedLeaves =>
+      _leaveAnalytics?.yearlyStatusCounts.approvedCount ?? 0;
+  int get rejectedLeaves =>
+      _leaveAnalytics?.yearlyStatusCounts.rejectedCount ?? 0;
 
   List<LeaveRecord> get leaveRecords {
     if (_leaveAnalytics == null) return [];
-    return _leaveAnalytics!.monthlyLeaveDetails.map((detail) => LeaveRecord(
-      date: detail.fromDate,
-      type: detail.leaveTypeName,
-      status: detail.status,
-    )).toList();
+    return _leaveAnalytics!.monthlyLeaveDetails
+        .map(
+          (detail) => LeaveRecord(
+            date: detail.fromDate,
+            type: detail.leaveTypeName,
+            status: detail.status,
+          ),
+        )
+        .toList();
   }
 
   List<LeaveBalanceDetail> get leaveBalances {
@@ -215,95 +254,95 @@ class StaffDetailsProvider extends ChangeNotifier {
   // FIX: Main load method with proper checks
   // In StaffDetailsProvider - modify loadAllData
 
-Future<void> loadAllData() async {
-  if (_isLoadingData) {
-    print('⏳ Already loading data, skipping...');
-    return;
-  }
-  
-  if (_isDataLoaded && _staffDetails != null) {
-    print('📊 Data already loaded, skipping...');
-    return;
-  }
-  
-  print('🔄 Starting data load...');
-  _isLoadingData = true;
-  _isLoading = true;
-  _error = null;
-  notifyListeners();
-  
-  final now = DateTime.now();
-  final month = selectedPayslipMonth ?? now.month;
-  final year = selectedPayslipYear ?? now.year;
-
-  // For attendance, leave analytics we might still want to use current year/month
-  // but let's keep them using the payslip month so everything is synced, 
-  // or use `now` for others. Let's use `now` for others and `month/year` for payslip.
-  final currentMonth = now.month;
-  final currentYear = now.year;
-
-  final attendanceMonth = selectedAttendanceMonth ?? currentMonth;
-  final attendanceYear = selectedAttendanceYear ?? currentYear;
-
-  try {
-    // Load each API separately to handle failures gracefully
-    await _loadStaffDetails();
-    await _loadLeaveAnalytics(currentYear, currentMonth);
-    await _loadLeaveBalance(currentYear);
-    
-    await _loadPayslipPreview(month, year);
-    
-    // Load monthly attendance separately with special handling
-    await _loadMonthlyAttendanceWithFallback(attendanceMonth, attendanceYear);
-    
-    if (!_isDisposed) {
-      _isDataLoaded = true;
-      _isLoading = false;
-      _isLoadingData = false;
-      notifyListeners();
-      print('✅ All data loaded successfully for staffId: $staffId');
+  Future<void> loadAllData() async {
+    if (_isLoadingData) {
+      print('⏳ Already loading data, skipping...');
+      return;
     }
-  } catch (e) {
-    if (!_isDisposed) {
-      _isLoading = false;
-      _isLoadingData = false;
-      _error = 'Failed to load data: ${e.toString()}';
-      notifyListeners();
-      print('❌ Error: $e');
-    }
-  }
-}
 
-// New method with fallback for monthly attendance
-Future<void> _loadMonthlyAttendanceWithFallback(int month, int year) async {
-  try {
-    final data = await _repository.getMonthlyAttendance(staffId, month, year);
-    if (!_isDisposed) {
-      _monthlyAttendance = data;
-      _error = null;
+    if (_isDataLoaded && _staffDetails != null) {
+      print('📊 Data already loaded, skipping...');
+      return;
     }
-  } catch (e) {
-    print('⚠️ Monthly attendance failed (server issue), using empty data');
-    if (!_isDisposed) {
-      // Use empty data instead of failing
-      _monthlyAttendance = MonthlyAttendanceResponse.fromJson({
-        'success': false,
-        'member_info': {
-          'member_id': staffId,
-          'emp_no': '',
-          'name': '',
-          'designation': '',
-          'department': ''
-        },
-        'month': month,
-        'year': year,
-        'saturday_rule_applied': '',
-        'calendar_data': []
-      });
-      // Don't set error for this - it's a known server issue
+
+    print('🔄 Starting data load...');
+    _isLoadingData = true;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final now = DateTime.now();
+    final month = selectedPayslipMonth ?? now.month;
+    final year = selectedPayslipYear ?? now.year;
+
+    // For attendance, leave analytics we might still want to use current year/month
+    // but let's keep them using the payslip month so everything is synced,
+    // or use `now` for others. Let's use `now` for others and `month/year` for payslip.
+    final currentMonth = now.month;
+    final currentYear = now.year;
+
+    final attendanceMonth = selectedAttendanceMonth ?? currentMonth;
+    final attendanceYear = selectedAttendanceYear ?? currentYear;
+
+    try {
+      // Load each API separately to handle failures gracefully
+      await _loadStaffDetails();
+      await _loadLeaveAnalytics(currentYear, currentMonth);
+      await _loadLeaveBalance(currentYear);
+
+      await _loadPayslipPreview(month, year);
+
+      // Load monthly attendance separately with special handling
+      await _loadMonthlyAttendanceWithFallback(attendanceMonth, attendanceYear);
+
+      if (!_isDisposed) {
+        _isDataLoaded = true;
+        _isLoading = false;
+        _isLoadingData = false;
+        notifyListeners();
+        print('✅ All data loaded successfully for staffId: $staffId');
+      }
+    } catch (e) {
+      if (!_isDisposed) {
+        _isLoading = false;
+        _isLoadingData = false;
+        _error = 'Failed to load data: ${e.toString()}';
+        notifyListeners();
+        print('❌ Error: $e');
+      }
     }
   }
-}
+
+  // New method with fallback for monthly attendance
+  Future<void> _loadMonthlyAttendanceWithFallback(int month, int year) async {
+    try {
+      final data = await _repository.getMonthlyAttendance(staffId, month, year);
+      if (!_isDisposed) {
+        _monthlyAttendance = data;
+        _error = null;
+      }
+    } catch (e) {
+      print('⚠️ Monthly attendance failed (server issue), using empty data');
+      if (!_isDisposed) {
+        // Use empty data instead of failing
+        _monthlyAttendance = MonthlyAttendanceResponse.fromJson({
+          'success': false,
+          'member_info': {
+            'member_id': staffId,
+            'emp_no': '',
+            'name': '',
+            'designation': '',
+            'department': '',
+          },
+          'month': month,
+          'year': year,
+          'saturday_rule_applied': '',
+          'calendar_data': [],
+        });
+        // Don't set error for this - it's a known server issue
+      }
+    }
+  }
 
   // Individual load methods
   Future<void> _loadStaffDetails() async {
@@ -366,30 +405,28 @@ Future<void> _loadMonthlyAttendanceWithFallback(int month, int year) async {
     }
   }
 
-
-
-Future<void> _loadPayslipPreview(int month, int year) async {
-  try {
-    final data = await _repository.getPayslipPreview(staffId, month, year);
-    if (!_isDisposed) {
-      _payslipPreview = data;
-    }
-  } catch (e) {
-    print('⚠️ Payslip preview error: $e');
-    if (!_isDisposed) {
-      _payslipPreview = null;
+  Future<void> _loadPayslipPreview(int month, int year) async {
+    try {
+      final data = await _repository.getPayslipPreview(staffId, month, year);
+      if (!_isDisposed) {
+        _payslipPreview = data;
+      }
+    } catch (e) {
+      print('⚠️ Payslip preview error: $e');
+      if (!_isDisposed) {
+        _payslipPreview = null;
+      }
     }
   }
-}
 
   Future<void> changeAttendanceMonth(int month, int year) async {
     if (_isDisposed) return;
     selectedAttendanceMonth = month;
     selectedAttendanceYear = year;
-    
+
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       await _loadMonthlyAttendanceWithFallback(month, year);
     } finally {
@@ -404,10 +441,10 @@ Future<void> _loadPayslipPreview(int month, int year) async {
     if (_isDisposed) return;
     selectedPayslipMonth = month;
     selectedPayslipYear = year;
-    
+
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       await _loadPayslipPreview(month, year);
     } finally {
@@ -428,7 +465,7 @@ Future<void> _loadPayslipPreview(int month, int year) async {
     if (_isDisposed) return;
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       await _repository.generatePayslip(memberId, month, year);
       if (!_isDisposed) {
@@ -448,7 +485,7 @@ Future<void> _loadPayslipPreview(int month, int year) async {
     if (_isDisposed) return;
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       await _repository.downloadPayslip(payslipId);
       if (!_isDisposed) {
@@ -469,7 +506,7 @@ Future<void> _loadPayslipPreview(int month, int year) async {
     if (_isDisposed) return;
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       await _repository.updateStaffDetails(staffId, data);
       if (!_isDisposed) {
@@ -490,7 +527,7 @@ Future<void> _loadPayslipPreview(int month, int year) async {
     if (_isDisposed) return;
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       await _repository.markMemberAsResigned(staffId);
       if (!_isDisposed) {

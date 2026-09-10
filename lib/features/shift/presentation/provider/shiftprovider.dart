@@ -8,7 +8,8 @@ import 'package:offixoadmin/features/shift/data/model/shiftmodel.dart';
 enum ShiftLoadState { idle, loading, loaded, error }
 
 class ShiftProvider extends ChangeNotifier {
-  static String get _baseUrl => '${dotenv.env['BASE_URL']}/api/maintainer/time-shifts/';
+  static String get _baseUrl =>
+      '${dotenv.env['BASE_URL']}/api/maintainer/time-shifts/';
 
   final StorageService _storage = StorageService();
 
@@ -35,6 +36,7 @@ class ShiftProvider extends ChangeNotifier {
           'Accept': 'application/json',
         },
       );
+      debugPrint('Shift response: ${res.body}');
       if (res.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(res.body);
 

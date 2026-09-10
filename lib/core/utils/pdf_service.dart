@@ -8,7 +8,8 @@ import 'package:offixoadmin/features/staffdetails/data/models/payslipmodel.dart'
 
 class PdfService {
   static Future<String?> generateAndSaveMonthlyAttendancePdf(
-      MonthlyAttendanceResponse data) async {
+    MonthlyAttendanceResponse data,
+  ) async {
     try {
       final pdf = pw.Document();
 
@@ -44,13 +45,10 @@ class PdfService {
 
       final bytes = await pdf.save();
 
-      // Save to Downloads folder
+      // Save to directory
       Directory? directory;
       if (Platform.isAndroid) {
-        directory = Directory('/storage/emulated/0/Download');
-        if (!await directory.exists()) {
-          directory = await getExternalStorageDirectory();
-        }
+        directory = await getExternalStorageDirectory();
       } else {
         directory = await getApplicationDocumentsDirectory();
       }
@@ -58,9 +56,10 @@ class PdfService {
       if (directory == null) return null;
 
       final monthStr = data.month.toString().padLeft(2, '0');
-      final fileName = 'Attendance_${data.memberInfo.empNo}_${data.year}_$monthStr.pdf';
+      final fileName =
+          'Attendance_${data.memberInfo.empNo}_${data.year}_$monthStr.pdf';
       final file = File('${directory.path}/$fileName');
-      
+
       await file.writeAsBytes(bytes);
       return file.path;
     } catch (e) {
@@ -73,27 +72,42 @@ class PdfService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('Monthly Attendance Report',
-            style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-        pw.SizedBox(height: 10),
-        pw.Text('Employee Name: ${data.memberInfo.name}',
-            style: const pw.TextStyle(fontSize: 14)),
-        pw.Text('Employee ID: ${data.memberInfo.empNo}',
-            style: const pw.TextStyle(fontSize: 14)),
-        pw.Text('Department: ${data.memberInfo.department}',
-            style: const pw.TextStyle(fontSize: 14)),
-        pw.Text('Designation: ${data.memberInfo.designation}',
-            style: const pw.TextStyle(fontSize: 14)),
+        pw.Text(
+          'Monthly Attendance Report',
+          style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+        ),
         pw.SizedBox(height: 10),
         pw.Text(
-            'Month/Year: ${data.month.toString().padLeft(2, '0')} / ${data.year}',
-            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          'Employee Name: ${data.memberInfo.name}',
+          style: const pw.TextStyle(fontSize: 14),
+        ),
+        pw.Text(
+          'Employee ID: ${data.memberInfo.empNo}',
+          style: const pw.TextStyle(fontSize: 14),
+        ),
+        pw.Text(
+          'Department: ${data.memberInfo.department}',
+          style: const pw.TextStyle(fontSize: 14),
+        ),
+        pw.Text(
+          'Designation: ${data.memberInfo.designation}',
+          style: const pw.TextStyle(fontSize: 14),
+        ),
+        pw.SizedBox(height: 10),
+        pw.Text(
+          'Month/Year: ${data.month.toString().padLeft(2, '0')} / ${data.year}',
+          style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+        ),
       ],
     );
   }
 
   static pw.Widget _buildSummary(
-      MonthlyAttendanceResponse data, int present, int absent, int holidays) {
+    MonthlyAttendanceResponse data,
+    int present,
+    int absent,
+    int holidays,
+  ) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(10),
       decoration: const pw.BoxDecoration(
@@ -114,9 +128,14 @@ class PdfService {
   static pw.Widget _summaryItem(String label, String value, PdfColor color) {
     return pw.Column(
       children: [
-        pw.Text(value,
-            style: pw.TextStyle(
-                fontSize: 20, fontWeight: pw.FontWeight.bold, color: color)),
+        pw.Text(
+          value,
+          style: pw.TextStyle(
+            fontSize: 20,
+            fontWeight: pw.FontWeight.bold,
+            color: color,
+          ),
+        ),
         pw.Text(label, style: const pw.TextStyle(fontSize: 12)),
       ],
     );
@@ -124,25 +143,19 @@ class PdfService {
 
   static pw.Widget _buildAttendanceTable(MonthlyAttendanceResponse data) {
     return pw.TableHelper.fromTextArray(
-      headers: [
-        'Date',
-        'Day',
-        'Status',
-        'Check-In',
-        'Check-Out',
-        'Worked Hrs'
-      ],
-      data: data.calendarData.map((day) {
-        final details = day.attendanceDetails;
-        return [
-          day.date,
-          day.dayType,
-          day.status.toUpperCase(),
-          _formatTime(details?.checkinTime ?? '--'),
-          _formatTime(details?.checkoutTime ?? '--'),
-          details?.workingHours ?? '--',
-        ];
-      }).toList(),
+      headers: ['Date', 'Day', 'Status', 'Check-In', 'Check-Out', 'Worked Hrs'],
+      data:
+          data.calendarData.map((day) {
+            final details = day.attendanceDetails;
+            return [
+              day.date,
+              day.dayType,
+              day.status.toUpperCase(),
+              _formatTime(details?.checkinTime ?? '--'),
+              _formatTime(details?.checkoutTime ?? '--'),
+              details?.workingHours ?? '--',
+            ];
+          }).toList(),
       headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
       headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
       cellHeight: 25,
@@ -171,10 +184,11 @@ class PdfService {
       final double baseSalary = double.tryParse(data.baseSalary) ?? 0;
       final double otherAllowance = double.tryParse(data.otherAllowance) ?? 0;
       final double travelAllowance = double.tryParse(data.travelAllowance) ?? 0;
-      final double medicalAllowance = double.tryParse(data.medicalAllowance) ?? 0;
+      final double medicalAllowance =
+          double.tryParse(data.medicalAllowance) ?? 0;
       final double otAmount = double.tryParse(data.otAmount) ?? 0;
       final double grossSalary = double.tryParse(data.grossSalary) ?? 0;
-      
+
       final double pfAmount = double.tryParse(data.pfAmount) ?? 0;
       final double insuranceAmount = double.tryParse(data.insuranceAmount) ?? 0;
       final double lopDeduction = double.tryParse(data.lopDeduction) ?? 0;
@@ -191,22 +205,40 @@ class PdfService {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('Salary Slip',
-                    style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Salary Slip',
+                  style: pw.TextStyle(
+                    fontSize: 24,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
                 pw.SizedBox(height: 10),
-                pw.Text('Employee Name: ${staffName?.isNotEmpty == true ? staffName : data.memberName}',
-                    style: const pw.TextStyle(fontSize: 14)),
-                pw.Text('Employee ID: ${empNo?.isNotEmpty == true ? empNo : data.empNo}',
-                    style: const pw.TextStyle(fontSize: 14)),
+                pw.Text(
+                  'Employee Name: ${staffName?.isNotEmpty == true ? staffName : data.memberName}',
+                  style: const pw.TextStyle(fontSize: 14),
+                ),
+                pw.Text(
+                  'Employee ID: ${empNo?.isNotEmpty == true ? empNo : data.empNo}',
+                  style: const pw.TextStyle(fontSize: 14),
+                ),
                 if (department?.isNotEmpty == true)
-                  pw.Text('Department: $department',
-                      style: const pw.TextStyle(fontSize: 14)),
+                  pw.Text(
+                    'Department: $department',
+                    style: const pw.TextStyle(fontSize: 14),
+                  ),
                 if (designation?.isNotEmpty == true)
-                  pw.Text('Designation: $designation',
-                      style: const pw.TextStyle(fontSize: 14)),
+                  pw.Text(
+                    'Designation: $designation',
+                    style: const pw.TextStyle(fontSize: 14),
+                  ),
                 pw.SizedBox(height: 5),
-                pw.Text('Month/Year: ${data.monthLabel} ${data.year}',
-                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Month/Year: ${data.monthLabel} ${data.year}',
+                  style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
                 pw.SizedBox(height: 20),
                 pw.Container(
                   padding: const pw.EdgeInsets.all(10),
@@ -217,28 +249,57 @@ class PdfService {
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
                     children: [
-                      _summaryItem('Net Salary', 'Rs ${_fmt(netSalary)}', PdfColors.blue700),
-                      _summaryItem('LOP Days', '${data.lopDays}', PdfColors.red700),
+                      _summaryItem(
+                        'Net Salary',
+                        'Rs ${_fmt(netSalary)}',
+                        PdfColors.blue700,
+                      ),
+                      _summaryItem(
+                        'LOP Days',
+                        '${data.lopDays}',
+                        PdfColors.red700,
+                      ),
                     ],
                   ),
                 ),
                 pw.SizedBox(height: 20),
-                pw.Text('Earnings', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Earnings',
+                  style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
                 pw.Divider(),
                 _pdfRow('Base Salary', 'Rs ${_fmt(baseSalary)}'),
-                if (otherAllowance > 0) _pdfRow('Other Allowance', 'Rs ${_fmt(otherAllowance)}'),
-                if (travelAllowance > 0) _pdfRow('Travel Allowance', 'Rs ${_fmt(travelAllowance)}'),
-                if (medicalAllowance > 0) _pdfRow('Medical Allowance', 'Rs ${_fmt(medicalAllowance)}'),
-                if (otAmount > 0) _pdfRow('Overtime Amount', 'Rs ${_fmt(otAmount)}'),
-                _pdfRow('Gross Salary', 'Rs ${_fmt(grossSalary)}', isBold: true),
-                
+                if (otherAllowance > 0)
+                  _pdfRow('Other Allowance', 'Rs ${_fmt(otherAllowance)}'),
+                if (travelAllowance > 0)
+                  _pdfRow('Travel Allowance', 'Rs ${_fmt(travelAllowance)}'),
+                if (medicalAllowance > 0)
+                  _pdfRow('Medical Allowance', 'Rs ${_fmt(medicalAllowance)}'),
+                if (otAmount > 0)
+                  _pdfRow('Overtime Amount', 'Rs ${_fmt(otAmount)}'),
+                _pdfRow(
+                  'Gross Salary',
+                  'Rs ${_fmt(grossSalary)}',
+                  isBold: true,
+                ),
+
                 pw.SizedBox(height: 20),
-                pw.Text('Deductions', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Deductions',
+                  style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
                 pw.Divider(),
                 _pdfRow('PF Amount', 'Rs ${_fmt(pfAmount)}'),
                 _pdfRow('Insurance', 'Rs ${_fmt(insuranceAmount)}'),
                 _pdfRow('LOP Deduction', 'Rs ${_fmt(lopDeduction)}'),
-                if (otherDeduction > 0) _pdfRow('Other Deductions', 'Rs ${_fmt(otherDeduction)}'),
+                if (otherDeduction > 0)
+                  _pdfRow('Other Deductions', 'Rs ${_fmt(otherDeduction)}'),
 
                 pw.SizedBox(height: 20),
                 pw.Divider(),
@@ -253,10 +314,7 @@ class PdfService {
 
       Directory? directory;
       if (Platform.isAndroid) {
-        directory = Directory('/storage/emulated/0/Download');
-        if (!await directory.exists()) {
-          directory = await getExternalStorageDirectory();
-        }
+        directory = await getExternalStorageDirectory();
       } else {
         directory = await getApplicationDocumentsDirectory();
       }
@@ -266,7 +324,7 @@ class PdfService {
       final monthStr = data.month.toString().padLeft(2, '0');
       final fileName = 'Payslip_${data.empNo}_${data.year}_$monthStr.pdf';
       final file = File('${directory.path}/$fileName');
-      
+
       await file.writeAsBytes(bytes);
       return file.path;
     } catch (e) {
@@ -281,8 +339,18 @@ class PdfService {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(label, style: pw.TextStyle(fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
-          pw.Text(value, style: pw.TextStyle(fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ),
         ],
       ),
     );
@@ -290,59 +358,58 @@ class PdfService {
 
   static String _formatTime(String timeStr) {
     if (timeStr.isEmpty || timeStr == '--') return '--';
-    
+
     try {
       String parseStr = timeStr.trim();
-      
+
       // 1. Check if it's just a time string like "HH:MM", "HH:MM:SS", or "HH:MM AM/PM"
-      final timeRegex = RegExp(r'^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM|am|pm)?$');
+      final timeRegex = RegExp(
+        r'^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM|am|pm)?$',
+      );
       final match = timeRegex.firstMatch(parseStr);
-      
+
       if (match != null) {
         int hour = int.parse(match.group(1)!);
         int minute = int.parse(match.group(2)!);
         String? period = match.group(3)?.toUpperCase();
-        
+
         if (period == 'PM' && hour < 12) hour += 12;
         if (period == 'AM' && hour == 12) hour = 0;
-        
-        // Assume this time is in UTC, convert to local
-        final utcTime = DateTime.utc(2000, 1, 1, hour, minute);
-        final localTime = utcTime.toLocal();
-        
-        int localHour = localTime.hour;
-        int localMin = localTime.minute;
-        
+
+        // Use the parsed time directly without assuming UTC
+        int localHour = hour;
+        int localMin = minute;
+
         String localPeriod = localHour >= 12 ? 'PM' : 'AM';
-        if (localHour == 0) localHour = 12;
-        else if (localHour > 12) localHour -= 12;
-        
+        if (localHour == 0)
+          localHour = 12;
+        else if (localHour > 12)
+          localHour -= 12;
+
         return '${localHour.toString().padLeft(2, '0')}:${localMin.toString().padLeft(2, '0')} $localPeriod';
       }
-      
+
       // 2. If it's a full DateTime string, ensure it's in standard ISO-8601 format
       // Replace space with T for standard parsing
-      if (parseStr.contains(' ') && parseStr.length > 10 && parseStr[4] == '-') {
+      if (parseStr.contains(' ') &&
+          parseStr.length > 10 &&
+          parseStr[4] == '-') {
         parseStr = parseStr.replaceFirst(' ', 'T');
       }
 
-      // If it's a datetime string without timezone, assume UTC by appending 'Z'
-      if (parseStr.contains('T') && !parseStr.endsWith('Z') && !parseStr.contains('+') && !parseStr.contains('-')) {
-        parseStr += 'Z';
-      }
-      
+      // Parse the DateTime string. If it contains timezone info, toLocal() will convert it.
+      // If it doesn't, it will be parsed as local time.
       DateTime dateTime = DateTime.parse(parseStr).toLocal();
       int hour = dateTime.hour;
       final int minute = dateTime.minute;
       final String period = hour >= 12 ? 'PM' : 'AM';
-      
+
       if (hour == 0) {
         hour = 12;
       } else if (hour > 12) {
         hour -= 12;
       }
       return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
-      
     } catch (e) {
       return '$timeStr (raw)';
     }

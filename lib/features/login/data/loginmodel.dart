@@ -16,11 +16,11 @@ class LoginResponseModel {
 
   factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
     return LoginResponseModel(
-      success: json['success'],
-      message: json['message'],
-      accessToken: json['access'],
-      refreshToken: json['refresh'],
-      maintainer: MaintainerModel.fromJson(json['maintainer']),
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      accessToken: json['access'] ?? '',
+      refreshToken: json['refresh'] ?? '',
+      maintainer: MaintainerModel.fromJson(json['maintainer'] ?? {}),
     );
   }
 }
@@ -48,14 +48,14 @@ class MaintainerModel {
 
   factory MaintainerModel.fromJson(Map<String, dynamic> json) {
     return MaintainerModel(
-      id: json['id'],
-      email: json['email'],
-      maintainerName: json['maintainer_name'],
-      phone: json['phone'],
-      address: json['address'],
+      id: json['id'] ?? 0,
+      email: json['email'] ?? '',
+      maintainerName: json['maintainer_name'] ?? '',
+      phone: json['phone'] ?? '',
+      address: json['address'] ?? '',
       image: json['image'],
-      organization: OrganizationModel.fromJson(json['organization']),
-      permissions: PermissionsModel.fromJson(json['permissions']),
+      organization: OrganizationModel.fromJson(json['organization'] ?? {}),
+      permissions: PermissionsModel.fromJson(json['permissions'] ?? {}),
     );
   }
 }
@@ -79,12 +79,12 @@ class OrganizationModel {
 
   factory OrganizationModel.fromJson(Map<String, dynamic> json) {
     return OrganizationModel(
-      id: json['id'],
-      name: json['name'],
-      organizationType: json['organization_type'],
-      organizationOwner: json['organization_owner'],
-      organizationAddress: json['organization_address'],
-      organizationPhone: json['organization_phone'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      organizationType: json['organization_type'] ?? '',
+      organizationOwner: json['organization_owner'] ?? '',
+      organizationAddress: json['organization_address'] ?? '',
+      organizationPhone: json['organization_phone'] ?? '',
     );
   }
 }
@@ -140,28 +140,28 @@ class PermissionsModel {
 
   factory PermissionsModel.fromJson(Map<String, dynamic> json) {
     return PermissionsModel(
-      canViewProfile: json['can_view_profile'],
-      canUpdateProfile: json['can_update_profile'],
-      canAddUser: json['can_add_user'],
-      canViewUser: json['can_view_user'],
-      canUpdateUser: json['can_update_user'],
-      canDeleteUser: json['can_delete_user'],
-      canAddAttendance: json['can_add_attendance'],
-      canViewAttendance: json['can_view_attendance'],
-      canUpdateAttendance: json['can_update_attendance'],
-      canDeleteAttendance: json['can_delete_attendance'],
-      canRegisterFace: json['can_register_face'],
-      canVerifyFace: json['can_verify_face'],
-      canRegisterThumb: json['can_register_thumb'],
-      canVerifyThumb: json['can_verify_thumb'],
-      canRegisterSelfie: json['can_register_selfie'],
-      canVerifySelfie: json['can_verify_selfie'],
-      canViewOrganization: json['can_view_organization'],
-      canUpdateOrganization: json['can_update_organization'],
-      canViewDashboard: json['can_view_dashboard'],
-      canViewReports: json['can_view_reports'],
-      canSendNotification: json['can_send_notification'],
-      canManageSettings: json['can_manage_settings'],
+      canViewProfile: json['can_view_profile'] ?? false,
+      canUpdateProfile: json['can_update_profile'] ?? false,
+      canAddUser: json['can_add_user'] ?? false,
+      canViewUser: json['can_view_user'] ?? false,
+      canUpdateUser: json['can_update_user'] ?? false,
+      canDeleteUser: json['can_delete_user'] ?? false,
+      canAddAttendance: json['can_add_attendance'] ?? false,
+      canViewAttendance: json['can_view_attendance'] ?? false,
+      canUpdateAttendance: json['can_update_attendance'] ?? false,
+      canDeleteAttendance: json['can_delete_attendance'] ?? false,
+      canRegisterFace: json['can_register_face'] ?? false,
+      canVerifyFace: json['can_verify_face'] ?? false,
+      canRegisterThumb: json['can_register_thumb'] ?? false,
+      canVerifyThumb: json['can_verify_thumb'] ?? false,
+      canRegisterSelfie: json['can_register_selfie'] ?? false,
+      canVerifySelfie: json['can_verify_selfie'] ?? false,
+      canViewOrganization: json['can_view_organization'] ?? false,
+      canUpdateOrganization: json['can_update_organization'] ?? false,
+      canViewDashboard: json['can_view_dashboard'] ?? false,
+      canViewReports: json['can_view_reports'] ?? false,
+      canSendNotification: json['can_send_notification'] ?? false,
+      canManageSettings: json['can_manage_settings'] ?? false,
     );
   }
 }

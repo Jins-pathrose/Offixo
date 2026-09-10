@@ -13,6 +13,7 @@ import 'package:offixoadmin/features/home/presentation/widgets/sectionheader.dar
 import 'package:offixoadmin/features/home/presentation/widgets/statcard.dart';
 import 'package:offixoadmin/features/home/presentation/widgets/topbar.dart';
 import 'package:offixoadmin/features/leave/presentation/screens/leavescreen.dart';
+import 'package:offixoadmin/features/login/presentation/provider/logincontroller.dart';
 import 'package:offixoadmin/common/shimmer/shimmer_container.dart';
 import 'package:provider/provider.dart';
 
@@ -31,40 +32,44 @@ class HomeScreen extends StatelessWidget {
 class _HomeView extends StatelessWidget {
   const _HomeView();
 
-  static List<QuickActionData> _buildQuickActions(BuildContext context) => [
-    QuickActionData(
-      label: 'Add Staff',
-      onTap:
-          () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddNewStaffScreen()),
-          ),
-    ),
-    QuickActionData(
-      label: 'Attendance',
-      onTap:
-          () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AttendanceScreen()),
-          ),
-    ),
-    QuickActionData(
-      label: 'Branches',
-      onTap:
-          () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const BranchesScreen()),
-          ),
-    ),
-    QuickActionData(
-      label: 'Today Leaves',
-      onTap:
-          () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const LeaveRequestScreen()),
-          ),
-    ),
-  ];
+  static List<QuickActionData> _buildQuickActions(BuildContext context) {
+    final loginProvider = context.watch<LoginProvider>();
+    return [
+      if (loginProvider.hasPermission('can_add_user'))
+        QuickActionData(
+          label: 'Add Staff',
+          onTap:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddNewStaffScreen()),
+              ),
+        ),
+      QuickActionData(
+        label: 'Attendance',
+        onTap:
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AttendanceScreen()),
+            ),
+      ),
+      QuickActionData(
+        label: 'Branches',
+        onTap:
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BranchesScreen()),
+            ),
+      ),
+      QuickActionData(
+        label: 'Today Leaves',
+        onTap:
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LeaveRequestScreen()),
+            ),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

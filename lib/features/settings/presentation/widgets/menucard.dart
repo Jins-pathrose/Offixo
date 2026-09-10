@@ -15,10 +15,11 @@ class MenuCard extends StatelessWidget {
       ),
       child: Column(
         children: items.asMap().entries.map((e) {
+          final isActualLast = e.key == items.length - 1;
           return Column(
             children: [
               e.value,
-              if (!e.value.isLast)
+              if (!isActualLast)
                 const Divider(
                   height: 1,
                   thickness: 0.5,

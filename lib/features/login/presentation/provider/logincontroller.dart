@@ -13,9 +13,28 @@ class LoginProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _errorMessage;
+  Map<String, dynamic> _permissions = {};
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  Map<String, dynamic> get permissions => _permissions;
+
+  LoginProvider() {
+    loadPermissions();
+  }
+
+  Future<void> loadPermissions() async {
+    final userData = await _storageService.getUserData();
+    if (userData != null && userData['permissions'] != null) {
+      _permissions = userData['permissions'] as Map<String, dynamic>;
+      notifyListeners();
+    }
+  }
+
+  bool hasPermission(String key) {
+    if (_permissions.isEmpty) return false;
+    return _permissions[key] == true;
+  }
 
   void setEmail(String value) {
     notifyListeners();
@@ -39,7 +58,7 @@ class LoginProvider extends ChangeNotifier {
           'password': passwordController.text,
         }),
       );
-
+      print(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
         final loginResponse = LoginResponseModel.fromJson(responseData);
@@ -50,6 +69,12 @@ class LoginProvider extends ChangeNotifier {
           refreshToken: loginResponse.refreshToken,
           userData: responseData['maintainer'],
         );
+
+        if (responseData['maintainer'] != null &&
+            responseData['maintainer']['permissions'] != null) {
+          _permissions =
+              responseData['maintainer']['permissions'] as Map<String, dynamic>;
+        }
 
         _isLoading = false;
         notifyListeners();

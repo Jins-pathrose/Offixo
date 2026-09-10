@@ -94,13 +94,13 @@ class ClinicCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    'Plan Expire on 15.02.2030',
-                    style: AppStyle.text(
-                      size: 12,
-                      color: Colors.white.withOpacity(0.85),
-                    ),
-                  ),
+                  // Text(
+                  //   'Plan Expire on 15.02.2030',
+                  //   style: AppStyle.text(
+                  //     size: 12,
+                  //     color: Colors.white.withOpacity(0.85),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

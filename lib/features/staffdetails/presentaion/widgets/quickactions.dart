@@ -3,6 +3,8 @@ import 'package:offixoadmin/core/appstyle/appstyle.dart';
 import 'package:offixoadmin/features/staffdetails/domain/enum.dart';
 import 'package:offixoadmin/features/addnewstaff/presentation/screens/addnewstaffscreen.dart';
 import 'package:offixoadmin/features/staffdetails/presentaion/provider/staffdetailsprovider.dart';
+import 'package:offixoadmin/features/medicines/presentation/screens/selected_medicines_screen.dart';
+import 'package:offixoadmin/features/home/presentation/provider/homeprovider.dart';
 import 'package:provider/provider.dart';
 
 class QuickActions extends StatelessWidget {
@@ -19,8 +21,13 @@ class QuickActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final actions = [
       (Icons.grid_view_rounded, 'Main', StaffDetailsTab.main),
-      (Icons.person_outline_rounded, 'Profile Info', StaffDetailsTab.profileInfo),
+      (
+        Icons.person_outline_rounded,
+        'Profile Info',
+        StaffDetailsTab.profileInfo,
+      ),
       (Icons.phone_outlined, 'Contact', StaffDetailsTab.contact),
+      (Icons.medical_services_outlined, 'Medicines', null), // Opens screen
       (Icons.edit_outlined, 'Edit', null), // Edit is an action, not a tab
       (Icons.settings_outlined, 'Settings', StaffDetailsTab.settings),
     ];
@@ -33,72 +40,104 @@ class QuickActions extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: actions.map((a) {
-          final isActive = a.$3 != null && a.$3 == activeTab;
+        children:
+            actions.map((a) {
+              final isActive = a.$3 != null && a.$3 == activeTab;
 
-          return GestureDetector(
-            onTap: () {
-              if (a.$3 == null) { // Edit button tapped
-                final provider = context.read<StaffDetailsProvider>();
-                if (provider.staffDetails != null) {
-                  // Print the raw JSON API response as requested
-                  debugPrint('--- API GET RESPONSE (EDIT PROFILE) ---');
-                  debugPrint(provider.staffDetails!.rawJson.toString());
-                  debugPrint('---------------------------------------');
-                  
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddNewStaffScreen(
-                        staffToEdit: provider.staffDetails,
-                        existingPayslip: provider.displayPayslip,
+              return GestureDetector(
+                onTap: () {
+                  if (a.$3 == null) {
+                    if (a.$2 == 'Medicines') {
+                      final provider = context.read<StaffDetailsProvider>();
+                      if (provider.staffDetails != null) {
+                        final homeProvider = context.read<HomeProvider>();
+                        final attendanceId =
+                            provider.todayAttendanceId ??
+                            homeProvider.getAttendanceIdForMember(
+                              provider.staffDetails!.id,
+                            );
+
+                        if (attendanceId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Member has not checked in (no attendance ID).',
+                              ),
+                              backgroundColor: Color(0xFFE53935),
+                            ),
+                          );
+                          return;
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => SelectedMedicinesScreen(
+                                  attendanceId: attendanceId,
+                                ),
+                          ),
+                        );
+                      }
+                    } else if (a.$2 == 'Edit') {
+                      // Edit button tapped
+                      final provider = context.read<StaffDetailsProvider>();
+                      if (provider.staffDetails != null) {
+                        // Print the raw JSON API response as requested
+                        debugPrint('--- API GET RESPONSE (EDIT PROFILE) ---');
+                        debugPrint(provider.staffDetails!.rawJson.toString());
+                        debugPrint('---------------------------------------');
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => AddNewStaffScreen(
+                                  staffToEdit: provider.staffDetails,
+                                  existingPayslip: provider.displayPayslip,
+                                ),
+                          ),
+                        );
+                      }
+                    }
+                  } else {
+                    onTabChanged(a.$3!);
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        gradient: isActive ? AppStyle.primaryGradient : null,
+                        color: isActive ? null : const Color(0xFFE0F7FA),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        a.$1,
+                        size: 20,
+                        color: isActive ? Colors.white : AppStyle.primaryColor,
                       ),
                     ),
-                  );
-                }
-              } else {
-                onTabChanged(a.$3!);
-              }
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    gradient: isActive ? AppStyle.primaryGradient : null,
-                    color: isActive
-                        ? null
-                        : const Color(0xFFE0F7FA),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    a.$1,
-                    size: 20,
-                    color: isActive
-                        ? Colors.white
-                        : AppStyle.primaryColor,
-                  ),
+                    const SizedBox(height: 6),
+                    Text(
+                      a.$2,
+                      style: AppStyle.text(
+                        size: 11,
+                        color:
+                            isActive
+                                ? AppStyle.primaryColor
+                                : AppStyle.hintColor,
+                        weight: isActive ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  a.$2,
-                  style: AppStyle.text(
-                    size: 11,
-                    color: isActive
-                        ? AppStyle.primaryColor
-                        : AppStyle.hintColor,
-                    weight: isActive
-                        ? FontWeight.w600
-                        : FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
-}
+}

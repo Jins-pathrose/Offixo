@@ -129,7 +129,7 @@ class Staffrepository {
   ) async {
     final apiName = 'getMonthlyAttendance';
 
-    final url = '$baseUrl/api/maintainer_duty/attendance/monthly/';
+    final url = '$baseUrl/api/member/monthly-calendar/?member_id=$memberId&month=$month&year=$year';
 
     print('🌐 [$apiName] GET: $url');
 

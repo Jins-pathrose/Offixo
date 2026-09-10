@@ -5,13 +5,17 @@ import 'package:offixoadmin/features/department/presentation/screens/departments
 import 'package:offixoadmin/features/designation/presentation/screens/designationscreen.dart';
 import 'package:offixoadmin/features/leavetype/presentation/screens/leavetypescreen.dart';
 import 'package:offixoadmin/features/login/presentation/screen/loginscreen.dart';
+import 'package:offixoadmin/features/medicines/presentation/screens/selected_medicines_screen.dart';
 import 'package:offixoadmin/features/settings/data/authservice.dart';
+import 'package:offixoadmin/features/medicines/presentation/screens/medicines_screen.dart';
 import 'package:offixoadmin/features/settings/presentation/screens/resigned_members_screen.dart';
 import 'package:offixoadmin/features/settings/presentation/screens/salaryscreen.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/cliniccard.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/menucard.dart';
 import 'package:offixoadmin/features/settings/presentation/widgets/menuitem.dart';
 import 'package:offixoadmin/features/shift/presentation/screens/shiftscreen.dart';
+import 'package:offixoadmin/features/login/presentation/provider/logincontroller.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -73,6 +77,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loginProvider = context.watch<LoginProvider>();
+
     return Scaffold(
       backgroundColor: AppStyle.backgroundColor,
       body: SafeArea(
@@ -107,75 +113,94 @@ class SettingsScreen extends StatelessWidget {
                   // ── Menu Group 1 ──
                   MenuCard(
                     items: [
-                      MenuItem(
-                        icon: Icons.account_tree_outlined,
-                        label: 'Branches',
-                        onTap:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const BranchesScreen(),
+                      if (loginProvider.hasPermission('can_add_branch'))
+                        MenuItem(
+                          icon: Icons.account_tree_outlined,
+                          label: 'Branches',
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const BranchesScreen(),
+                                ),
                               ),
-                            ),
-                      ),
-                      MenuItem(
-                        icon: Icons.domain_outlined,
-                        label: 'Departments',
-                        onTap:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const DepartmentsScreen(),
+                        ),
+                      if (loginProvider.hasPermission('can_add_department'))
+                        MenuItem(
+                          icon: Icons.domain_outlined,
+                          label: 'Departments',
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const DepartmentsScreen(),
+                                ),
                               ),
-                            ),
-                      ),
-                      MenuItem(
-                        icon: Icons.badge_outlined,
-                        label: 'Designations',
-                        onTap:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const DesignationsScreen(),
+                        ),
+                      if (loginProvider.hasPermission('can_add_designation'))
+                        MenuItem(
+                          icon: Icons.badge_outlined,
+                          label: 'Designations',
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const DesignationsScreen(),
+                                ),
                               ),
-                            ),
-                      ),
-                      MenuItem(
-                        icon: Icons.work_outline_rounded,
-                        label: 'Leave Types',
-                        onTap:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const LeaveTypeScreen(),
+                        ),
+                      if (loginProvider.hasPermission('can_add_leave_type'))
+                        MenuItem(
+                          icon: Icons.work_outline_rounded,
+                          label: 'Leave Types',
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const LeaveTypeScreen(),
+                                ),
                               ),
-                            ),
-                      ),
-                      MenuItem(
-                        icon: Icons.access_time_outlined,
-                        label: 'Shifts',
-                        onTap:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ShiftScreen(),
+                        ),
+
+                      if (loginProvider.hasPermission('can_add_shift'))
+                        MenuItem(
+                          icon: Icons.access_time_outlined,
+                          label: 'Shifts',
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ShiftScreen(),
+                                ),
                               ),
-                            ),
-                      ),
+                        ),
+                      if (loginProvider.hasPermission('can_add_salary'))
+                        MenuItem(
+                          icon: Icons.monetization_on_outlined,
+                          label: 'Salary',
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SalaryScreen(),
+                                ),
+                              ),
+                        ),
                       MenuItem(
-                        icon: Icons.monetization_on_outlined,
-                        label: 'Salary',
+                        icon: Icons.medical_services_outlined,
+                        label: 'Medicines',
                         onTap:
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const SalaryScreen(),
+                                builder: (_) => const MedicinesScreen(),
                               ),
                             ),
                         isLast: true,
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 16),
                   // ── Menu Group 2 ──
                   MenuCard(
